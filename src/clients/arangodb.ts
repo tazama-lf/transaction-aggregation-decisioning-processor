@@ -31,7 +31,7 @@ export class ArangoDBService {
     } catch (error) {
       LoggerService.error(
         'Error while executing query from arango with message:',
-        error,
+        error as Error,
         'ArangoDBService',
       );
     }

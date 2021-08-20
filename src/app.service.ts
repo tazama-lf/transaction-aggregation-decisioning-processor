@@ -1,4 +1,4 @@
-import { iScore } from '../interfaces/iScore';
+import { iScore } from './app.interface';
 
 export const getScore = (
   resultsArray: number[],

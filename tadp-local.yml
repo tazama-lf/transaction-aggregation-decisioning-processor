@@ -1,9 +1,7 @@
 version: 1.0
-
 provider:
   name: openfaas
   gateway: http://127.0.0.1:8080
-
 functions:
   off-transaction-aggregation-decisioning:
     lang: dockerfile
@@ -16,5 +14,3 @@ functions:
     annotations:
       com.openfaas.health.http.path: /health
       com.openfaas.health.http.initialDelay: "45s"
-    environment_file:
-      - environment.yml

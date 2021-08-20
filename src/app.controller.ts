@@ -1,15 +1,8 @@
 import { Context } from 'koa';
-import axios from 'axios';
-import { IConfig } from '../interfaces';
-import { getScores, appendScore, deleteTransactionRecord } from '../clients';
-import { getScore } from '../services/evaluation';
-import { iScore } from '../interfaces/iScore';
-import { LoggerService } from '../helpers';
-
-const createPostRequest = async (config: IConfig, requestBody: iScore) => {
-  const route = `http://${config.transactionRoutingHostname}:${config.transactionRoutingPort}/${config.transactionRoutingPath}`;
-  await axios.post(route, requestBody);
-};
+import { getScore } from './app.service';
+import { appendScore, deleteTransactionRecord, getScores } from './clients';
+import { LoggerService } from './helpers';
+import { createPostRequest } from './helpers/requests';
 
 /**
  * @description Only 1 channel for MVP
@@ -35,7 +28,7 @@ const handleScoring = async (ctx: Context): Promise<Context> => {
         ctx.body = requestBody;
         return ctx;
       } catch (error) {
-        LoggerService.error(error);
+        LoggerService.error(error as string);
       }
     }
 
@@ -53,7 +46,7 @@ const handleScoring = async (ctx: Context): Promise<Context> => {
         ctx.response.status = 200;
         return ctx;
       } catch (error) {
-        LoggerService.error(error);
+        LoggerService.error(error as string);
       }
     }
 
@@ -90,7 +83,7 @@ const handleScoring = async (ctx: Context): Promise<Context> => {
     ctx.body = { result: 'Transaction result saved' };
     ctx.response.status = 400;
   } catch (e) {
-    LoggerService.error(e);
+    LoggerService.error(e as string);
     ctx.status = 500;
     ctx.body = e;
   }
