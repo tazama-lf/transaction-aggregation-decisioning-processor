@@ -2,9 +2,10 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import { configuration } from './config';
-import { initializeRedis } from './clients/redisClient';
 import { Server } from 'http';
 import router from './routes';
+import { initializeRedis } from './clients/redis';
+import { ArangoDBService } from './clients/arango';
 
 class App extends Koa {
   public servers: Server[];
@@ -18,16 +19,11 @@ class App extends Koa {
 
   async _configureRoutes(): Promise<void> {
     // Bootstrap application router
-    const {
-      redisDB,
-      redisAuth,
-      redisHost,
-      redisPort,
-      redisConnection,
-    } = configuration;
+    const { redisDB, redisAuth, redisHost, redisPort, redisConnection } =
+      configuration;
 
     if (redisConnection) {
-      const redisClient = await initializeRedis(
+      const redisClient = initializeRedis(
         redisDB,
         redisHost,
         redisPort,
@@ -38,6 +34,16 @@ class App extends Koa {
         return next();
       });
     }
+
+    const arangodb = new ArangoDBService();
+
+    if (arangodb) {
+      this.use(async (ctx, next) => {
+        ctx.state.arangodb = arangodb;
+        return next();
+      });
+    }
+
     this.use((ctx, next) => {
       ctx.state.configuration = configuration;
       return next();

@@ -1,8 +1,11 @@
 import { Context } from 'koa';
-import { handleHealthCheck, handleMonitorTransaction } from './misc';
+import {
+  handleHealthCheck,
+  handleMonitorTransaction,
+} from './health.controller';
 
-describe('test misc functions', () => {
-  test('should healtcheck return UP', () => {
+describe('HealthCheck', () => {
+  test('should healtcheck returns UP', () => {
     const ctx = {
       body: {
         status: 'DOWN',

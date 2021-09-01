@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { LoggerService } from '../../helpers/logger';
+import { LoggerService } from './logger';
 
 Date.now = jest.fn(() => new Date(Date.UTC(2021, 5, 14)).valueOf());
 

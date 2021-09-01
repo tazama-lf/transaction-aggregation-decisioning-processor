@@ -1,11 +1,11 @@
-import { IConfig } from '../interfaces';
-import { iScore } from '../interfaces/iScore';
-import axios from 'axios';
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
+import axios, { AxiosResponse } from 'axios';
+import { configuration, IConfig } from '../config';
 
 export const createPostRequest = async (
   config: IConfig,
-  requestBody: iScore,
-): Promise<void> => {
-  const route = `http://${config.transactionRoutingHostname}:${config.transactionRoutingPort}/${config.transactionRoutingPath}`;
-  await axios.post(route, requestBody);
+  data: any,
+): Promise<AxiosResponse> => {
+  const route = `http://${configuration.transactionRoutingHostname}:${config.transactionRoutingPort}/${config.transactionRoutingPath}`;
+  return await axios.post(route, data);
 };

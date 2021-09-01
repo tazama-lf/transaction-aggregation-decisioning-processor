@@ -1,14 +1,14 @@
 import supertest from 'supertest';
-import App from '../../index';
+import { app } from '../../src/index';
 
-const server = App.listen();
+const server = app.listen();
 
 const request = supertest(server);
 
 describe('App exposed on 3000', () => {
   afterAll(() => {
     // eslint-disable-next-line import/no-named-as-default-member
-    App.terminate();
+    app.terminate();
   });
 
   test('should response the request with UP', async () => {

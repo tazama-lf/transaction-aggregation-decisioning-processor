@@ -4,7 +4,7 @@
   "description": "transaction-agreggation-decisioning-processor",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "nodemon",
+    "dev": "nodemon -r dotenv/config",
     "build": "tsc",
     "start": "node dist/index.js",
     "cleanup": "rm -rf dist template jest.config.js jest.config.js.map node_modules",
@@ -43,6 +43,7 @@
     "koa": "^2.13.1",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^10.0.0",
+    "lodash": "^4.17.21",
     "redis": "^3.1.2"
   },
   "devDependencies": {
@@ -52,6 +53,7 @@
     "@types/koa": "^2.13.1",
     "@types/koa-bodyparser": "^4.3.0",
     "@types/koa-router": "^7.4.2",
+    "@types/lodash": "^4.14.172",
     "@types/node": "^14.14.43",
     "@types/redis": "^2.8.28",
     "@types/supertest": "^2.0.11",

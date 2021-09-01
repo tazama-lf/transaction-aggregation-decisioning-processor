@@ -8,11 +8,11 @@ export class ArangoDBService {
 
   constructor() {
     this.client = new Database({
-      url: configuration.dbURL,
-      databaseName: configuration.dbName,
+      url: 'http://20.49.247.152:8529',
+      databaseName: 'transactionHistory',
       auth: {
-        username: configuration.dbUser,
-        password: configuration.dbPassword,
+        username: 'root',
+        password: '123456',
       },
     });
 
@@ -31,7 +31,7 @@ export class ArangoDBService {
     } catch (error) {
       LoggerService.error(
         'Error while executing query from arango with message:',
-        error as Error,
+        error as any,
         'ArangoDBService',
       );
     }

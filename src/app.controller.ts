@@ -1,87 +1,54 @@
-import { Context } from 'koa';
-import { getScore } from './app.service';
-import { appendScore, deleteTransactionRecord, getScores } from './clients';
+import { Context, Next } from 'koa';
 import { LoggerService } from './helpers';
-import { createPostRequest } from './helpers/requests';
+import { ChannelResult } from './interfaces/channel-result';
+import { CustomerCreditTransferInitiation } from './interfaces/iPain001Transaction';
+import { NetworkMap } from './interfaces/network-map';
+import { RuleResult } from './interfaces/rule-result';
+import { TypologyResult } from './interfaces/typology-result';
 
-/**
- * @description Only 1 channel for MVP
- * @param ctx get request data
- * @returns response
- */
-const handleScoring = async (ctx: Context): Promise<Context> => {
+export const handleRequest = async (
+  ctx: Context,
+  next: Next,
+): Promise<Context> => {
+  const transaction = ctx.request.body
+    .transaction as CustomerCreditTransferInitiation;
+  const networkMap = ctx.request.body.networkMap as NetworkMap;
+  const ruleResult = ctx.request.body.ruleResults as RuleResult[];
+  const typologyResult = ctx.request.body.typologyResult as TypologyResult;
+  const channelResult = ctx.request.body.channelResult as ChannelResult;
+
+  const transactionID =
+    transaction.PaymentInformation.CreditTransferTransactionInformation
+      .PaymentIdentification.EndToEndIdentification;
+
+  const transactionHistoryQuery = `
+      INSERT {
+        "transactionID": ${JSON.stringify(transactionID)},
+        "transaction": ${JSON.stringify(transaction)},
+        "networkMap": ${JSON.stringify(networkMap)},
+        "ruleResult": ${JSON.stringify(ruleResult)},
+        "typologyResult": ${JSON.stringify(typologyResult)},
+        "channelResult": ${JSON.stringify(channelResult)}
+    } INTO "history"
+    `;
+
   try {
-    const channelsNeeded = [28];
-    const { redisClient, configuration } = ctx.state;
-    const { transactionID, channelNumber, score } = ctx.request.body;
-
-    /**
-     * TODO: REMOVE AFTER MVP. This is an easy scoring
-     * @description implementation since we're only using 1 channel.
-     */
-    if (channelsNeeded.length === 1) {
-      const requestBody = getScore([score], transactionID);
-
-      try {
-        await createPostRequest(configuration, requestBody);
-        ctx.status = 200;
-        ctx.body = requestBody;
-        return ctx;
-      } catch (error) {
-        LoggerService.error(error as string);
-      }
-    }
-
-    const jsonChannelsResults = await getScores(redisClient, transactionID);
-
-    /**
-     * @description check if it's the first record for this transaction and record it.
-     */
-    if (jsonChannelsResults === 'null') {
-      const body = `{"${channelNumber}": ${score}`;
-      try {
-        await appendScore(redisClient, transactionID, body);
-
-        ctx.body = { result: 'Channel result saved' };
-        ctx.response.status = 200;
-        return ctx;
-      } catch (error) {
-        LoggerService.error(error as string);
-      }
-    }
-
-    /**
-     * @description check if this is a duplicate for the same Channel.
-     */
-    const newResultToBeAdded = `, "${channelNumber}": ${score}`;
-    const testChannelsNumbers = Object.keys(
-      JSON.parse(`${jsonChannelsResults}}`),
+    const resp = await ctx.state.arangodb.query(transactionHistoryQuery);
+    LoggerService.log(
+      '👀 LOGGING ~ file: app.controller.ts ~ line 41 ~ resp',
+      resp,
     );
-    if (testChannelsNumbers.includes(`${channelNumber}`)) {
-      ctx.body = { result: 'Channel result already stored' };
-      ctx.response.status = 400;
-      return ctx;
-    }
 
-    /**
-     * @description Store the channel result and evaluate if these are all the results, then score it.
-     */
-    await appendScore(redisClient, transactionID, newResultToBeAdded);
-    const channelsResults = JSON.parse(
-      `${jsonChannelsResults}${newResultToBeAdded}}`,
-    );
-    const resultsArray: number[] = Object.values(channelsResults);
-    if (resultsArray.length === channelsNeeded.length) {
-      const requestBody = getScore(resultsArray, transactionID);
-      createPostRequest(configuration, requestBody);
-      // remove transaction from redis to save memory.
-      deleteTransactionRecord(redisClient, transactionID);
-      ctx.status = 200;
-      ctx.body = requestBody;
-      return ctx;
-    }
-    ctx.body = { result: 'Transaction result saved' };
-    ctx.response.status = 400;
+    const result = {
+      transactionID: transactionID,
+      message: 'The result is saved in the Transaction History Database.',
+    };
+
+    LoggerService.log(transactionID + result.message);
+    ctx.body = result;
+    ctx.status = 200;
+    await next();
+    return ctx;
   } catch (e) {
     LoggerService.error(e as string);
     ctx.status = 500;
@@ -89,16 +56,3 @@ const handleScoring = async (ctx: Context): Promise<Context> => {
   }
   return ctx;
 };
-
-/**
- * @description check test the request transaction
- * @param ctx get request data
- * @returns response with ctx
- */
-const handleTestRequest = async (ctx: Context): Promise<Context> => {
-  LoggerService.log(JSON.stringify(ctx.request.body));
-  ctx.status = 201;
-  return ctx;
-};
-
-export { handleTestRequest, handleScoring };

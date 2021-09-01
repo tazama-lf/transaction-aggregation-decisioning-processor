@@ -1,6 +1,5 @@
 import supertest from 'supertest';
-import { LoggerService } from '../../helpers';
-import App from '../../index';
+import { app as App } from '../../src/index';
 // const redis = require('redis-mock');
 
 // const client = redis.createClient();

@@ -1,9 +1,12 @@
 import { configuration } from './config';
-import { Context } from 'koa';
 import App from './app';
-import apm from 'elastic-apm-node';
 import { LoggerService } from './helpers';
+import apm from 'elastic-apm-node';
+import { Context } from 'vm';
 
+/*
+ * Initialize the APM Logging
+ **/
 if (configuration.dev === 'production') {
   apm.start({
     serviceName: configuration.apmServiceName,
@@ -12,15 +15,20 @@ if (configuration.dev === 'production') {
   });
 }
 
-const app = new App();
+export const app = new App();
 
-export function handleError(err: Error, ctx: Context): void {
+/*
+ * Centralized error handling
+ **/
+app.on('error', handleError);
+
+function handleError(err: Error, ctx: Context): void {
   if (ctx == null) {
     LoggerService.error(err, undefined, 'Unhandled exception occured');
   }
 }
 
-export function terminate(signal: NodeJS.Signals): void {
+function terminate(signal: NodeJS.Signals): void {
   try {
     app.terminate();
   } finally {
@@ -29,14 +37,13 @@ export function terminate(signal: NodeJS.Signals): void {
   }
 }
 
-// Handle uncaught errors
-app.on('error', handleError);
-
-// Start server
+/*
+ * Start server
+ **/
 if (
   Object.values(require.cache).filter(async (m) => m?.children.includes(module))
 ) {
-  const server = app.listen(configuration.port, () => {
+  const server = app.listen(3005, () => {
     LoggerService.log(
       `API server listening on PORT ${configuration.port}`,
       'execute',

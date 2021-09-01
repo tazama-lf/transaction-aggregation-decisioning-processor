@@ -8,7 +8,7 @@ dotenv({
   path: path.resolve(__dirname, '../.env'),
 });
 
-interface IConfig {
+export interface IConfig {
   functionName: string;
   port: number;
   redisDB: string;
