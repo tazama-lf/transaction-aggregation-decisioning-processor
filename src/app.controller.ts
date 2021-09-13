@@ -1,4 +1,5 @@
 import { Context, Next } from 'koa';
+import { handleChannels } from './app.service';
 import { LoggerService } from './helpers';
 import { ChannelResult } from './interfaces/channel-result';
 import { CustomerCreditTransferInitiation } from './interfaces/iPain001Transaction';
@@ -6,45 +7,56 @@ import { NetworkMap } from './interfaces/network-map';
 import { RuleResult } from './interfaces/rule-result';
 import { TypologyResult } from './interfaces/typology-result';
 
+/**
+ * Handle the incoming request and return the result
+ * @param ctx default koa context
+ * @param next default koa next
+ * @returns Koa context
+ */
 export const handleRequest = async (
   ctx: Context,
   next: Next,
 ): Promise<Context> => {
-  const transaction = ctx.request.body
-    .transaction as CustomerCreditTransferInitiation;
-  const networkMap = ctx.request.body.networkMap as NetworkMap;
-  const ruleResult = ctx.request.body.ruleResults as RuleResult[];
-  const typologyResult = ctx.request.body.typologyResult as TypologyResult;
-  const channelResult = ctx.request.body.channelResult as ChannelResult;
-
-  const transactionID =
-    transaction.PaymentInformation.CreditTransferTransactionInformation
-      .PaymentIdentification.EndToEndIdentification;
-
-  const transactionHistoryQuery = `
-      INSERT {
-        "transactionID": ${JSON.stringify(transactionID)},
-        "transaction": ${JSON.stringify(transaction)},
-        "networkMap": ${JSON.stringify(networkMap)},
-        "ruleResult": ${JSON.stringify(ruleResult)},
-        "typologyResult": ${JSON.stringify(typologyResult)},
-        "channelResult": ${JSON.stringify(channelResult)}
-    } INTO "history"
-    `;
-
   try {
-    const resp = await ctx.state.arangodb.query(transactionHistoryQuery);
-    LoggerService.log(
-      '👀 LOGGING ~ file: app.controller.ts ~ line 41 ~ resp',
-      resp,
-    );
+    // Get the request body and parse it to variables
+    const transaction = ctx.request.body
+      .transaction as CustomerCreditTransferInitiation;
+    const networkMap = ctx.request.body.networkMap as NetworkMap;
+    const ruleResult = ctx.request.body.ruleResults as RuleResult[];
+    const typologyResult = ctx.request.body.typologyResult as TypologyResult;
+    const channelResult = ctx.request.body.channelResult as ChannelResult;
+
+    const transactionId =
+      transaction.PaymentInformation.CreditTransferTransactionInformation
+        .PaymentIdentification.EndToEndIdentification;
+
+    // Send every channel request to the service function
+    let channelCounter = 0;
+    const toReturn = [];
+    for (const channel of networkMap.transactions[0].channels) {
+      channelCounter++;
+
+      const channelRes = await handleChannels(
+        ctx,
+        transaction,
+        networkMap,
+        ruleResult,
+        typologyResult,
+        channelResult,
+        channel,
+      );
+
+      toReturn.push(
+        `{"Channel": ${channel.channel_id}, "Result":${channelRes}}`,
+      );
+    }
 
     const result = {
-      transactionID: transactionID,
-      message: 'The result is saved in the Transaction History Database.',
+      transactionId: transactionId,
+      message: `Successfully ${channelCounter} channels completed`,
+      result: toReturn,
     };
 
-    LoggerService.log(transactionID + result.message);
     ctx.body = result;
     ctx.status = 200;
     await next();

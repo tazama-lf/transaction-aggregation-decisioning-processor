@@ -66,3 +66,5 @@ typings/
 Katalon Tests/Profiles/
 template
 templates
+
+.DS_Store

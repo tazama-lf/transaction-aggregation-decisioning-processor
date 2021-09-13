@@ -2,7 +2,7 @@ import { Context } from 'koa';
 import {
   handleHealthCheck,
   handleMonitorTransaction,
-} from './health.controller';
+} from '../../src/health.controller';
 
 describe('HealthCheck', () => {
   test('should healtcheck returns UP', () => {

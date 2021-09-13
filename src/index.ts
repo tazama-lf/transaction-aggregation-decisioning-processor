@@ -7,11 +7,11 @@ import { Context } from 'vm';
 /*
  * Initialize the APM Logging
  **/
-if (configuration.dev === 'production') {
+if (configuration.env === 'production') {
   apm.start({
-    serviceName: configuration.apmServiceName,
-    secretToken: configuration.apmSecretToken,
-    serverUrl: configuration.apmURL,
+    serviceName: configuration.apm?.serviceName,
+    secretToken: configuration.apm?.secretToken,
+    serverUrl: configuration.apm?.url,
   });
 }
 
@@ -43,7 +43,7 @@ function terminate(signal: NodeJS.Signals): void {
 if (
   Object.values(require.cache).filter(async (m) => m?.children.includes(module))
 ) {
-  const server = app.listen(3005, () => {
+  const server = app.listen(configuration.port, () => {
     LoggerService.log(
       `API server listening on PORT ${configuration.port}`,
       'execute',

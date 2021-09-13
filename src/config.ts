@@ -1,55 +1,86 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 // config settings, env variables
-import path from 'path';
-import { config as dotenv } from 'dotenv';
+import * as path from 'path';
+import * as dotenv from 'dotenv';
 
 // Load .env file into process.env if it exists. This is convenient for running locally.
-dotenv({
+const result = dotenv.config({
   path: path.resolve(__dirname, '../.env'),
 });
 
-export interface IConfig {
-  functionName: string;
-  port: number;
-  redisDB: string;
-  redisAuth: string;
-  redisHost: string;
-  redisPort: number;
-  redisConnection: boolean;
-  apmServiceName: string;
-  apmSecretToken: string;
-  apmURL: string;
-  dbName: string;
-  dbURL: string;
-  dbUser: string;
-  dbPassword: string;
-  graphName: string;
-  collectionName: string;
-  dev: string;
-  transactionRoutingHostname: string;
-  transactionRoutingPort: number;
-  transactionRoutingPath: string;
+if (result.error) {
+  throw result.error;
 }
 
-export const configuration: IConfig = {
-  functionName: <string>process.env.FUNCTION_NAME,
-  port: parseInt(process.env.PORT!, 10) || 3000,
-  redisDB: <string>process.env.REDIS_DB,
-  redisAuth: <string>process.env.REDIS_AUTH,
-  redisHost: <string>process.env.REDIS_HOST,
-  redisPort: parseInt(process.env.REDIS_PORT!, 10),
-  redisConnection: <boolean>(process.env.REDIS_CONNECTION === 'true'),
-  apmServiceName: <string>process.env.APM_SERVICE_NAME,
-  apmURL: <string>process.env.APM_URL,
-  apmSecretToken: <string>process.env.APM_SECRET_TOKEN,
-  dbName: <string>process.env.DATABASE_NAME,
-  dbURL: <string>process.env.DATABASE_URL,
-  dbUser: <string>process.env.DATABASE_USER,
-  dbPassword: <string>process.env.DATABASE_PASSWORD,
-  graphName: <string>process.env.GRAPH_NAME,
+export interface IConfig {
+  collectionName: string;
+  env: string;
+  functionName: string;
+  port: number;
+  apm: {
+    secretToken: string;
+    serviceName: string;
+    url: string;
+  };
+  db: {
+    name: string;
+    password: string;
+    url: string;
+    user: string;
+    graphName: string;
+  };
+  logstash: {
+    host: string;
+    port: number;
+  };
+  redis: {
+    auth: string;
+    connection: boolean;
+    db: string;
+    host: string;
+    port: number;
+  };
+  transactionRouting: {
+    host: string;
+    path: string;
+    port: number;
+  };
+}
+
+/**
+ * TODO: Investigate why this is not working sometimes.
+ */
+export const configuration: Partial<IConfig> = {
+  apm: {
+    serviceName: <string>process.env.APM_SERVICE_NAME,
+    url: <string>process.env.APM_URL,
+    secretToken: <string>process.env.APM_SECRET_TOKEN,
+  },
   collectionName: <string>process.env.COLLECTION_NAME,
-  dev: <string>process.env.NODE_ENV,
-  transactionRoutingHostname: <string>process.env.TRANSACTION_ROUTING_HOST,
-  transactionRoutingPort: parseInt(process.env.TRANSACTION_ROUTING_PORT!, 10),
-  transactionRoutingPath: <string>process.env.TRANSACTION_ROUTING_PATH,
+  db: {
+    name: <string>process.env.DATABASE_NAME,
+    password: <string>process.env.DATABASE_PASSWORD,
+    url: <string>process.env.DATABASE_URL,
+    user: <string>process.env.DATABASE_USER,
+    graphName: <string>process.env.GRAPH_NAME,
+  },
+  env: <string>process.env.NODE_ENV,
+  functionName: <string>process.env.FUNCTION_NAME,
+  logstash: {
+    host: <string>process.env.LOGSTASH_HOST,
+    port: parseInt(process.env.LOGSTASH_PORT!, 10),
+  },
+  port: parseInt(process.env.PORT!, 10) || 3000,
+  redis: {
+    auth: <string>process.env.REDIS_AUTH,
+    connection: <boolean>(process.env.REDIS_CONNECTION === 'true'),
+    db: <string>process.env.REDIS_DB,
+    host: <string>process.env.REDIS_HOST,
+    port: parseInt(process.env.REDIS_PORT!, 10),
+  },
+  transactionRouting: {
+    host: <string>process.env.TRANSACTION_ROUTING_HOST,
+    path: <string>process.env.TRANSACTION_ROUTING_PATH,
+    port: parseInt(process.env.TRANSACTION_ROUTING_PORT!, 10),
+  },
 };

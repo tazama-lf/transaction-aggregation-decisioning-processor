@@ -34,13 +34,12 @@ const config: Config.InitialOptions = {
     './src/interfaces',
     './src/models',
     './src/test',
-    'interfaces',
     '.module.ts',
     '.mock.ts',
     './src/index.ts',
-    './src/clients/arangodb.ts',
-    './src/clients/index.ts',
-    './src/clients/redisClient.ts',
+    './src/clients/arango.ts',
+    './src/clients/redis.ts',
+    './src/interfaces',
   ],
 
   // Indicates which provider should be used to instrument code for coverage
@@ -107,7 +106,7 @@ const config: Config.InitialOptions = {
   // modulePathIgnorePatterns: [],
 
   // Activates notifications for test results
-  notify: true,
+  notify: false,
 
   // An enum that specifies notification mode. Requires { notify: true }
   // notifyMode: "failure-change",
@@ -137,13 +136,13 @@ const config: Config.InitialOptions = {
   // rootDir: ".",
 
   // A list of paths to directories that Jest should use to search for files in
-  roots: ['<rootDir>/src/'],
+  roots: ['<rootDir>'],
 
   // Allows you to use a custom runner instead of Jest's default test runner
   // runner: "jest-runner",
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
-  // setupFiles: [],
+  setupFiles: ['dotenv/config'],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   // setupFilesAfterEnv: ['./jest.setup.redis-mock.js'],
@@ -167,7 +166,7 @@ const config: Config.InitialOptions = {
   testMatch: ['**/*.test.ts'],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  testPathIgnorePatterns: ['/node_modules/'],
+  testPathIgnorePatterns: ['/node_modules/', 'build', 'dist'],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(ts|js)$',

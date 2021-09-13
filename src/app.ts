@@ -4,6 +4,7 @@ import bodyParser from 'koa-bodyparser';
 import { configuration } from './config';
 import { Server } from 'http';
 import router from './routes';
+import helmet from 'koa-helmet';
 import { initializeRedis } from './clients/redis';
 import { ArangoDBService } from './clients/arango';
 
@@ -19,15 +20,14 @@ class App extends Koa {
 
   async _configureRoutes(): Promise<void> {
     // Bootstrap application router
-    const { redisDB, redisAuth, redisHost, redisPort, redisConnection } =
-      configuration;
+    const { redis } = configuration;
 
-    if (redisConnection) {
+    if (redis?.connection) {
       const redisClient = initializeRedis(
-        redisDB,
-        redisHost,
-        redisPort,
-        redisAuth,
+        redis.db,
+        redis.host,
+        redis.port,
+        redis.auth,
       );
       this.use((ctx, next) => {
         ctx.state.redisClient = redisClient;
@@ -51,6 +51,7 @@ class App extends Koa {
     this.use(bodyParser());
     this.use(router.routes());
     this.use(router.allowedMethods());
+    this.use(helmet());
   }
 
   listen(...args: any[]): Server {

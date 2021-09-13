@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
-import { LoggerService } from './logger';
+import { configuration } from '../../src/config';
+import { LoggerService } from '../../src/helpers';
 
 Date.now = jest.fn(() => new Date(Date.UTC(2021, 5, 14)).valueOf());
 
@@ -9,20 +10,22 @@ describe('Logger Service', () => {
   let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    consoleLoggerSpy = jest.spyOn(console, 'log').mockImplementation();
+    consoleLoggerSpy = jest.spyOn(console, 'info').mockImplementation();
 
     consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
   });
 
-  describe('Log', () => {
+  describe('Logger Service', () => {
+    console.log(configuration);
+
     it('should log a message with defined operation', async () => {
       const expectedMessage = 'ExpectedLogMessage';
 
       LoggerService.log(expectedMessage);
       LoggerService.log(expectedMessage);
-      expect(console.log).toHaveBeenCalledTimes(2);
+      expect(console.info).toHaveBeenCalledTimes(2);
       expect(consoleLoggerSpy).toHaveBeenCalledTimes(2);
 
       consoleLoggerSpy.mockRestore();

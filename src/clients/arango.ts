@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Database } from 'arangojs';
-import { configuration } from '../config';
 import { LoggerService } from '../helpers';
 
 export class ArangoDBService {
