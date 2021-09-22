@@ -38,7 +38,7 @@ export const handleChannels = async (
       typologyResult,
     );
 
-    // If the channel is completed, then save the trasaaction evaluation result
+    // If the channel is completed, then save the transaction evaluation result
     if (hasChannelCompleted) {
       const transactionHistoryQuery = `
       INSERT {
