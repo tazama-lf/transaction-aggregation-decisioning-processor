@@ -1,53 +1,59 @@
-import { RedisClient } from 'redis';
+import redis from 'redis';
+import { configuration } from '../config';
 import { LoggerService } from '../helpers';
 
-let redisClient: RedisClient;
+export class RedisService {
+  client: redis.RedisClient;
 
-const initializeRedis = (
-  redisDB: string,
-  redisHost: string,
-  redisPort: number,
-  redisAuth: string,
-): void => {
-  redisClient = new RedisClient({
-    db: redisDB,
-    host: redisHost,
-    port: redisPort,
-    auth_pass: redisAuth,
-  });
-};
-
-const redisGetJson = (key: string): Promise<string> =>
-  new Promise((resolve) => {
-    redisClient.get(key, (err, res) => {
-      if (err) {
-        LoggerService.error('Error while getting Redis key', err);
-        resolve('');
-      }
-      resolve(res ?? '');
+  constructor() {
+    this.client = redis.createClient({
+      db: configuration.redis?.db,
+      host: configuration.redis?.host,
+      port: configuration.redis?.port,
+      auth_pass: configuration.redis?.auth,
     });
-  });
 
-const redisSetJson = (key: string, value: string): Promise<string> =>
-  new Promise((resolve) => {
-    redisClient.SET(key, value, (err, res) => {
-      if (err) {
-        LoggerService.error(`Error while saving to Redis key: ${key}`, err);
-        resolve('');
-      }
-      resolve(res);
+    if (this.client.connected) {
+      LoggerService.log('✅ Redis connection is ready');
+    } else {
+      LoggerService.error('❌ Redis connection is not ready');
+      throw new Error('Redis connection error');
+    }
+  }
+
+  getJson = (key: string): Promise<string> =>
+    new Promise((resolve) => {
+      this.client.get(key, (err, res) => {
+        if (err) {
+          LoggerService.error('Error while getting key from redis with message:', err, 'RedisService');
+
+          resolve('');
+        }
+        resolve(res ?? '');
+      });
     });
-  });
 
-const redisDeleteKey = (key: string): Promise<number> =>
-  new Promise((resolve) => {
-    redisClient.DEL(key, (err, res) => {
-      if (err) {
-        LoggerService.error(`Error while Deleting key in Redis: ${key}`, err);
-        resolve(0);
-      }
-      resolve(res);
+  setJson = (key: string, value: string): Promise<string> =>
+    new Promise((resolve) => {
+      this.client.SET(key, value, (err, res) => {
+        if (err) {
+          LoggerService.error('Error while setting key to redis with message:', err, 'RedisService');
+
+          resolve('');
+        }
+        resolve(res);
+      });
     });
-  });
 
-export { redisGetJson, redisSetJson, initializeRedis, redisDeleteKey };
+  deleteKey = (key: string): Promise<number> =>
+    new Promise((resolve) => {
+      this.client.DEL(key, (err, res) => {
+        if (err) {
+          LoggerService.error('Error while deleting key from redis with message:', err, 'RedisService');
+
+          resolve(0);
+        }
+        resolve(res);
+      });
+    });
+}

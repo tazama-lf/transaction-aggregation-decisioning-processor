@@ -1,4 +1,6 @@
 node_modules
 coverage
+template
+templates
 .vscode
-docs
+README.md

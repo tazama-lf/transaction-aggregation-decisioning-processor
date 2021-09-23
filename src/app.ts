@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
-import { configuration } from './config';
 import { Server } from 'http';
 import router from './routes';
 import helmet from 'koa-helmet';
-import { initializeRedis } from './clients/redis';
+import { RedisService } from './clients/redis';
 import { ArangoDBService } from './clients/arango';
+import { LoggerService } from './helpers';
 
 class App extends Koa {
   public servers: Server[];
@@ -16,25 +16,36 @@ class App extends Koa {
     // bodyparser needs to be loaded first in order to work
     this.servers = [];
     this._configureRoutes();
+    this._configureClients();
   }
 
   async _configureRoutes(): Promise<void> {
-    // Bootstrap application router
-    const { redis } = configuration;
+    this.use(bodyParser());
+    this.use(router.routes());
+    this.use(router.allowedMethods());
+    this.use(helmet());
+  }
 
-    if (redis?.connection) {
-      const redisClient = initializeRedis(
-        redis.db,
-        redis.host,
-        redis.port,
-        redis.auth,
-      );
-      this.use((ctx, next) => {
-        ctx.state.redisClient = redisClient;
-        return next();
-      });
-    }
+  configureMiddlewares(): void {
+    // LoggerService Middleware
+    this.use(async (ctx, next) => {
+      await next();
+      const rt = ctx.response.get('X-Response-Time');
+      if (ctx.path !== '/health') {
+        LoggerService.log(`${ctx.method} ${ctx.url} - ${rt}`);
+      }
+    });
 
+    // x-response-time
+    this.use(async (ctx, next) => {
+      const start = Date.now();
+      await next();
+      const ms = Date.now() - start;
+      ctx.set('X-Response-Time', `${ms}ms`);
+    });
+  }
+
+  async _configureClients(): Promise<void> {
     const arangodb = new ArangoDBService();
 
     if (arangodb) {
@@ -44,14 +55,14 @@ class App extends Koa {
       });
     }
 
-    this.use((ctx, next) => {
-      ctx.state.configuration = configuration;
-      return next();
-    });
-    this.use(bodyParser());
-    this.use(router.routes());
-    this.use(router.allowedMethods());
-    this.use(helmet());
+    const redisClient = new RedisService();
+
+    if (redisClient) {
+      this.use((ctx, next) => {
+        ctx.state.redisClient = redisClient;
+        return next();
+      });
+    }
   }
 
   listen(...args: any[]): Server {

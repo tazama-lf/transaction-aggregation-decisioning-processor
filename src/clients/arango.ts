@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Database } from 'arangojs';
+import { configuration } from '../config';
 import { LoggerService } from '../helpers';
 
 export class ArangoDBService {
@@ -7,18 +7,23 @@ export class ArangoDBService {
 
   constructor() {
     this.client = new Database({
-      url: 'http://20.49.247.152:8529',
-      databaseName: 'transactionHistory',
+      url: configuration.db.url,
+      databaseName: configuration.db.name,
       auth: {
-        username: 'root',
-        password: '123456',
+        username: configuration.db.user,
+        password: configuration.db.password,
       },
     });
 
-    LoggerService.log('✅ ArangoDB connection is ready');
+    if (this.client.isArangoDatabase) {
+      LoggerService.log('✅ ArangoDB connection is ready');
+    } else {
+      LoggerService.error('❌ ArangoDB connection is not ready');
+      throw new Error('ArangoDB connection is not ready');
+    }
   }
 
-  async query(query: string): Promise<any> {
+  async query(query: string): Promise<unknown> {
     try {
       const cycles = await this.client.query(query);
 
@@ -28,11 +33,7 @@ export class ArangoDBService {
 
       return results;
     } catch (error) {
-      LoggerService.error(
-        'Error while executing query from arango with message:',
-        error as any,
-        'ArangoDBService',
-      );
+      LoggerService.error('Error while executing query from arango with message:', error as any, 'ArangoDBService');
     }
   }
 }

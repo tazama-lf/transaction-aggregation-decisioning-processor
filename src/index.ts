@@ -2,7 +2,7 @@ import { configuration } from './config';
 import App from './app';
 import { LoggerService } from './helpers';
 import apm from 'elastic-apm-node';
-import { Context } from 'vm';
+import { Context } from 'koa';
 
 /*
  * Initialize the APM Logging
@@ -12,6 +12,8 @@ if (configuration.env === 'production') {
     serviceName: configuration.apm?.serviceName,
     secretToken: configuration.apm?.secretToken,
     serverUrl: configuration.apm?.url,
+    usePathAsTransactionName: true,
+    active: Boolean(configuration.apm?.active),
   });
 }
 
@@ -40,14 +42,9 @@ function terminate(signal: NodeJS.Signals): void {
 /*
  * Start server
  **/
-if (
-  Object.values(require.cache).filter(async (m) => m?.children.includes(module))
-) {
+if (Object.values(require.cache).filter(async (m) => m?.children.includes(module))) {
   const server = app.listen(configuration.port, () => {
-    LoggerService.log(
-      `API server listening on PORT ${configuration.port}`,
-      'execute',
-    );
+    LoggerService.log(`API server listening on PORT ${configuration.port}`, 'execute');
   });
   server.on('error', handleError);
 

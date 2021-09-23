@@ -76,8 +76,7 @@ class EquivalentAmount {
 class ActiveOrHistoricCurrencyAndAmount {}
 
 class Amount {
-  InstructedAmount: ActiveOrHistoricCurrencyAndAmount =
-    new ActiveOrHistoricCurrencyAndAmount();
+  InstructedAmount: ActiveOrHistoricCurrencyAndAmount = new ActiveOrHistoricCurrencyAndAmount();
 
   EquivalentAmount: EquivalentAmount = new EquivalentAmount();
 }
@@ -93,13 +92,11 @@ class ClearingSystemMemberIdentification {
 }
 
 class FinancialInstitutionIdentification {
-  ClearingSystemMemberIdentification: ClearingSystemMemberIdentification =
-    new ClearingSystemMemberIdentification();
+  ClearingSystemMemberIdentification: ClearingSystemMemberIdentification = new ClearingSystemMemberIdentification();
 }
 
 class Agent {
-  FinancialInstitutionIdentification: FinancialInstitutionIdentification =
-    new FinancialInstitutionIdentification();
+  FinancialInstitutionIdentification: FinancialInstitutionIdentification = new FinancialInstitutionIdentification();
 }
 
 class SupplementaryData {
@@ -111,8 +108,7 @@ class StructuredRemittanceInformation {
 }
 
 class RemittanceInformation {
-  Structured: StructuredRemittanceInformation =
-    new StructuredRemittanceInformation();
+  Structured: StructuredRemittanceInformation = new StructuredRemittanceInformation();
 }
 
 class CreditTransferTransactionInformation {
@@ -129,8 +125,7 @@ class CreditTransferTransactionInformation {
 
 class PaymentInformation {
   PaymentInformationIdentification = ''; // quoteId
-  CreditTransferTransactionInformation: CreditTransferTransactionInformation =
-    new CreditTransferTransactionInformation();
+  CreditTransferTransactionInformation: CreditTransferTransactionInformation = new CreditTransferTransactionInformation();
 
   DebtorAccount: Account = new Account();
   DebtorAgent: Agent = new Agent();
@@ -144,9 +139,7 @@ export class CustomerCreditTransferInitiation {
 
   constructor(init: Partial<CustomerCreditTransferInitiation>) {
     if (!init) {
-      throw new Error(
-        'CustomerCreditTransferInitiation was not received in the request body',
-      );
+      throw new Error('CustomerCreditTransferInitiation was not received in the request body');
     }
 
     // We assign all the properties present in the init parameter to the object we are creating.

@@ -13,22 +13,16 @@ import { TypologyResult } from './interfaces/typology-result';
  * @param next default koa next
  * @returns Koa context
  */
-export const handleRequest = async (
-  ctx: Context,
-  next: Next,
-): Promise<Context> => {
+export const handleRequest = async (ctx: Context, next: Next): Promise<Context> => {
   try {
     // Get the request body and parse it to variables
-    const transaction = ctx.request.body
-      .transaction as CustomerCreditTransferInitiation;
+    const transaction = ctx.request.body.transaction as CustomerCreditTransferInitiation;
     const networkMap = ctx.request.body.networkMap as NetworkMap;
     const ruleResult = ctx.request.body.ruleResults as RuleResult[];
     const typologyResult = ctx.request.body.typologyResult as TypologyResult;
     const channelResult = ctx.request.body.channelResult as ChannelResult;
 
-    const transactionId =
-      transaction.PaymentInformation.CreditTransferTransactionInformation
-        .PaymentIdentification.EndToEndIdentification;
+    const transactionId = transaction.PaymentInformation.CreditTransferTransactionInformation.PaymentIdentification.EndToEndIdentification;
 
     // Send every channel request to the service function
     let channelCounter = 0;
@@ -36,19 +30,9 @@ export const handleRequest = async (
     for (const channel of networkMap.transactions[0].channels) {
       channelCounter++;
 
-      const channelRes = await handleChannels(
-        ctx,
-        transaction,
-        networkMap,
-        ruleResult,
-        typologyResult,
-        channelResult,
-        channel,
-      );
+      const channelRes = await handleChannels(ctx, transaction, networkMap, ruleResult, typologyResult, channelResult, channel);
 
-      toReturn.push(
-        `{"Channel": ${channel.channel_id}, "Result":${channelRes}}`,
-      );
+      toReturn.push(`{"Channel": ${channel.channel_id}, "Result":${channelRes}}`);
     }
 
     const result = {

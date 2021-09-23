@@ -21,6 +21,7 @@ export interface IConfig {
     secretToken: string;
     serviceName: string;
     url: string;
+    active: string;
   };
   db: {
     name: string;
@@ -47,14 +48,12 @@ export interface IConfig {
   };
 }
 
-/**
- * TODO: Investigate why this is not working sometimes.
- */
-export const configuration: Partial<IConfig> = {
+export const configuration: IConfig = {
   apm: {
     serviceName: <string>process.env.APM_SERVICE_NAME,
     url: <string>process.env.APM_URL,
     secretToken: <string>process.env.APM_SECRET_TOKEN,
+    active: <string>process.env.APM_ACTIVE,
   },
   collectionName: <string>process.env.COLLECTION_NAME,
   db: {

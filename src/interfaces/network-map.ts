@@ -16,11 +16,7 @@ export class Typology {
   typology_version = '';
   rules: Array<Rule> = [];
 
-  constructor(
-    typology_id: string,
-    typology_name: string,
-    typology_version: string,
-  ) {
+  constructor(typology_id: string, typology_name: string, typology_version: string) {
     this.typology_id = typology_id;
     this.typology_name = typology_name;
     this.typology_version = typology_version;

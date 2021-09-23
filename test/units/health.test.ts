@@ -1,8 +1,5 @@
 import { Context } from 'koa';
-import {
-  handleHealthCheck,
-  handleMonitorTransaction,
-} from '../../src/health.controller';
+import { handleHealthCheck, handleMonitorTransaction } from '../../src/health.controller';
 
 describe('HealthCheck', () => {
   test('should healtcheck returns UP', () => {

@@ -3,11 +3,9 @@ import request from 'supertest';
 
 const supertest = request.agent(app.listen());
 
-// const redis = require('redis-mock');
-
-// const client = redis.createClient();
-
 Date.now = jest.fn(() => new Date(Date.UTC(2022, 1, 1)).valueOf());
+
+jest.mock('redis', () => jest.requireActual('redis-mock'));
 
 describe('TADProc Service', () => {
   const requestBody = {
@@ -265,20 +263,17 @@ describe('TADProc Service', () => {
     });
 
     test('should /execute response with status code 200', async () => {
-      await supertest
+      const resp = await supertest
         .post('/execute')
         .send(requestBody)
         .set('Content-Type', 'application/json')
+        .expect('Content-Type', /json/)
         .expect(200);
+
+      console.log('👀 LOGGING ~ file: app.test.ts ~ line 272 ~ test ~ resp', resp);
     });
 
-    test('should /health response with status code 200', async () => {
-      await supertest
-        .post('/execute')
-        .send(requestBody)
-        .set('Content-Type', 'application/json')
-        .expect('Content-Type', /json/);
-    });
+    // expect(resp).toMatchObject();
   });
 
   // test('the data is peanut butter', async () => {
