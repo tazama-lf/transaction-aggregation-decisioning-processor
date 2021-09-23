@@ -1,6 +1,11 @@
 import { Database } from 'arangojs';
 import { configuration } from '../config';
 import { LoggerService } from '../helpers';
+import { ChannelResult } from '../interfaces/channel-result';
+import { CustomerCreditTransferInitiation } from '../interfaces/iPain001Transaction';
+import { NetworkMap } from '../interfaces/network-map';
+import { RuleResult } from '../interfaces/rule-result';
+import { TypologyResult } from '../interfaces/typology-result';
 
 export class ArangoDBService {
   client: Database;
@@ -33,7 +38,37 @@ export class ArangoDBService {
 
       return results;
     } catch (error) {
-      LoggerService.error('Error while executing query from arango with message:', error as any, 'ArangoDBService');
+      LoggerService.error('Error while executing query from arango with message:', error as Error, 'ArangoDBService');
+    }
+  }
+
+  async insertTransactionHistory(
+    transactionID: string,
+    transaction: CustomerCreditTransferInitiation,
+    networkMap: NetworkMap,
+    ruleResult: RuleResult[],
+    typologyResult: TypologyResult,
+    channelResult: ChannelResult,
+  ): Promise<unknown> {
+    try {
+      const transactionHistoryQuery = `
+      INSERT {
+        "transactionID": ${JSON.stringify(transactionID)},
+        "transaction": ${JSON.stringify(transaction)},
+        "networkMap": ${JSON.stringify(networkMap)},
+        "ruleResult": ${JSON.stringify(ruleResult)},
+        "typologyResult": ${JSON.stringify(typologyResult)},
+        "channelResult": ${JSON.stringify(channelResult)}
+    } INTO "history"
+    `;
+
+      const results = this.client.query(transactionHistoryQuery);
+
+      LoggerService.log(`Inserted transaction history: ${JSON.stringify(results)}`);
+
+      return results;
+    } catch (error) {
+      LoggerService.error('Error while inserting transaction history from arango with message:', error as Error, 'ArangoDBService');
     }
   }
 }
