@@ -4,8 +4,6 @@ import bodyParser from 'koa-bodyparser';
 import { Server } from 'http';
 import router from './routes';
 import helmet from 'koa-helmet';
-import { RedisService } from './clients/redis';
-import { ArangoDBService } from './clients/arango';
 import { LoggerService } from './helpers';
 
 class App extends Koa {
@@ -16,7 +14,6 @@ class App extends Koa {
     // bodyparser needs to be loaded first in order to work
     this.servers = [];
     this._configureRoutes();
-    this._configureClients();
   }
 
   async _configureRoutes(): Promise<void> {
@@ -43,26 +40,6 @@ class App extends Koa {
       const ms = Date.now() - start;
       ctx.set('X-Response-Time', `${ms}ms`);
     });
-  }
-
-  async _configureClients(): Promise<void> {
-    const arangodb = new ArangoDBService();
-
-    if (arangodb) {
-      this.use(async (ctx, next) => {
-        ctx.state.arangodb = arangodb;
-        return next();
-      });
-    }
-
-    const redisClient = new RedisService();
-
-    if (redisClient) {
-      this.use((ctx, next) => {
-        ctx.state.redisClient = redisClient;
-        return next();
-      });
-    }
   }
 
   listen(...args: any[]): Server {

@@ -3,6 +3,8 @@ import App from './app';
 import { LoggerService } from './helpers';
 import apm from 'elastic-apm-node';
 import { Context } from 'koa';
+import { ArangoDBService } from './clients/arango';
+import { RedisService } from './clients/redis';
 
 /*
  * Initialize the APM Logging
@@ -17,7 +19,12 @@ if (configuration.env === 'production') {
   });
 }
 
+/*
+ * Initialize the clients and start the server
+ */
 export const app = new App();
+export const databaseClient = new ArangoDBService();
+export const cacheClient = new RedisService();
 
 /*
  * Centralized error handling
