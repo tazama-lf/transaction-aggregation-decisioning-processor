@@ -1,11 +1,11 @@
 import { Context } from 'koa';
-import { redisGetJson, redisSetJson } from './clients/redis';
 import { LoggerService } from './helpers';
 import { ChannelResult } from './interfaces/channel-result';
 import { CustomerCreditTransferInitiation } from './interfaces/iPain001Transaction';
 import { Channel, NetworkMap } from './interfaces/network-map';
 import { RuleResult } from './interfaces/rule-result';
 import { TypologyResult } from './interfaces/typology-result';
+import { cacheClient, databaseClient } from './index';
 import apm from 'elastic-apm-node';
 
 export const handleChannels = async (
@@ -21,9 +21,9 @@ export const handleChannels = async (
   message: string;
 }> => {
   try {
-    const transactionID =
-      transaction.PaymentInformation.CreditTransferTransactionInformation
-        .PaymentIdentification.EndToEndIdentification;
+    apm.setTransactionName('TADProc');
+    const span = apm.startSpan('handleChannels');
+    const transactionID = transaction.PaymentInformation.CreditTransferTransactionInformation.PaymentIdentification.EndToEndIdentification;
 
     // Initialize the result message
     const result = {
@@ -32,11 +32,7 @@ export const handleChannels = async (
     };
 
     // Check if the channel is completed
-    const hasChannelCompleted = await checkChannelCompletion(
-      transactionID,
-      channel,
-      typologyResult,
-    );
+    const hasChannelCompleted = await checkChannelCompletion(ctx, transactionID, channel, typologyResult);
 
     // If the channel is completed, then save the transaction evaluation result
     if (hasChannelCompleted) {
@@ -51,12 +47,14 @@ export const handleChannels = async (
     } INTO "history"
     `;
 
-      await ctx.state.arangodb.query(transactionHistoryQuery);
+      await databaseClient.query(transactionHistoryQuery);
 
       result.message = 'The transaction evaluation result is saved.';
+    } else {
+      result.message = 'The transaction evaluation result is not saved.';
     }
-    result.message = 'The transaction evaluation result is not saved.';
 
+    span?.end();
     return result;
   } catch (error) {
     LoggerService.error(error as string);
@@ -65,12 +63,14 @@ export const handleChannels = async (
 };
 
 const checkChannelCompletion = async (
+  ctx: Context,
   transactionID: string,
   channel: Channel,
   typologyResult: TypologyResult,
 ): Promise<boolean> => {
   const cacheKey = `${transactionID}_${channel.channel_id}`;
-  const cacheData = await redisGetJson(cacheKey);
+
+  const cacheData = await cacheClient.getJson(cacheKey);
 
   const cacheResults: TypologyResult[] = [...JSON.parse(cacheData)];
 
@@ -86,11 +86,9 @@ const checkChannelCompletion = async (
 
   // Second check: if all results for this Channel is found
   if (cacheResults.length < channel.typologies.length) {
-    LoggerService.log(
-      `[${transactionID}] Save Channel interim rule results to Cache`,
-    );
+    LoggerService.log(`[${transactionID}] Save Channel interim rule results to Cache`);
 
-    await redisSetJson(cacheKey, JSON.stringify(cacheResults));
+    ctx.state.redis.set(cacheKey, JSON.stringify(cacheResults));
 
     return false;
   }
