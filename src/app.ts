@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
-import { configuration } from './config';
-import { initializeRedis } from './clients/redisClient';
 import { Server } from 'http';
 import router from './routes';
+import helmet from 'koa-helmet';
+import { LoggerService } from './helpers';
 
 class App extends Koa {
   public servers: Server[];
@@ -17,34 +17,29 @@ class App extends Koa {
   }
 
   async _configureRoutes(): Promise<void> {
-    // Bootstrap application router
-    const {
-      redisDB,
-      redisAuth,
-      redisHost,
-      redisPort,
-      redisConnection,
-    } = configuration;
-
-    if (redisConnection) {
-      const redisClient = await initializeRedis(
-        redisDB,
-        redisHost,
-        redisPort,
-        redisAuth,
-      );
-      this.use((ctx, next) => {
-        ctx.state.redisClient = redisClient;
-        return next();
-      });
-    }
-    this.use((ctx, next) => {
-      ctx.state.configuration = configuration;
-      return next();
-    });
     this.use(bodyParser());
     this.use(router.routes());
     this.use(router.allowedMethods());
+    this.use(helmet());
+  }
+
+  configureMiddlewares(): void {
+    // LoggerService Middleware
+    this.use(async (ctx, next) => {
+      await next();
+      const rt = ctx.response.get('X-Response-Time');
+      if (ctx.path !== '/health') {
+        LoggerService.log(`${ctx.method} ${ctx.url} - ${rt}`);
+      }
+    });
+
+    // x-response-time
+    this.use(async (ctx, next) => {
+      const start = Date.now();
+      await next();
+      const ms = Date.now() - start;
+      ctx.set('X-Response-Time', `${ms}ms`);
+    });
   }
 
   listen(...args: any[]): Server {

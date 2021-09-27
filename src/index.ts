@@ -1,26 +1,43 @@
 import { configuration } from './config';
-import { Context } from 'koa';
 import App from './app';
-import apm from 'elastic-apm-node';
 import { LoggerService } from './helpers';
+import apm from 'elastic-apm-node';
+import { Context } from 'koa';
+import { ArangoDBService } from './clients/arango';
+import { RedisService } from './clients/redis';
 
-if (configuration.dev === 'production') {
+/*
+ * Initialize the APM Logging
+ **/
+if (configuration.env === 'production') {
   apm.start({
-    serviceName: configuration.apmServiceName,
-    secretToken: configuration.apmSecretToken,
-    serverUrl: configuration.apmURL,
+    serviceName: configuration.apm?.serviceName,
+    secretToken: configuration.apm?.secretToken,
+    serverUrl: configuration.apm?.url,
+    usePathAsTransactionName: true,
+    active: Boolean(configuration.apm?.active),
   });
 }
 
-const app = new App();
+/*
+ * Initialize the clients and start the server
+ */
+export const app = new App();
+export const databaseClient = new ArangoDBService();
+export const cacheClient = new RedisService();
 
-export function handleError(err: Error, ctx: Context): void {
+/*
+ * Centralized error handling
+ **/
+app.on('error', handleError);
+
+function handleError(err: Error, ctx: Context): void {
   if (ctx == null) {
     LoggerService.error(err, undefined, 'Unhandled exception occured');
   }
 }
 
-export function terminate(signal: NodeJS.Signals): void {
+function terminate(signal: NodeJS.Signals): void {
   try {
     app.terminate();
   } finally {
@@ -29,18 +46,12 @@ export function terminate(signal: NodeJS.Signals): void {
   }
 }
 
-// Handle uncaught errors
-app.on('error', handleError);
-
-// Start server
-if (
-  Object.values(require.cache).filter(async (m) => m?.children.includes(module))
-) {
+/*
+ * Start server
+ **/
+if (Object.values(require.cache).filter(async (m) => m?.children.includes(module))) {
   const server = app.listen(configuration.port, () => {
-    LoggerService.log(
-      `API server listening on PORT ${configuration.port}`,
-      'execute',
-    );
+    LoggerService.log(`API server listening on PORT ${configuration.port}`, 'execute');
   });
   server.on('error', handleError);
 
