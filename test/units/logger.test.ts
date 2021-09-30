@@ -18,8 +18,6 @@ describe('Logger Service', () => {
   });
 
   describe('Logger Service', () => {
-    console.log(configuration);
-
     it('should log a message with defined operation', async () => {
       const expectedMessage = 'ExpectedLogMessage';
 

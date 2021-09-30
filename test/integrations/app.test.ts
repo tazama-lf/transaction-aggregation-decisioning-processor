@@ -6,6 +6,8 @@ const supertest = request.agent(app.listen());
 Date.now = jest.fn(() => new Date(Date.UTC(2022, 1, 1)).valueOf());
 
 jest.mock('redis', () => jest.requireActual('redis-mock'));
+jest.mock('../../src/clients/redis.ts');
+jest.mock('../../src/clients/arango.ts');
 
 describe('TADProc Service', () => {
   const requestBody = {
@@ -253,40 +255,31 @@ describe('TADProc Service', () => {
     },
   };
 
+  const expectedResponse = {
+    transactionId:
+      requestBody.transaction.PaymentInformation.CreditTransferTransactionInformation.PaymentIdentification.EndToEndIdentification,
+    message: 'Successfully 0 channels completed',
+    result: [{ Channel: `${requestBody.channelResult.channel}`, Result: `${requestBody.channelResult.result}` }],
+  };
+
   afterAll(() => {
     app.terminate();
   });
 
   describe('test each endpoint', () => {
     test('should /health response with status code 200', async () => {
-      await supertest.get('/health').expect(200);
+      await supertest.get('/health').expect(200).expect({
+        status: 'UP',
+      });
     });
-
-    test('should /execute response with status code 200', async () => {
-      const resp = await supertest
-        .post('/execute')
-        .send(requestBody)
-        .set('Content-Type', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(200);
-
-      console.log('👀 LOGGING ~ file: app.test.ts ~ line 272 ~ test ~ resp', resp);
-    });
-
-    // expect(resp).toMatchObject();
   });
 
-  // test('the data is peanut butter', async () => {
-  //   const data = await fetchData();
-  //   expect(data).toBe('peanut butter');
-  // });
+  describe('test each endpoint', () => {
+    test('should /execute response with status code 200', async () => {
+      const res = await supertest.post('/execute').send(requestBody);
 
-  // test('the fetch fails with an error', async () => {
-  //   expect.assertions(1);
-  //   try {
-  //     await fetchData();
-  //   } catch (e) {
-  //     expect(e).toMatch('error');
-  //   }
-  // });
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(expectedResponse);
+    });
+  });
 });
