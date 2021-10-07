@@ -38,7 +38,7 @@ const config: Config.InitialOptions = {
     '.mock.ts',
     './src/index.ts',
     './src/clients/arango.ts',
-    './src/clients/redis.ts',
+    './src/clients/redisClient.ts',
     './src/interfaces',
   ],
 
@@ -142,7 +142,7 @@ const config: Config.InitialOptions = {
   // runner: "jest-runner",
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
-  setupFiles: ['dotenv/config'],
+  setupFiles: ['./setup.jest.js'],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   // setupFilesAfterEnv: ['./jest.setup.redis-mock.js'],

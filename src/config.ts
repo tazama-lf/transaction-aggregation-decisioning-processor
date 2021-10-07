@@ -4,13 +4,9 @@ import * as path from 'path';
 import * as dotenv from 'dotenv';
 
 // Load .env file into process.env if it exists. This is convenient for running locally.
-const result = dotenv.config({
+dotenv.config({
   path: path.resolve(__dirname, '../.env'),
 });
-
-if (result.error) {
-  throw result.error;
-}
 
 export interface IConfig {
   collectionName: string;
@@ -39,11 +35,6 @@ export interface IConfig {
     connection: boolean;
     db: string;
     host: string;
-    port: number;
-  };
-  transactionRouting: {
-    host: string;
-    path: string;
     port: number;
   };
 }
@@ -76,10 +67,5 @@ export const configuration: IConfig = {
     db: <string>process.env.REDIS_DB,
     host: <string>process.env.REDIS_HOST,
     port: parseInt(process.env.REDIS_PORT!, 10),
-  },
-  transactionRouting: {
-    host: <string>process.env.TRANSACTION_ROUTING_HOST,
-    path: <string>process.env.TRANSACTION_ROUTING_PATH,
-    port: parseInt(process.env.TRANSACTION_ROUTING_PORT!, 10),
   },
 };

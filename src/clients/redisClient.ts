@@ -12,13 +12,6 @@ export class RedisService {
       port: configuration.redis?.port,
       auth_pass: configuration.redis?.auth,
     });
-
-    if (this.client.connected) {
-      LoggerService.log('✅ Redis connection is ready');
-    } else {
-      LoggerService.error('❌ Redis connection is not ready');
-      throw new Error('Redis connection error');
-    }
   }
 
   getJson = (key: string): Promise<string> =>

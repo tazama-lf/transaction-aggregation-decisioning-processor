@@ -62,7 +62,7 @@ const checkChannelCompletion = async (
 
   const cacheData = await cacheClient.getJson(cacheKey);
 
-  const cacheResults: TypologyResult[] = [...JSON.parse(cacheData)];
+  const cacheResults: TypologyResult[] = cacheData ? [...JSON.parse(cacheData)] : [];
 
   // First check: The channel is not completed
   if (cacheResults.some((t) => t.typology === typologyResult.typology)) {
@@ -78,7 +78,7 @@ const checkChannelCompletion = async (
   if (cacheResults.length < channel.typologies.length) {
     LoggerService.log(`[${transactionID}] Save Channel interim rule results to Cache`);
 
-    ctx.state.redis.set(cacheKey, JSON.stringify(cacheResults));
+    cacheClient.setJson(cacheKey, JSON.stringify(cacheResults));
 
     return false;
   }

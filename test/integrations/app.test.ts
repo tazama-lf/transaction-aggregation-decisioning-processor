@@ -5,8 +5,6 @@ const supertest = request.agent(app.listen());
 
 Date.now = jest.fn(() => new Date(Date.UTC(2022, 1, 1)).valueOf());
 
-jest.mock('redis', () => jest.requireActual('redis-mock'));
-jest.mock('../../src/clients/redis.ts');
 jest.mock('../../src/clients/arango.ts');
 
 describe('TADProc Service', () => {
@@ -255,11 +253,21 @@ describe('TADProc Service', () => {
     },
   };
 
+  const transactionId =
+    requestBody.transaction.PaymentInformation.CreditTransferTransactionInformation.PaymentIdentification.EndToEndIdentification;
+
   const expectedResponse = {
-    transactionId:
-      requestBody.transaction.PaymentInformation.CreditTransferTransactionInformation.PaymentIdentification.EndToEndIdentification,
-    message: 'Successfully 0 channels completed',
-    result: [{ Channel: `${requestBody.channelResult.channel}`, Result: `${requestBody.channelResult.result}` }],
+    transactionId: transactionId,
+    message: 'Successfully 1 channels completed',
+    result: [
+      {
+        Channel: `${requestBody.channelResult.channel}`,
+        Result: {
+          transactionID: transactionId,
+          message: 'The transaction evaluation result is saved.',
+        },
+      },
+    ],
   };
 
   afterAll(() => {
@@ -279,7 +287,20 @@ describe('TADProc Service', () => {
       const res = await supertest.post('/execute').send(requestBody);
 
       expect(res.status).toBe(200);
-      expect(res.body).toEqual(expectedResponse);
+    });
+
+    test('should /execute response contains correct transactionId', async () => {
+      const res = await supertest.post('/execute').send(requestBody);
+      const data = res.body;
+
+      expect(data?.transactionId).toBe(transactionId);
+    });
+
+    test('should /execute response contains channel completed message', async () => {
+      const res = await supertest.post('/execute').send(requestBody);
+      const data = res.body;
+
+      expect(data?.message).toBe(expectedResponse.message);
     });
   });
 });

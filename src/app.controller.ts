@@ -13,7 +13,7 @@ import { TypologyResult } from './interfaces/typology-result';
  * @param next default koa next
  * @returns Koa context
  */
-export const handleRequest = async (ctx: Context, next: Next): Promise<Context> => {
+export const handleExecute = async (ctx: Context, next: Next): Promise<Context> => {
   try {
     // Get the request body and parse it to variables
     const transaction = ctx.request.body.transaction as CustomerCreditTransferInitiation;

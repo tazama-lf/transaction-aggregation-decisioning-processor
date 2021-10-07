@@ -1,13 +1,13 @@
 version: 1.0
 provider:
   name: openfaas
-  gateway: http://20.90.137.195:8080
+  gateway: https://frmfaas.sybrin.com
 functions:
-  off-transaction-aggregation-decisioning:
-    namespace: frm-meshed
+  off-transaction-aggregation-decisioning-processor:
+    namespace: openfaas-fn
     lang: dockerfile
     handler: .
-    image: frmacr.azurecr.io/transaction-aggregation-decisioning:latest
+    image: actio.azurecr.io/transaction-aggregation-decisioning-processor:latest
     labels:
       com.openfaas.scale.min: 1
       com.openfaas.scale.max: 20
