@@ -24,7 +24,7 @@ export interface IConfig {
     password: string;
     url: string;
     user: string;
-    graphName: string;
+    collectionName: string;
   };
   logstash: {
     host: string;
@@ -52,7 +52,7 @@ export const configuration: IConfig = {
     password: <string>process.env.DATABASE_PASSWORD,
     url: <string>process.env.DATABASE_URL,
     user: <string>process.env.DATABASE_USER,
-    graphName: <string>process.env.GRAPH_NAME,
+    collectionName: <string>process.env.COLLECTION_NAME,
   },
   env: <string>process.env.NODE_ENV,
   functionName: <string>process.env.FUNCTION_NAME,

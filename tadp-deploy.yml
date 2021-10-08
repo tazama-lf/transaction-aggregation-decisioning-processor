@@ -8,10 +8,6 @@ functions:
     lang: dockerfile
     handler: .
     image: actio.azurecr.io/transaction-aggregation-decisioning-processor:latest
-    labels:
-      com.openfaas.scale.min: 1
-      com.openfaas.scale.max: 20
-      com.openfaas.scale.zero: true
     annotations:
       com.openfaas.health.http.path: /health
       com.openfaas.health.http.initialDelay: "45s"

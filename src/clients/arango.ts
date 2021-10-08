@@ -59,7 +59,7 @@ export class ArangoDBService {
         "ruleResult": ${JSON.stringify(ruleResult)},
         "typologyResult": ${JSON.stringify(typologyResult)},
         "channelResult": ${JSON.stringify(channelResult)}
-    } INTO "history"
+    } INTO "${configuration.db.collectionName}"
     `;
 
       const results = this.client.query(transactionHistoryQuery);
