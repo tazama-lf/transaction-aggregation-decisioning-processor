@@ -6,7 +6,7 @@ if (configuration.env !== 'development' && configuration.env !== 'test') {
     appenders: {
       logstash: {
         type: '@log4js-node/logstash-http',
-        url: `http://${configuration.logstash?.host}:${configuration.logstash?.port}/_bulk`,
+        url: `http://${configuration.logstash.host}:${configuration.logstash.port}/_bulk`,
         application: 'logstash-log4js',
         logType: 'application',
         logChannel: configuration.functionName,
@@ -48,7 +48,7 @@ export abstract class LoggerService {
     logger.warn(`${LoggerService.messageStamp(serviceOperation)}[WARN] - ${message}`);
   }
 
-  static error(message: string | Error, innerError?: Error, serviceOperation?: string): void {
+  static error(message: string | Error, innerError?: unknown, serviceOperation?: string): void {
     let errMessage = typeof message === 'string' ? message : message.stack;
 
     if (innerError && innerError instanceof Error) {

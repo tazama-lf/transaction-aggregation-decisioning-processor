@@ -4,7 +4,7 @@ import { LoggerService } from './helpers';
 import apm from 'elastic-apm-node';
 import { Context } from 'koa';
 import { ArangoDBService } from './clients/arango';
-import { RedisService } from './clients/redisClient';
+import { RedisService } from './clients/redis';
 
 /*
  * Initialize the APM Logging
@@ -66,5 +66,3 @@ if (Object.values(require.cache).filter(async (m) => m?.children.includes(module
     process.once(signal, () => terminate(signal));
   });
 }
-
-export default app;

@@ -1,19 +1,29 @@
 import { Database } from 'arangojs';
 import { configuration } from '../config';
 import { LoggerService } from '../helpers';
-import { ChannelResult } from '../interfaces/channel-result';
-import { CustomerCreditTransferInitiation } from '../interfaces/iPain001Transaction';
-import { NetworkMap } from '../interfaces/network-map';
-import { RuleResult } from '../interfaces/rule-result';
-import { TypologyResult } from '../interfaces/typology-result';
+import { ChannelResult } from '../classes/channel-result';
+import { IPain001Message } from '../interfaces/iPain001';
+import { NetworkMap } from '../classes/network-map';
+import { RuleResult } from '../classes/rule-result';
+import { TypologyResult } from '../classes/typology-result';
 
 export class ArangoDBService {
   client: Database;
+  transactionConfig: Database;
 
   constructor() {
     this.client = new Database({
       url: configuration.db.url,
       databaseName: configuration.db.name,
+      auth: {
+        username: configuration.db.user,
+        password: configuration.db.password,
+      },
+    });
+
+    this.transactionConfig = new Database({
+      url: configuration.db.url,
+      databaseName: configuration.db.transactionConfigDb,
       auth: {
         username: configuration.db.user,
         password: configuration.db.password,
@@ -26,15 +36,21 @@ export class ArangoDBService {
       LoggerService.error('❌ ArangoDB connection is not ready');
       throw new Error('ArangoDB connection is not ready');
     }
+
+    if (this.transactionConfig.isArangoDatabase) {
+      LoggerService.log('✅ ArangoDB connection to transactionConfig is ready');
+    } else {
+      LoggerService.error('❌ ArangoDB connection to transactionConfig is not ready');
+      throw new Error('ArangoDB connection to transactionConfig is not ready');
+    }
   }
 
-  async query(query: string): Promise<unknown> {
+  async query(query: string, client: Database): Promise<unknown> {
     try {
-      const cycles = await this.client.query(query);
-
+      const cycles = await client.query(query);
       const results = await cycles.batches.all();
 
-      LoggerService.log(`Query result: ${JSON.stringify(results)}`);
+      // LoggerService.log(`Query result: ${JSON.stringify(results)}`);
 
       return results;
     } catch (error) {
@@ -42,9 +58,17 @@ export class ArangoDBService {
     }
   }
 
+  async getTransactionConfig(): Promise<any> {
+    const transactionInfoQuery = `
+      FOR doc IN ${configuration.db.transactionConfigCollection}
+        RETURN UNSET(doc, "_id", "_key", "_rev")
+    `;
+    return this.query(transactionInfoQuery, this.transactionConfig);
+  }
+
   async insertTransactionHistory(
     transactionID: string,
-    transaction: CustomerCreditTransferInitiation,
+    transaction: IPain001Message,
     networkMap: NetworkMap,
     ruleResult: RuleResult[],
     typologyResult: TypologyResult,
@@ -59,10 +83,9 @@ export class ArangoDBService {
         "ruleResult": ${JSON.stringify(ruleResult)},
         "typologyResult": ${JSON.stringify(typologyResult)},
         "channelResult": ${JSON.stringify(channelResult)}
-    } INTO "${configuration.db.collectionName}"
+    } INTO ${configuration.db.collectionName}
     `;
-
-      const results = this.client.query(transactionHistoryQuery);
+      const results = await this.query(transactionHistoryQuery, this.client);
 
       LoggerService.log(`Inserted transaction history: ${JSON.stringify(results)}`);
 

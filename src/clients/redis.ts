@@ -12,6 +12,13 @@ export class RedisService {
       port: configuration.redis?.port,
       auth_pass: configuration.redis?.auth,
     });
+
+    this.client.on('connect', () => {
+      LoggerService.log('✅ Redis connection is ready');
+    });
+    this.client.on('error', (error) => {
+      LoggerService.error('❌ Redis connection is not ready', error);
+    });
   }
 
   getJson = (key: string): Promise<string> =>
@@ -49,4 +56,8 @@ export class RedisService {
         resolve(res);
       });
     });
+
+  quit = (): void => {
+    this.client.quit();
+  };
 }

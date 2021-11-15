@@ -23,7 +23,7 @@ const config: Config.InitialOptions = {
   collectCoverage: true,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
-  collectCoverageFrom: ['src/**/*.{ts,js}', '!src/**/*.d.ts'],
+  collectCoverageFrom: ['src/controllers/execute.ts'],
 
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/coverage/',
@@ -136,7 +136,7 @@ const config: Config.InitialOptions = {
   // rootDir: ".",
 
   // A list of paths to directories that Jest should use to search for files in
-  roots: ['<rootDir>'],
+  roots: ['<rootDir>/__tests__'],
 
   // Allows you to use a custom runner instead of Jest's default test runner
   // runner: "jest-runner",

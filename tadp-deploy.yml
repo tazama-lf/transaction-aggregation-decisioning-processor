@@ -7,9 +7,9 @@ functions:
     namespace: openfaas-fn
     lang: dockerfile
     handler: .
-    image: actio.azurecr.io/transaction-aggregation-decisioning-processor:latest
+    image: actio.azurecr.io/off-transaction-aggregation-decisioning-processor:latest
     annotations:
       com.openfaas.health.http.path: /health
-      com.openfaas.health.http.initialDelay: "45s"
+      com.openfaas.health.http.initialDelay: '45s'
     secrets:
       - frmpullsecret
