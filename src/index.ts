@@ -16,6 +16,7 @@ if (configuration.apm.active === 'true') {
     serverUrl: configuration.apm?.url,
     usePathAsTransactionName: true,
     active: Boolean(configuration.apm?.active),
+    transactionIgnoreUrls: ['/health'],
   });
 }
 
