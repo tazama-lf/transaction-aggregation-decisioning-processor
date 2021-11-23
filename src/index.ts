@@ -11,7 +11,7 @@ import { RedisService } from './clients/redis';
  **/
 if (configuration.apm.active === 'true') {
   apm.start({
-    serviceName: configuration.apm?.serviceName,
+    serviceName: configuration.serviceName,
     secretToken: configuration.apm?.secretToken,
     serverUrl: configuration.apm?.url,
     usePathAsTransactionName: true,

@@ -22,7 +22,7 @@ export const handleChannels = async (
   try {
     apm.setTransactionName('TADProc');
     const span = apm.startSpan('handleChannels');
-    const transactionID = transaction.CstmrCdtTrfInitn.PmtInf.CdtTrfTxInf.PmtId.EndToEndId;
+    const transactionID = transaction.CstmrCdtTrfInitn.GrpHdr.MsgId;
     const transactionConfiguration = await databaseClient.getTransactionConfig();
     const transactionConfigMessages = transactionConfiguration[0][0] as TransactionConfiguration;
     const requiredConfigMessage = transactionConfigMessages.messages.find((msg) => msg.txTp === transaction.TxTp);

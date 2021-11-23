@@ -9,13 +9,11 @@ dotenv.config({
 });
 
 export interface IConfig {
-  collectionName: string;
   env: string;
-  functionName: string;
   port: number;
+  serviceName: string;
   apm: {
     secretToken: string;
-    serviceName: string;
     url: string;
     active: string;
   };
@@ -34,7 +32,6 @@ export interface IConfig {
   };
   redis: {
     auth: string;
-    connection: boolean;
     db: string;
     host: string;
     port: number;
@@ -42,13 +39,12 @@ export interface IConfig {
 }
 
 export const configuration: IConfig = {
+  serviceName: <string>process.env.FUNCTION_NAME,
   apm: {
-    serviceName: <string>process.env.APM_SERVICE_NAME,
     url: <string>process.env.APM_URL,
     secretToken: <string>process.env.APM_SECRET_TOKEN,
     active: <string>process.env.APM_ACTIVE,
   },
-  collectionName: <string>process.env.COLLECTION_NAME,
   db: {
     name: <string>process.env.DATABASE_NAME,
     password: <string>process.env.DATABASE_PASSWORD,
@@ -59,7 +55,6 @@ export const configuration: IConfig = {
     transactionConfigCollection: <string>process.env.TRANSACTION_CONFIG_COLLECTION,
   },
   env: <string>process.env.NODE_ENV,
-  functionName: <string>process.env.FUNCTION_NAME,
   logstash: {
     host: <string>process.env.LOGSTASH_HOST,
     port: parseInt(process.env.LOGSTASH_PORT!, 10),
@@ -67,7 +62,6 @@ export const configuration: IConfig = {
   port: parseInt(process.env.PORT!, 10) || 3000,
   redis: {
     auth: <string>process.env.REDIS_AUTH,
-    connection: <boolean>(process.env.REDIS_CONNECTION === 'true'),
     db: <string>process.env.REDIS_DB,
     host: <string>process.env.REDIS_HOST,
     port: parseInt(process.env.REDIS_PORT!, 10),

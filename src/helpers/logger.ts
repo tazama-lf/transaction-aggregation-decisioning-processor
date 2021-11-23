@@ -9,7 +9,7 @@ if (configuration.env !== 'development' && configuration.env !== 'test') {
         url: `http://${configuration.logstash.host}:${configuration.logstash.port}/_bulk`,
         application: 'logstash-log4js',
         logType: 'application',
-        logChannel: configuration.functionName,
+        logChannel: configuration.serviceName,
       },
     },
     categories: {
@@ -33,7 +33,7 @@ export abstract class LoggerService {
   }
 
   static messageStamp(serviceOperation?: string): string {
-    return `[${LoggerService.timeStamp()}][${configuration.functionName}${serviceOperation ? ' - ' + serviceOperation : ''}]`;
+    return `[${LoggerService.timeStamp()}][${configuration.serviceName}${serviceOperation ? ' - ' + serviceOperation : ''}]`;
   }
 
   static trace(message: string, serviceOperation?: string): void {
