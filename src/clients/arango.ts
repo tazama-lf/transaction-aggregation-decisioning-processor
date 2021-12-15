@@ -1,11 +1,10 @@
+/* eslint-disable */
 import { Database } from 'arangojs';
 import { configuration } from '../config';
 import { LoggerService } from '../helpers';
 import { ChannelResult } from '../classes/channel-result';
 import { IPain001Message } from '../interfaces/iPain001';
 import { NetworkMap } from '../classes/network-map';
-import { RuleResult } from '../classes/rule-result';
-import { TypologyResult } from '../classes/typology-result';
 
 export class ArangoDBService {
   client: Database;
@@ -70,8 +69,6 @@ export class ArangoDBService {
     transactionID: string,
     transaction: IPain001Message,
     networkMap: NetworkMap,
-    ruleResult: RuleResult[],
-    typologyResult: TypologyResult,
     channelResult: ChannelResult,
   ): Promise<unknown> {
     try {
@@ -80,8 +77,6 @@ export class ArangoDBService {
         "transactionID": ${JSON.stringify(transactionID)},
         "transaction": ${JSON.stringify(transaction)},
         "networkMap": ${JSON.stringify(networkMap)},
-        "ruleResult": ${JSON.stringify(ruleResult)},
-        "typologyResult": ${JSON.stringify(typologyResult)},
         "channelResult": ${JSON.stringify(channelResult)}
     } INTO ${configuration.db.collectionName}
     `;

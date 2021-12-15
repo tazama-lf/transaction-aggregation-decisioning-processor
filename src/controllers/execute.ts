@@ -18,8 +18,6 @@ export const handleExecute = async (ctx: Context, next: Next): Promise<Context> 
     // Get the request body and parse it to variables
     const transaction = ctx.request.body.transaction as IPain001Message;
     const networkMap = ctx.request.body.networkMap as NetworkMap;
-    const ruleResult = ctx.request.body.ruleResults as RuleResult[];
-    const typologyResult = ctx.request.body.typologyResult as TypologyResult;
     const channelResult = ctx.request.body.channelResult as ChannelResult;
 
     const transactionId = transaction.CstmrCdtTrfInitn.PmtInf.CdtTrfTxInf.PmtId.EndToEndId;
@@ -34,7 +32,7 @@ export const handleExecute = async (ctx: Context, next: Next): Promise<Context> 
       for (const channel of pain001Message.channels) {
         channelCounter++;
 
-        const channelRes = await handleChannels(transaction, networkMap, ruleResult, typologyResult, channelResult, channel);
+        const channelRes = await handleChannels(transaction, networkMap, channelResult, channel);
 
         toReturn.push({ Channel: channel.id, Result: channelRes });
       }

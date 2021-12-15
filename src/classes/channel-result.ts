@@ -1,4 +1,8 @@
+import { TypologyResult } from './typology-result';
+
 export class ChannelResult {
-  channel = '';
+  id = '';
+  cfg = '';
   result = 0.0;
+  typologyResult: TypologyResult[] = [];
 }

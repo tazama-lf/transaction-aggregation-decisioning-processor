@@ -1,5 +1,8 @@
+import { RuleResult } from './rule-result';
+
 export class TypologyResult {
-  typology = '';
-  result = 0.0;
+  id = '';
   cfg = '';
+  result = 0.0;
+  ruleResults: RuleResult[] = [];
 }
