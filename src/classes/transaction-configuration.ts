@@ -1,10 +1,12 @@
 class Typology {
   id = '';
+  cfg = '';
   threshold = 0;
 }
 
 class Channel {
   id = '';
+  cfg = '';
   typologies: Array<Typology> = [];
 }
 

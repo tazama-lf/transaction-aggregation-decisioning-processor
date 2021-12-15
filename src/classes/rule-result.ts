@@ -1,6 +1,7 @@
 export class RuleResult {
-  rule = '';
-  result = false;
+  id = '';
+  cfg = '';
   subRuleRef = '';
+  result = false;
   reason = '';
 }
