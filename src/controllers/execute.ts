@@ -43,8 +43,6 @@ export const handleExecute = async (ctx: Context, next: Next): Promise<Context> 
       const alert = new Alert();
       alert.tadpResult = toReturn;
       alert.status = review === true ? 'ALRT' : 'NALT';
-      console.log(`---------------------------------------Alert status = ${alert.status} ChannelCount = ${channelResults.length}`);
-      console.log(channelResults);
       const result: CMSRequest = {
         message: `Successfully completed ${channelResults.length} channels`,
         alert: alert,

@@ -35,7 +35,6 @@ describe('TADProc Service', () => {
           Object.assign(
             new TransactionConfiguration(),
             JSON.parse(
-              // '[[{"messages":[{"id":"001@1.0","cfg":"1.0","txTp":"pain.001.001.11","channels":[{"id":"001@1.0","typologies":[{"id":"028@1.0","threshold":100},{"id":"029@1.0","threshold":100}]},{"id":"002@1.0","typologies":[{"id":"028@1.0","threshold":100},{"id":"029@1.0","threshold":100}]}]},{"id":"002@1.0","cfg":"1.0","txTp":"pain.013.001.09","channels":[{"id":"001@1.0","typologies":[{"id":"028@1.0","threshold":100},{"id":"029@1.0","threshold":100}]},{"id":"002@1.0","typologies":[{"id":"028@1.0","threshold":100},{"id":"029@1.0","threshold":100}]}]}]}]]',
               '[[{"messages":[{"id":"001@1.0","cfg":"1.0","txTp":"pain.001.001.11","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":100},{"id":"029@1.0","cfg":"1.0","threshold":100}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":100},{"id":"029@1.0","cfg":"1.0","threshold":100}]}]},{"id":"002@1.0","cfg":"1.0","txTp":"pain.013.001.09","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":100},{"id":"029@1.0","cfg":"1.0","threshold":100}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":100},{"id":"029@1.0","cfg":"1.0","threshold":100}]}]}]}]]',
             ),
           ),
@@ -94,8 +93,6 @@ describe('TADProc Service', () => {
         .set('Accept', 'application/json')
         .expect(200);
 
-      console.log(`CACHE STRING = ${cacheString}`);
-      console.log(`CACHE STRING = ${await cacheClient.getJson('asdf')}`);
       await supertest
         .post('/execute')
         .send(requestBody2)
