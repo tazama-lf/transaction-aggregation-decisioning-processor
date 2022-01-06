@@ -6,6 +6,12 @@ import { IPain001Message } from '../interfaces/iPain001';
 import { NetworkMap } from '../classes/network-map';
 import { RuleResult } from '../classes/rule-result';
 import { TypologyResult } from '../classes/typology-result';
+import { TADPResult } from '../classes/tadp-result';
+import axios from 'axios';
+import { Alert } from '../classes/alert';
+import { configuration } from '../config';
+import { cacheClient } from '..';
+import { CMSRequest } from '../classes/cms-request';
 
 /**
  * Handle the incoming request and return the result
@@ -16,43 +22,46 @@ import { TypologyResult } from '../classes/typology-result';
 export const handleExecute = async (ctx: Context, next: Next): Promise<Context> => {
   try {
     // Get the request body and parse it to variables
-    const transaction = ctx.request.body.transaction as IPain001Message;
+    const transaction = ctx.request.body.transaction;
     const networkMap = ctx.request.body.networkMap as NetworkMap;
     const channelResult = ctx.request.body.channelResult as ChannelResult;
 
-    const transactionId = transaction.CstmrCdtTrfInitn.PmtInf.CdtTrfTxInf.PmtId.EndToEndId;
-
     // Send every channel request to the service function
-    let channelCounter = 0;
-    const toReturn = [];
+    const toReturn: TADPResult = { id: '', cfg: '', channelResult: [] };
 
-    const pain001Message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
+    const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
-    if (pain001Message) {
-      for (const channel of pain001Message.channels) {
-        channelCounter++;
+    if (message) {
+      toReturn.id = message.id;
+      toReturn.cfg = message.cfg;
+      let review = false;
+      const channelResults = await handleChannels(message, transaction, networkMap, channelResult);
 
-        const channelRes = await handleChannels(transaction, networkMap, channelResult, channel);
+      if (channelResults.some((c) => c.status === 'Review')) review = true;
+      toReturn.channelResult = channelResults;
 
-        toReturn.push({ Channel: channel.id, Result: channelRes });
-      }
-
-      const result = {
-        transactionId: transactionId,
-        message: `Successfully completed ${channelCounter} channels`,
-        result: toReturn,
-        networkMap,
+      const alert = new Alert();
+      alert.tadpResult = toReturn;
+      alert.status = review === true ? 'ALRT' : 'NALT';
+      console.log(`---------------------------------------Alert status = ${alert.status} ChannelCount = ${channelResults.length}`);
+      console.log(channelResults);
+      const result: CMSRequest = {
+        message: `Successfully completed ${channelResults.length} channels`,
+        alert: alert,
+        transaction: transaction,
+        networkMap: networkMap,
       };
+      if (channelResults.length > 0) await executePost(configuration.cmsEndpoint, result);
+
       ctx.body = result;
     } else {
-      const result = {
-        transactionId: transactionId,
+      const tadpResult = {
         message: 'Invalid message type',
         result: [],
-        networkMap,
+        networkMap: networkMap,
       };
       LoggerService.log('Invalid message type');
-      ctx.body = result;
+      ctx.body = tadpResult;
     }
 
     ctx.status = 200;
@@ -64,4 +73,18 @@ export const handleExecute = async (ctx: Context, next: Next): Promise<Context> 
     ctx.body = e;
   }
   return ctx;
+};
+
+const executePost = async (endpoint: string, request: CMSRequest): Promise<void | Error> => {
+  try {
+    const res = await axios.post(endpoint, request);
+    LoggerService.log(`CMS response statusCode: ${res.status}`);
+    if (res.status !== 200) {
+      LoggerService.trace(`Result from CMS StatusCode != 200, request:\r\n${request}`);
+      LoggerService.error(`Error Code (${res.status}) from CMS with message: \r\n${res.data ?? '[NO MESSAGE]'}`);
+    } else LoggerService.log(`Success response from CMS with message: ${res.toString()}`);
+  } catch (err) {
+    LoggerService.error('Error while sending request to CMS', err);
+    LoggerService.trace(`Error while sending request to CMS with Request:\r\n${request}`);
+  }
 };
