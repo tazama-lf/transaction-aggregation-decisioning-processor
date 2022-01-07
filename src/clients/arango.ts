@@ -5,6 +5,7 @@ import { LoggerService } from '../helpers';
 import { ChannelResult } from '../classes/channel-result';
 import { IPain001Message } from '../interfaces/iPain001';
 import { NetworkMap } from '../classes/network-map';
+import { Alert } from '../classes/alert';
 
 export class ArangoDBService {
   client: Database;

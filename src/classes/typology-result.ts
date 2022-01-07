@@ -5,4 +5,6 @@ export class TypologyResult {
   cfg = '';
   result = 0.0;
   ruleResults: RuleResult[] = [];
+  threshold = 0;
+  review = false;
 }

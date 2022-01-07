@@ -36,6 +36,7 @@ export interface IConfig {
     host: string;
     port: number;
   };
+  cmsEndpoint: string;
 }
 
 export const configuration: IConfig = {
@@ -66,4 +67,5 @@ export const configuration: IConfig = {
     host: <string>process.env.REDIS_HOST,
     port: parseInt(process.env.REDIS_PORT!, 10),
   },
+  cmsEndpoint: <string>process.env.CMS_ENDPOINT,
 };
