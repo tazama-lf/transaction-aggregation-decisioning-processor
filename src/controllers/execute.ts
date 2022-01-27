@@ -10,7 +10,7 @@ import { TADPResult } from '../classes/tadp-result';
 import axios from 'axios';
 import { Alert } from '../classes/alert';
 import { configuration } from '../config';
-import { cacheClient } from '..';
+import { cacheClient, databaseClient } from '..';
 import { CMSRequest } from '../classes/cms-request';
 
 /**
@@ -43,13 +43,19 @@ export const handleExecute = async (ctx: Context, next: Next): Promise<Context> 
       const alert = new Alert();
       alert.tadpResult = toReturn;
       alert.status = review === true ? 'ALRT' : 'NALT';
+
       const result: CMSRequest = {
         message: `Successfully completed ${channelResults.length} channels`,
         alert: alert,
         transaction: transaction,
         networkMap: networkMap,
       };
-      if (channelResults.length > 0) await executePost(configuration.cmsEndpoint, result);
+      if (channelResults.length > 0) {
+        const transactionType = Object.keys(transaction).find((k) => k !== 'TxTp') ?? '';
+        const transactionID = transaction[transactionType].GrpHdr.MsgId;
+        await databaseClient.insertTransactionHistory(transactionID, transaction, networkMap, alert);
+        await executePost(configuration.cmsEndpoint, result);
+      }
 
       ctx.body = result;
     } else {

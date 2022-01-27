@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LoggerService } from '../helpers';
 import { ChannelResult } from '../classes/channel-result';
 import { IPain001Message } from '../interfaces/iPain001';
@@ -48,13 +49,15 @@ export const checkChannelCompletion = async (
 
 export const handleChannels = async (
   message: Message,
-  transaction: IPain001Message,
+  transaction: any,
   networkMap: NetworkMap,
   channelResult: ChannelResult,
 ): Promise<ChannelResult[]> => {
   const span = apm.startSpan('handleChannels');
   try {
-    const transactionID = transaction.CstmrCdtTrfInitn.GrpHdr.MsgId;
+    const transactionType = Object.keys(transaction).find((k) => k !== 'TxTp') ?? '';
+    const transactionID = transaction[transactionType].GrpHdr.MsgId;
+
     const transactionConfiguration = await databaseClient.getTransactionConfig();
     const transactionConfigMessages = transactionConfiguration[0][0] as TransactionConfiguration;
     const requiredConfigMessage = transactionConfigMessages.messages.find((msg) => msg.txTp === transaction.TxTp);
@@ -111,7 +114,6 @@ export const handleChannels = async (
     LoggerService.log(`Transaction: ${transactionID} has status: ${reviewMessage}`);
 
     // Save the transaction evaluation result
-    await databaseClient.insertTransactionHistory(transactionID, transaction, networkMap, channelResult);
     cacheClient.deleteKey(cacheKey);
 
     span?.end();

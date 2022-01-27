@@ -6,6 +6,7 @@ import { ChannelResult } from '../classes/channel-result';
 import { IPain001Message } from '../interfaces/iPain001';
 import { NetworkMap } from '../classes/network-map';
 import { Alert } from '../classes/alert';
+import { TADPResult } from '../classes/tadp-result';
 
 export class ArangoDBService {
   client: Database;
@@ -66,19 +67,14 @@ export class ArangoDBService {
     return this.query(transactionInfoQuery, this.transactionConfig);
   }
 
-  async insertTransactionHistory(
-    transactionID: string,
-    transaction: IPain001Message,
-    networkMap: NetworkMap,
-    channelResult: ChannelResult,
-  ): Promise<unknown> {
+  async insertTransactionHistory(transactionID: string, transaction: any, networkMap: NetworkMap, alert: Alert): Promise<unknown> {
     try {
       const transactionHistoryQuery = `
       INSERT {
         "transactionID": ${JSON.stringify(transactionID)},
         "transaction": ${JSON.stringify(transaction)},
         "networkMap": ${JSON.stringify(networkMap)},
-        "channelResult": ${JSON.stringify(channelResult)}
+        "report": ${JSON.stringify(alert)}
     } INTO ${configuration.db.collectionName}
     `;
       const results = await this.query(transactionHistoryQuery, this.client);
