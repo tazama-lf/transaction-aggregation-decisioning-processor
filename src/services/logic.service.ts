@@ -59,8 +59,10 @@ export const handleChannels = async (
     const transactionID = transaction[transactionType].GrpHdr.MsgId;
 
     const transactionConfiguration = await databaseClient.getTransactionConfig();
-    const transactionConfigMessages = transactionConfiguration[0][0] as TransactionConfiguration;
-    const requiredConfigMessage = transactionConfigMessages.messages.find((msg) => msg.txTp === transaction.TxTp);
+    const transactionConfigMessages = transactionConfiguration[0] as TransactionConfiguration[];
+    const requiredConfigMessage = transactionConfigMessages
+      .find((tc) => tc.messages.find((msg) => msg.id === message.id && msg.cfg === message.cfg && msg.txTp === transaction.TxTp))
+      ?.messages.find((msg) => msg.id === message.id && msg.cfg === message.cfg && msg.txTp === transaction.TxTp);
 
     const cacheKey = `tadp_${transactionID}_${message.id}_${message.cfg}`;
     const jchannelResults = await cacheClient.getJson(cacheKey);
