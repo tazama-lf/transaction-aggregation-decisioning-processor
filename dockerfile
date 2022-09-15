@@ -1,5 +1,5 @@
 FROM --platform=${TARGETPLATFORM:-linux/amd64} ghcr.io/openfaas/of-watchdog:0.8.4 as watchdog
-FROM --platform=${TARGETPLATFORM:-linux/amd64} node:14-alpine as ship
+FROM --platform=${TARGETPLATFORM:-linux/amd64} node:16.17-alpine as ship
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
@@ -8,8 +8,6 @@ COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
 RUN chmod +x /usr/bin/fwatchdog
 
 RUN addgroup -S app && adduser -S -g app app
-
-RUN apk --no-cache add curl ca-certificates
 
 RUN apk add --no-cache -t build-dependencies git make gcc g++ python libtool autoconf automake yarn
 
@@ -55,17 +53,27 @@ ENV read_timeout="15s"
 
 ENV prefix_logs="false"
 
-ENV FUNCTION_NAME=transaction-aggregation-decisioning-processor
+ENV FUNCTION_NAME=transaction-aggregation-decisioning-processor-rel-1-0-0
+ENV NODE_ENV=production
 ENV PORT=3000
 ENV REDIS_DB=0
 ENV REDIS_AUTH=
 ENV REDIS_HOST=
 ENV REDIS_PORT=6379
 ENV REDIS_CONNECTION=true
-ENV APM_SERVICE_NAME=transaction-aggregation-decisioning-processor
+ENV DATABASE_NAME=transactionHistory
+ENV DATABASE_URL=https://arango.development.svc:8529
+ENV DATABASE_USER=root
+ENV DATABASE_PASSWORD=''
+ENV COLLECTION_NAME=transactions
+ENV TRANSACTION_CONFIG_DB=Configuration
+ENV TRANSACTION_CONFIG_COLLECTION=transactionConfiguration
+ENV APM_ACTIVE=true
+ENV APM_SERVICE_NAME=transaction-aggregation-decisioning-processor-rel-1-0-0
 ENV APM_URL=
-ENV APM_SECRET_TOKEN=
-ENV NODE_ENV=production
+ENV APM_SECRET_TOKEN=http://apm-server.development:8200
+ENV LOGSTASH_HOST=logstash.development
+ENV LOGSTASH_PORT=8080
 ENV TRANSACTION_ROUTING_HOST=localhost
 ENV TRANSACTION_ROUTING_PORT=3000
 ENV TRANSACTION_ROUTING_PATH=result-test
