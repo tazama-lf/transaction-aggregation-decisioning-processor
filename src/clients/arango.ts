@@ -6,17 +6,22 @@ import { CustomerCreditTransferInitiation } from '../interfaces/iPain001Transact
 import { NetworkMap } from '../interfaces/network-map';
 import { RuleResult } from '../interfaces/rule-result';
 import { TypologyResult } from '../interfaces/typology-result';
+import * as fs from 'fs'
 
 export class ArangoDBService {
   client: Database;
 
   constructor() {
+    const caOption = fs.existsSync("/usr/local/share/ca-certificates/ca-certificates.crt") ? [fs.readFileSync("/usr/local/share/ca-certificates/ca-certificates.crt")] : []
     this.client = new Database({
       url: configuration.db.url,
       databaseName: configuration.db.name,
       auth: {
         username: configuration.db.user,
         password: configuration.db.password,
+      },
+      agentOptions: {
+        ca: caOption
       },
     });
 
