@@ -9,16 +9,8 @@ RUN chmod +x /usr/bin/fwatchdog
 
 RUN addgroup -S app && adduser -S -g app app
 
-RUN apk add --no-cache -t build-dependencies git make gcc g++ python libtool autoconf automake yarn
-
 # Turn down the verbosity to default level.
 ENV NPM_CONFIG_LOGLEVEL warn
-
-# chmod for tmp is for a buildkit issue
-RUN chown app:app -R /home/app \
-  && chmod 777 /tmp
-
-USER app
 
 # Create a folder named function
 RUN mkdir -p /home/app
@@ -26,20 +18,17 @@ RUN mkdir -p /home/app
 # Wrapper/boot-strapper
 WORKDIR /home/app
 
-COPY package.json ./
-COPY yarn.lock ./
-COPY tsconfig.json ./
+COPY ./package.json ./
+COPY ./package-lock.json ./
+COPY ./tsconfig.json ./
 
 # Install dependencies
-# RUN yarn run cleanup
-
-# Install dependencies
-RUN yarn install
+RUN npm install
 
 COPY ./src ./src
 
 # Build the project
-RUN yarn run build
+RUN npm run build
 
 # Environment variables for openfaas
 ENV cgi_headers="true"
@@ -64,21 +53,22 @@ ENV REDIS_CONNECTION=true
 ENV DATABASE_NAME=transactionHistory
 ENV DATABASE_URL=
 ENV DATABASE_USER=root
-ENV DATABASE_PASSWORD=''
+ENV DATABASE_PASSWORD='$!prAtHe>Qh5X9D3'
 ENV COLLECTION_NAME=transactions
 ENV TRANSACTION_CONFIG_DB=Configuration
 ENV TRANSACTION_CONFIG_COLLECTION=transactionConfiguration
 ENV APM_ACTIVE=true
 ENV APM_SERVICE_NAME=transaction-aggregation-decisioning-processor-rel-1-0-0
-ENV APM_URL=
-ENV APM_SECRET_TOKEN=http://apm-server.development:8200
+ENV APM_URL=http://apm-server.development:8200
+ENV APM_SECRET_TOKEN=
+
 ENV LOGSTASH_HOST=logstash.development
 ENV LOGSTASH_PORT=8080
 ENV TRANSACTION_ROUTING_HOST=localhost
 ENV TRANSACTION_ROUTING_PORT=3000
 ENV TRANSACTION_ROUTING_PATH=result-test
 
-HEALTHCHECK --interval=3s CMD [ -e /tmp/.lock ] || exit 1
+HEALTHCHECK --interval=60s CMD [ -e /tmp/.lock ] || exit 1
 
 # Execute watchdog command
 CMD ["fwatchdog"]
