@@ -4,22 +4,16 @@ import * as path from 'path';
 import * as dotenv from 'dotenv';
 
 // Load .env file into process.env if it exists. This is convenient for running locally.
-const result = dotenv.config({
+dotenv.config({
   path: path.resolve(__dirname, '../.env'),
 });
 
-if (result.error) {
-  throw result.error;
-}
-
 export interface IConfig {
-  collectionName: string;
   env: string;
-  functionName: string;
   port: number;
+  serviceName: string;
   apm: {
     secretToken: string;
-    serviceName: string;
     url: string;
     active: string;
   };
@@ -28,7 +22,9 @@ export interface IConfig {
     password: string;
     url: string;
     user: string;
-    graphName: string;
+    collectionName: string;
+    transactionConfigDb: string;
+    transactionConfigCollection: string;
   };
   logstash: {
     host: string;
@@ -36,35 +32,30 @@ export interface IConfig {
   };
   redis: {
     auth: string;
-    connection: boolean;
     db: string;
     host: string;
     port: number;
   };
-  transactionRouting: {
-    host: string;
-    path: string;
-    port: number;
-  };
+  cmsEndpoint: string;
 }
 
 export const configuration: IConfig = {
+  serviceName: <string>process.env.FUNCTION_NAME,
   apm: {
-    serviceName: <string>process.env.APM_SERVICE_NAME,
     url: <string>process.env.APM_URL,
     secretToken: <string>process.env.APM_SECRET_TOKEN,
     active: <string>process.env.APM_ACTIVE,
   },
-  collectionName: <string>process.env.COLLECTION_NAME,
   db: {
     name: <string>process.env.DATABASE_NAME,
     password: <string>process.env.DATABASE_PASSWORD,
     url: <string>process.env.DATABASE_URL,
     user: <string>process.env.DATABASE_USER,
-    graphName: <string>process.env.GRAPH_NAME,
+    collectionName: <string>process.env.COLLECTION_NAME,
+    transactionConfigDb: <string>process.env.TRANSACTION_CONFIG_DB,
+    transactionConfigCollection: <string>process.env.TRANSACTION_CONFIG_COLLECTION,
   },
   env: <string>process.env.NODE_ENV,
-  functionName: <string>process.env.FUNCTION_NAME,
   logstash: {
     host: <string>process.env.LOGSTASH_HOST,
     port: parseInt(process.env.LOGSTASH_PORT!, 10),
@@ -72,14 +63,9 @@ export const configuration: IConfig = {
   port: parseInt(process.env.PORT!, 10) || 3000,
   redis: {
     auth: <string>process.env.REDIS_AUTH,
-    connection: <boolean>(process.env.REDIS_CONNECTION === 'true'),
     db: <string>process.env.REDIS_DB,
     host: <string>process.env.REDIS_HOST,
     port: parseInt(process.env.REDIS_PORT!, 10),
   },
-  transactionRouting: {
-    host: <string>process.env.TRANSACTION_ROUTING_HOST,
-    path: <string>process.env.TRANSACTION_ROUTING_PATH,
-    port: parseInt(process.env.TRANSACTION_ROUTING_PORT!, 10),
-  },
+  cmsEndpoint: <string>process.env.CMS_ENDPOINT,
 };

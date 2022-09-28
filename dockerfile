@@ -42,6 +42,7 @@ ENV read_timeout="15s"
 
 ENV prefix_logs="false"
 
+# Service-Based Enviroment Variables
 ENV FUNCTION_NAME=transaction-aggregation-decisioning-processor-rel-1-0-0
 ENV NODE_ENV=production
 ENV PORT=3000
@@ -67,6 +68,7 @@ ENV LOGSTASH_PORT=8080
 ENV TRANSACTION_ROUTING_HOST=localhost
 ENV TRANSACTION_ROUTING_PORT=3000
 ENV TRANSACTION_ROUTING_PATH=result-test
+ENV CMS_ENDPOINT=http://gateway.openfaas:8080/function/off-cms-service/execute
 
 HEALTHCHECK --interval=60s CMD [ -e /tmp/.lock ] || exit 1
 

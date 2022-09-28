@@ -9,13 +9,14 @@ import { RedisService } from './clients/redis';
 /*
  * Initialize the APM Logging
  **/
-if (configuration.env === 'production') {
+if (configuration.apm.active === 'true') {
   apm.start({
-    serviceName: configuration.apm?.serviceName,
+    serviceName: configuration.serviceName,
     secretToken: configuration.apm?.secretToken,
     serverUrl: configuration.apm?.url,
     usePathAsTransactionName: true,
     active: Boolean(configuration.apm?.active),
+    transactionIgnoreUrls: ['/health'],
   });
 }
 
@@ -66,5 +67,3 @@ if (Object.values(require.cache).filter(async (m) => m?.children.includes(module
     process.once(signal, () => terminate(signal));
   });
 }
-
-export default app;

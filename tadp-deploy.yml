@@ -3,13 +3,13 @@ provider:
   name: openfaas
   gateway: https://frmfaas.sybrin.com
 functions:
-  off-transaction-aggregation-decisioning-rel-1-0-0:
+  off-transaction-aggregation-decisioning-processor-rel-1-0-0:
     namespace: openfaas-fn
     lang: dockerfile
     handler: .
-    image: actio.azurecr.io/off-transaction-aggregation-decisioning-rel-1-0-0:latest
+    image: actio.azurecr.io/off-transaction-aggregation-decisioning-processor-rel-1-0-0:latest
     annotations:
       com.openfaas.health.http.path: /health
-      com.openfaas.health.http.initialDelay: "45s"
+      com.openfaas.health.http.initialDelay: '45s'
     secrets:
       - frmpullsecret
