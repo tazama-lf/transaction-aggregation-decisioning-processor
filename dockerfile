@@ -1,5 +1,5 @@
 FROM --platform=${TARGETPLATFORM:-linux/amd64} ghcr.io/openfaas/of-watchdog:0.8.4 as watchdog
-FROM --platform=${TARGETPLATFORM:-linux/amd64} node:14-alpine as ship
+FROM --platform=${TARGETPLATFORM:-linux/amd64} node:16.17-alpine as ship
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
@@ -8,8 +8,6 @@ COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
 RUN chmod +x /usr/bin/fwatchdog
 
 RUN addgroup -S app && adduser -S -g app app
-
-RUN apk --no-cache add curl ca-certificates
 
 # Turn down the verbosity to default level.
 ENV NPM_CONFIG_LOGLEVEL warn
@@ -55,7 +53,7 @@ ENV REDIS_DB=0
 ENV REDIS_AUTH=
 
 ENV DATABASE_NAME=transactionHistory
-ENV DATABASE_URL=http://arango.development:8529
+ENV DATABASE_URL=
 ENV DATABASE_USER=root
 ENV DATABASE_PASSWORD=''
 ENV COLLECTION_NAME=transactions
@@ -68,6 +66,9 @@ ENV APM_SECRET_TOKEN=
 
 ENV LOGSTASH_HOST=logstash.development
 ENV LOGSTASH_PORT=8080
+ENV TRANSACTION_ROUTING_HOST=localhost
+ENV TRANSACTION_ROUTING_PORT=3000
+ENV TRANSACTION_ROUTING_PATH=result-test
 
 ENV CMS_ENDPOINT=http://gateway.openfaas:8080/function/off-cms-service/execute
 
