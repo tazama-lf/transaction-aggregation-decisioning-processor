@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { LoggerService } from '../helpers';
-import { ChannelResult } from '../classes/channel-result';
-import { IPain001Message } from '../interfaces/iPain001';
-import { Channel, Message, NetworkMap } from '../classes/network-map';
-import { cacheClient, databaseClient } from '../index';
 import apm from 'elastic-apm-node';
+import { ChannelResult } from '../classes/channel-result';
+import { Channel, Message, NetworkMap } from '../classes/network-map';
 import { TransactionConfiguration } from '../classes/transaction-configuration';
-import { kebabCase } from 'lodash';
+import { LoggerService } from '../helpers';
+import { cacheClient, databaseClient } from '../index';
 
 export const checkChannelCompletion = async (
   transactionID: string,
@@ -18,7 +16,7 @@ export const checkChannelCompletion = async (
 
   const cacheData = await cacheClient.getJson(cacheKey);
 
-  const cacheResults: ChannelResult[] = cacheData ? [...JSON.parse(cacheData)] : [];
+  const cacheResults: ChannelResult[] = cacheData ? [...cacheData.map(x => JSON.parse(x))] : [];
 
   // First check: The channel is not completed
   if (cacheResults.some((c) => c.id === channelResult.id && c.cfg === channelResult.cfg)) {
@@ -67,7 +65,13 @@ export const handleChannels = async (
     const cacheKey = `tadp_${transactionID}_${message.id}_${message.cfg}`;
     const jchannelResults = await cacheClient.getJson(cacheKey);
     const channelResults: ChannelResult[] = [];
-    if (jchannelResults && jchannelResults.length > 0) Object.assign(channelResults, JSON.parse(jchannelResults));
+    if (jchannelResults && jchannelResults.length > 0) {
+      for (const jchannelResult of jchannelResults) {
+        let channelResult: ChannelResult = new ChannelResult();
+        Object.assign(channelResult, JSON.parse(jchannelResult));
+        channelResults.push(channelResult);
+      }
+    }
 
     if (!message.channels.some((c) => c.id === channelResult.id && c.cfg === channelResult.cfg)) {
       LoggerService.warn('Channel not part of Message - ignoring.');

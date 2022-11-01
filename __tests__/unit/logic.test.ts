@@ -48,9 +48,9 @@ describe('TADProc Service', () => {
       });
     });
 
-    getJsonSpy = jest.spyOn(cacheClient, 'getJson').mockImplementation((key: string): Promise<string> => {
-      return new Promise<string>((resolve, reject) => {
-        resolve(cacheString);
+    getJsonSpy = jest.spyOn(cacheClient, 'getJson').mockImplementation((key: string): Promise<string[]> => {
+      return new Promise<string[]>((resolve, reject) => {
+        resolve([]);
       });
     });
 
