@@ -8,9 +8,15 @@ functions:
     lang: dockerfile
     handler: .
     image: actio.azurecr.io/off-transaction-aggregation-decisioning-processor-rel-1-0-0:latest
-    annotations:
-      com.openfaas.health.http.path: /health
-      com.openfaas.health.http.initialDelay: '45s'
+    labels:
+      com.openfaas.health.http.initialDelay: "45s"
       com.openfaas.profile: nodeselector
+      com.openfaas.scale.type: rps
+      com.openfaas.scale.min: 1
+      com.openfaas.scale.max: 10
+      com.openfaas.scale.zero: false
+      com.openfaas.scale.zero-duration: 15m
+      com.openfaas.scale.target: 50
+      com.openfaas.scale.target-proportion: 0.90
     secrets:
       - frmpullsecret
