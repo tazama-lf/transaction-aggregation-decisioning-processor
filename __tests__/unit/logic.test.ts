@@ -19,9 +19,9 @@ const invalidRequestBody = JSON.parse(
 );
 
 afterAll(() => {
+  cacheClient.quit();
   databaseClient.client.close();
   app.terminate();
-  cacheClient.quit();
 });
 
 describe('TADProc Service', () => {
@@ -31,6 +31,12 @@ describe('TADProc Service', () => {
   let setJsonSpy: jest.SpyInstance;
   let deleteJsonSpy: jest.SpyInstance;
   let postSpy: jest.SpyInstance;
+
+  beforeAll((done) => {
+    cacheClient.client.once('connect', () => {
+      done();
+    });
+  });
 
   beforeEach(async () => {
     getTransactionConfigSpy = jest.spyOn(databaseClient, 'getTransactionConfig').mockImplementation(() => {
