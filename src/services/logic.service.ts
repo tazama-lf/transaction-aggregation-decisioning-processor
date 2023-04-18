@@ -1,49 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apm from 'elastic-apm-node';
 import { ChannelResult } from '../classes/channel-result';
-import { Channel, Message, NetworkMap } from '../classes/network-map';
+import { Message, NetworkMap } from '../classes/network-map';
 import { TransactionConfiguration } from '../classes/transaction-configuration';
 import { LoggerService } from '../helpers';
 import { cacheClient, databaseClient } from '../index';
-
-export const checkChannelCompletion = async (
-  transactionID: string,
-  channel: Channel,
-  channelResult: ChannelResult,
-  networkMap: NetworkMap,
-): Promise<boolean> => {
-  const cacheKey = `${transactionID}_${channel.id}_${channel.cfg}`;
-
-  const cacheData = await cacheClient.getJson(cacheKey);
-
-  const cacheResults: ChannelResult[] = cacheData ? [...cacheData.map(x => JSON.parse(x))] : [];
-
-  // First check: The channel is not completed
-  if (cacheResults.some((c) => c.id === channelResult.id && c.cfg === channelResult.cfg)) {
-    return false;
-  }
-
-  cacheResults.push({
-    id: channelResult.id,
-    result: channelResult.result,
-    cfg: channelResult.cfg,
-    status: channelResult.status,
-    typologyResult: channelResult.typologyResult,
-  });
-
-  // Second check: if all channel results for this Message is found
-  if (cacheResults.length < networkMap.messages[0].channels.length) {
-    LoggerService.log(`[${transactionID}] Save interim channel results to Cache`);
-
-    cacheClient.setJson(cacheKey, JSON.stringify(cacheResults));
-
-    return false;
-  }
-
-  // The channel is completed
-  cacheClient.deleteKey(cacheKey);
-  return true;
-};
 
 export const handleChannels = async (
   message: Message,
@@ -67,7 +28,7 @@ export const handleChannels = async (
     const channelResults: ChannelResult[] = [];
     if (jchannelResults && jchannelResults.length > 0) {
       for (const jchannelResult of jchannelResults) {
-        let channelResult: ChannelResult = new ChannelResult();
+        const channelResult: ChannelResult = new ChannelResult();
         Object.assign(channelResult, JSON.parse(jchannelResult));
         channelResults.push(channelResult);
       }
@@ -97,7 +58,6 @@ export const handleChannels = async (
         if (configuredChannel) {
           const channelRes = channelResults.find((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
           for (const typology of configuredChannel.typologies) {
-            const tpres = {};
             const typologyResult = channelRes?.typologyResult.find((t) => t.id === typology.id && t.cfg === typology.cfg);
             if (!typologyResult) continue;
 
@@ -120,7 +80,7 @@ export const handleChannels = async (
     LoggerService.log(`Transaction: ${transactionID} has status: ${reviewMessage}`);
 
     // Save the transaction evaluation result
-    cacheClient.deleteKey(cacheKey);
+    await cacheClient.deleteKey(cacheKey);
 
     span?.end();
     return channelResults;
