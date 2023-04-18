@@ -43,7 +43,7 @@ ENV read_timeout="15s"
 ENV prefix_logs="false"
 
 # Service-Based Enviroment Variables
-ENV FUNCTION_NAME=transaction-aggregation-decisioning-processor-rel-1-0-0
+ENV FUNCTION_NAME="transaction-aggregation-decisioning-processor-rel-1-1-0"
 ENV NODE_ENV=production
 ENV PORT=3000
 

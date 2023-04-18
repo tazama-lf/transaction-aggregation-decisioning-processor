@@ -1,6 +1,6 @@
 {
   "name": "transaction-agreggation-decisioning-processor",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "description": "transaction-agreggation-decisioning-processor",
   "main": "src/index.js",
   "scripts": {
