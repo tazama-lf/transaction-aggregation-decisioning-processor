@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apm from 'elastic-apm-node';
 import { ChannelResult } from '../classes/channel-result';
-import { Message, NetworkMap } from '../classes/network-map';
+import { NetworkMap } from '../classes/network-map';
 import { TransactionConfiguration } from '../classes/transaction-configuration';
 import { LoggerService } from '../helpers';
 import { cacheClient, databaseClient } from '../index';
 
-export const handleChannels = async (
-  message: Message,
-  transaction: any,
-  networkMap: NetworkMap,
-  channelResult: ChannelResult,
-): Promise<ChannelResult[]> => {
+export const handleChannels = async (rawTransaction: any): Promise<any> => {
+  const transaction = rawTransaction.transaction;
+  const networkMap: NetworkMap = rawTransaction.networkMap;
+  const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
+  const channelResult: ChannelResult = rawTransaction.channelResult;
+
   const span = apm.startSpan('handleChannels');
   try {
     const transactionType = Object.keys(transaction).find((k) => k !== 'TxTp') ?? '';
@@ -20,10 +20,10 @@ export const handleChannels = async (
     const transactionConfiguration = await databaseClient.getTransactionConfig();
     const transactionConfigMessages = transactionConfiguration[0] as TransactionConfiguration[];
     const requiredConfigMessage = transactionConfigMessages
-      .find((tc) => tc.messages.find((msg) => msg.id === message.id && msg.cfg === message.cfg && msg.txTp === transaction.TxTp))
-      ?.messages.find((msg) => msg.id === message.id && msg.cfg === message.cfg && msg.txTp === transaction.TxTp);
+      .find((tc) => tc.messages.find((msg) => msg.id === message!.id && msg.cfg === message!.cfg && msg.txTp === transaction.TxTp))
+      ?.messages.find((msg) => msg.id === message!.id && msg.cfg === message!.cfg && msg.txTp === transaction.TxTp);
 
-    const cacheKey = `tadp_${transactionID}_${message.id}_${message.cfg}`;
+    const cacheKey = `tadp_${transactionID}_${message!.id}_${message!.cfg}`;
     const jchannelResults = await cacheClient.getJson(cacheKey);
     const channelResults: ChannelResult[] = [];
     if (jchannelResults && jchannelResults.length > 0) {
@@ -34,7 +34,7 @@ export const handleChannels = async (
       }
     }
 
-    if (!message.channels.some((c) => c.id === channelResult.id && c.cfg === channelResult.cfg)) {
+    if (!message!.channels.some((c) => c.id === channelResult.id && c.cfg === channelResult.cfg)) {
       LoggerService.warn('Channel not part of Message - ignoring.');
       return [];
     }
@@ -46,7 +46,7 @@ export const handleChannels = async (
 
     channelResults.push(channelResult);
     // check if all Channel results for this transaction is found
-    if (channelResults.length < message.channels.length) {
+    if (channelResults.length < message!.channels.length) {
       await cacheClient.setJson(cacheKey, JSON.stringify(channelResults));
       LoggerService.log('All channels not completed.');
       return [];
