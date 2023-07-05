@@ -1,10 +1,10 @@
+import { init } from '@frmscoe/frms-coe-startup-lib';
 import cluster from 'cluster';
 import apm from 'elastic-apm-node';
 import os from 'os';
 import { configuration } from './config';
 import { LoggerService } from './helpers';
 import { Services } from './services';
-import { init } from '@frmscoe/frms-coe-startup-lib';
 import { handleChannels } from './services/logic.service';
 
 /*
@@ -58,7 +58,7 @@ if (cluster.isPrimary && configuration.maxCPU !== 1) {
   // Workers can share any TCP connection
   // In this case it is an HTTP server
   try {
-    runServer();
+    if (configuration.env !== 'test') runServer();
   } catch (err) {
     LoggerService.error(`Error while starting HTTP server on Worker ${process.pid}`, err);
   }
