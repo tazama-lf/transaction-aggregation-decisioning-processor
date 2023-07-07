@@ -1,9 +1,8 @@
 /* eslint-disable */
-import axios from 'axios';
 import { NetworkMap } from '../../src/classes/network-map';
 import { TransactionConfiguration } from '../../src/classes/transaction-configuration';
-import { app, cacheClient, databaseClient } from '../../src/index';
-import { handleChannels } from '../../src/services/logic.service';
+import { cacheClient, databaseClient, runServer, server } from '../../src/index';
+import { handleChannels, handleExecute } from '../../src/services/logic.service';
 
 let cacheString = '';
 const requestBody = JSON.parse(
@@ -21,7 +20,6 @@ const invalidRequestBody = JSON.parse(
 afterAll(() => {
   cacheClient.quit();
   databaseClient.client.close();
-  app.terminate();
 });
 
 describe('TADProc Service', () => {
@@ -31,11 +29,15 @@ describe('TADProc Service', () => {
   let setJsonSpy: jest.SpyInstance;
   let deleteJsonSpy: jest.SpyInstance;
   let postSpy: jest.SpyInstance;
+  let responseSpy: jest.SpyInstance;
 
   beforeAll((done) => {
     cacheClient.client.once('connect', () => {
       done();
     });
+
+    runServer();
+    responseSpy = jest.spyOn(server, 'handleResponse').mockImplementation(jest.fn());
   });
 
   beforeEach(async () => {
@@ -77,12 +79,6 @@ describe('TADProc Service', () => {
         resolve(1);
       });
     });
-
-    postSpy = jest.spyOn(axios, 'post').mockImplementation(async (url: string, data?: any) => {
-      return new Promise((resolve, reject) => {
-        resolve({ status: 200 });
-      });
-    });
   });
 
   describe('Logic Service', () => {
@@ -105,12 +101,6 @@ describe('TADProc Service', () => {
               ),
             ),
           );
-        });
-      });
-
-      postSpy = jest.spyOn(axios, 'post').mockImplementation(() => {
-        return new Promise((resolve, reject) => {
-          resolve({ status: 200 });
         });
       });
 
@@ -143,7 +133,7 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
         if (message) {
-          const result = await handleChannels(message, transaction, networkMap, channelResult);
+          const result = await handleExecute(requestBody);
           expect(result).toBeDefined();
         }
       });
@@ -155,7 +145,7 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
         if (message) {
-          const result = await handleChannels(message, transaction, networkMap, channelResult);
+          const result = await handleExecute(requestBody);
           expect(result).toBeDefined();
         }
       });
@@ -188,7 +178,7 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
         if (message) {
-          const result = await handleChannels(message, transaction, networkMap, channelResult);
+          const result = await handleExecute(requestBody);
           expect(result).toBeDefined();
         }
       });
@@ -221,7 +211,7 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
         if (message) {
-          const result = await handleChannels(message, transaction, networkMap, channelResult);
+          const result = await handleExecute(requestBody);
           expect(result).toBeDefined();
         }
       });
@@ -239,7 +229,7 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
         if (message) {
-          let thrownFunction = handleChannels(message, transaction, networkMap, channelResult);
+          let thrownFunction = handleExecute(requestBody);
           try {
             expect(await thrownFunction).toThrow();
           } catch (err) {}
@@ -276,7 +266,7 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
         if (message) {
-          const result = await handleChannels(message, transaction, networkMap, channelResult);
+          const result = await handleExecute(requestBody);
           expect(result).toBeDefined();
         }
       });
