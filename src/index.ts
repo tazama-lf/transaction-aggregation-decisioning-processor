@@ -1,11 +1,11 @@
-import { init } from '@frmscoe/frms-coe-startup-lib';
+import { StartupFactory, IStartupService } from 'startup';
 import cluster from 'cluster';
 import apm from 'elastic-apm-node';
 import os from 'os';
 import { configuration } from './config';
 import { LoggerService } from './helpers';
 import { Services } from './services';
-import { handleChannels } from './services/logic.service';
+import { handleChannels, handleExecute } from './services/logic.service';
 
 /*
  * Initialize the APM Logging
@@ -24,20 +24,22 @@ if (configuration.apm.active === 'true') {
 /*
  * Initialize the clients and start the server
  */
-
+export let server: IStartupService;
 export const cacheClient = Services.getCacheClientInstance();
 export const databaseClient = Services.getDatabaseInstance();
 
 export const runServer = async () => {
-  for (let retryCount = 0; retryCount < 10; retryCount++) {
-    console.log('Connecting to nats server...');
-    if (!(await init(handleChannels))) {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-    } else {
-      console.log('Connected to nats');
-      break;
+  server = new StartupFactory();
+  if (configuration.env !== 'test')
+    for (let retryCount = 0; retryCount < 10; retryCount++) {
+      console.log('Connecting to nats server...');
+      if (!(await server.init(handleExecute))) {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      } else {
+        console.log('Connected to nats');
+        break;
+      }
     }
-  }
 };
 
 const numCPUs = os.cpus().length > configuration.maxCPU ? configuration.maxCPU + 1 : os.cpus().length + 1;

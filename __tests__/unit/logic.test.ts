@@ -1,9 +1,8 @@
 /* eslint-disable */
 import { NetworkMap } from '../../src/classes/network-map';
 import { TransactionConfiguration } from '../../src/classes/transaction-configuration';
-import { cacheClient, databaseClient } from '../../src/index';
-import { handleChannels } from '../../src/services/logic.service';
-import * as startUpLib from '@frmscoe/frms-coe-startup-lib';
+import { cacheClient, databaseClient, runServer, server } from '../../src/index';
+import { handleChannels, handleExecute } from '../../src/services/logic.service';
 
 let cacheString = '';
 const requestBody = JSON.parse(
@@ -37,7 +36,8 @@ describe('TADProc Service', () => {
       done();
     });
 
-    responseSpy = jest.spyOn(startUpLib, 'handleResponse').mockImplementation(jest.fn());
+    runServer();
+    responseSpy = jest.spyOn(server, 'handleResponse').mockImplementation(jest.fn());
   });
 
   beforeEach(async () => {
@@ -133,7 +133,7 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
         if (message) {
-          const result = await handleChannels(requestBody);
+          const result = await handleExecute(requestBody);
           expect(result).toBeDefined();
         }
       });
@@ -145,7 +145,7 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
         if (message) {
-          const result = await handleChannels(requestBody);
+          const result = await handleExecute(requestBody);
           expect(result).toBeDefined();
         }
       });
@@ -178,7 +178,7 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
         if (message) {
-          const result = await handleChannels(requestBody);
+          const result = await handleExecute(requestBody);
           expect(result).toBeDefined();
         }
       });
@@ -211,7 +211,7 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
         if (message) {
-          const result = await handleChannels(requestBody);
+          const result = await handleExecute(requestBody);
           expect(result).toBeDefined();
         }
       });
@@ -229,7 +229,7 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
         if (message) {
-          let thrownFunction = handleChannels(requestBody);
+          let thrownFunction = handleExecute(requestBody);
           try {
             expect(await thrownFunction).toThrow();
           } catch (err) {}
@@ -266,7 +266,7 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
         if (message) {
-          const result = await handleChannels(requestBody);
+          const result = await handleExecute(requestBody);
           expect(result).toBeDefined();
         }
       });

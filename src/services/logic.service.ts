@@ -1,17 +1,66 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apm from 'elastic-apm-node';
 import { ChannelResult } from '../classes/channel-result';
-import { NetworkMap } from '../classes/network-map';
+import { Message, NetworkMap } from '../classes/network-map';
 import { TransactionConfiguration } from '../classes/transaction-configuration';
 import { LoggerService } from '../helpers';
-import { cacheClient, databaseClient } from '../index';
+import { cacheClient, databaseClient, server } from '../index';
+import { CMSRequest } from '../classes/cms-request';
+import { Alert } from '../classes/alert';
+import { TADPResult } from '../classes/tadp-result';
 
-export const handleChannels = async (rawTransaction: any): Promise<any> => {
-  const transaction = rawTransaction.transaction;
-  const networkMap: NetworkMap = rawTransaction.networkMap;
-  const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
-  const channelResult: ChannelResult = rawTransaction.channelResult;
+export const handleExecute = async (rawTransaction: any): Promise<any> => {
+  try {
+    // Get the request body and parse it to variables
+    const transaction = rawTransaction.transaction;
+    const networkMap = rawTransaction.networkMap as NetworkMap;
+    const channelResult = rawTransaction.channelResult as ChannelResult;
 
+    // Send every channel request to the service function
+    const toReturn: TADPResult = { id: '', cfg: '', channelResult: [] };
+
+    const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
+
+    if (message) {
+      toReturn.id = message.id;
+      toReturn.cfg = message.cfg;
+      let review = false;
+      const channelResults = await handleChannels(message, transaction, networkMap, channelResult);
+
+      if (channelResults.some((c) => c.status === 'Review')) review = true;
+      toReturn.channelResult = channelResults;
+
+      const alert = new Alert();
+      alert.tadpResult = toReturn;
+      alert.status = review === true ? 'ALRT' : 'NALT';
+
+      const result: CMSRequest = {
+        message: `Successfully completed ${channelResults.length} channels`,
+        alert: alert,
+        transaction: transaction,
+        networkMap: networkMap,
+      };
+      if (channelResults.length > 0) {
+        const transactionType = Object.keys(transaction).find((k) => k !== 'TxTp') ?? '';
+        const transactionID = transaction[transactionType].GrpHdr.MsgId;
+        await databaseClient.insertTransactionHistory(transactionID, transaction, networkMap, alert);
+        await server.handleResponse(result);
+      }
+      return channelResults;
+    } else {
+      LoggerService.log('Invalid message type');
+    }
+  } catch (e) {
+    LoggerService.error('Error while calculating Transaction score', e as Error);
+  }
+};
+
+export const handleChannels = async (
+  message: Message,
+  transaction: any,
+  networkMap: NetworkMap,
+  channelResult: ChannelResult,
+): Promise<ChannelResult[]> => {
   const span = apm.startSpan('handleChannels');
   try {
     const transactionType = Object.keys(transaction).find((k) => k !== 'TxTp') ?? '';
@@ -79,7 +128,7 @@ export const handleChannels = async (rawTransaction: any): Promise<any> => {
     channelResult.status = reviewMessage;
     LoggerService.log(`Transaction: ${transactionID} has status: ${reviewMessage}`);
 
-    // Save the transaction evaluation result
+    // Delete interim cache as transaction processed to fulfilment
     await cacheClient.deleteKey(cacheKey);
 
     span?.end();
