@@ -1,4 +1,4 @@
-import { StartupFactory, IStartupService } from 'startup';
+import { StartupFactory, IStartupService } from '@frmscoe/frms-coe-startup-lib';
 import cluster from 'cluster';
 import apm from 'elastic-apm-node';
 import os from 'os';
