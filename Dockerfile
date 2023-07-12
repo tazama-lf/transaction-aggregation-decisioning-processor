@@ -81,6 +81,7 @@ ENV PRODUCER_RETENTION_POLICY=Workqueue
 
 # Set healthcheck command
 HEALTHCHECK --interval=3s CMD [ -e /tmp/.lock ] || exit 1
+EXPOSE 4222
 
 # Execute watchdog command
 CMD ["build/index.js"]
