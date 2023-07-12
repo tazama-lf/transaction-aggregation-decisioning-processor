@@ -6,7 +6,10 @@ LABEL stage=build
 # TS -> JS stage
 
 WORKDIR /home/app
-COPY . .
+COPY ./src ./src
+COPY ./package*.json ./
+COPY ./tsconfig.json ./
+COPY .npmrc ./
 ARG GH_TOKEN
 
 RUN npm ci --ignore-scripts
@@ -21,7 +24,7 @@ COPY .npmrc ./
 ARG GH_TOKEN
 RUN npm ci --omit=dev --ignore-scripts
 
-FROM ${RUN_IMAGE} as run-env
+FROM ${RUN_IMAGE} AS run-env
 USER nonroot
 
 WORKDIR /home/app
