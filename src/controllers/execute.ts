@@ -50,7 +50,7 @@ export const handleExecute = async (ctx: Context, next: Next): Promise<Context> 
       const alert = new Alert();
       alert.tadpResult = toReturn;
       alert.status = review === true ? 'ALRT' : 'NALT';
-      alert.prcgDP = ctx.request.body.prcgDP;
+      alert.prcgTmDP = ctx.request.body.prcgTmDP;
       alert.prcgTmCRSP = ctx.request.body.prcgTmCRSP;
 
       const result: CMSRequest = {
