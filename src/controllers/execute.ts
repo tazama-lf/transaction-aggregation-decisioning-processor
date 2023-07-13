@@ -19,15 +19,21 @@ import { CMSRequest } from '../classes/cms-request';
  * @param next default koa next
  * @returns Koa context
  */
+
+const calculateDuration = (startHrTime: Array<number>, endHrTime: Array<number>): number => {
+  return (endHrTime[0] - startHrTime[0]) * 1000 + (endHrTime[1] - startHrTime[1]) / 1000000;
+};
+
 export const handleExecute = async (ctx: Context, next: Next): Promise<Context> => {
   try {
     // Get the request body and parse it to variables
+    const startHrTime = process.hrtime();
     const transaction = ctx.request.body.transaction;
     const networkMap = ctx.request.body.networkMap as NetworkMap;
     const channelResult = ctx.request.body.channelResult as ChannelResult;
 
     // Send every channel request to the service function
-    const toReturn: TADPResult = { id: '', cfg: '', channelResult: [] };
+    const toReturn: TADPResult = { id: '', cfg: '', channelResult: [], prcgTm: 0 };
 
     const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
@@ -39,6 +45,7 @@ export const handleExecute = async (ctx: Context, next: Next): Promise<Context> 
 
       if (channelResults.some((c) => c.status === 'Review')) review = true;
       toReturn.channelResult = channelResults;
+      toReturn.prcgTm = calculateDuration(startHrTime, process.hrtime());
 
       const alert = new Alert();
       alert.tadpResult = toReturn;
@@ -54,6 +61,7 @@ export const handleExecute = async (ctx: Context, next: Next): Promise<Context> 
         const transactionType = Object.keys(transaction).find((k) => k !== 'TxTp') ?? '';
         const transactionID = transaction[transactionType].GrpHdr.MsgId;
         await databaseClient.insertTransactionHistory(transactionID, transaction, networkMap, alert);
+        result.alert.tadpResult.prcgTm = calculateDuration(startHrTime, process.hrtime());
         await executePost(configuration.cmsEndpoint, result);
       }
 
@@ -61,6 +69,7 @@ export const handleExecute = async (ctx: Context, next: Next): Promise<Context> 
     } else {
       const tadpResult = {
         message: 'Invalid message type',
+        prcgTm: calculateDuration(startHrTime, process.hrtime()),
         result: [],
         networkMap: networkMap,
       };
