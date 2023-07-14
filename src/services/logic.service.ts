@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apm from 'elastic-apm-node';
 import { ChannelResult } from '../classes/channel-result';
@@ -9,15 +10,25 @@ import { CMSRequest } from '../classes/cms-request';
 import { Alert } from '../classes/alert';
 import { TADPResult } from '../classes/tadp-result';
 
+const calculateDuration = (startHrTime: Array<number>, endHrTime: Array<number>): number => {
+  return (endHrTime[0] - startHrTime[0]) * 1000 + (endHrTime[1] - startHrTime[1]) / 1000000;
+};
+
 export const handleExecute = async (rawTransaction: any): Promise<any> => {
   try {
+    const startHrTime = process.hrtime();
     // Get the request body and parse it to variables
     const transaction = rawTransaction.transaction;
     const networkMap = rawTransaction.networkMap as NetworkMap;
     const channelResult = rawTransaction.channelResult as ChannelResult;
 
     // Send every channel request to the service function
-    const toReturn: TADPResult = { id: '', cfg: '', channelResult: [] };
+    const toReturn: TADPResult = {
+      id: '',
+      cfg: '',
+      channelResult: [],
+      prcgTm: 0,
+    };
 
     const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
@@ -29,10 +40,12 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
 
       if (channelResults.some((c) => c.status === 'Review')) review = true;
       toReturn.channelResult = channelResults;
-
+      toReturn.prcgTm = calculateDuration(startHrTime, process.hrtime());
       const alert = new Alert();
       alert.tadpResult = toReturn;
       alert.status = review === true ? 'ALRT' : 'NALT';
+      alert.prcgTmCRSP = rawTransaction.prcgTmCRSP;
+      alert.prcgTmDP = rawTransaction.prcgTmDP;
 
       const result: CMSRequest = {
         message: `Successfully completed ${channelResults.length} channels`,
@@ -62,6 +75,7 @@ export const handleChannels = async (
   channelResult: ChannelResult,
 ): Promise<ChannelResult[]> => {
   const span = apm.startSpan('handleChannels');
+
   try {
     const transactionType = Object.keys(transaction).find((k) => k !== 'TxTp') ?? '';
     const transactionID = transaction[transactionType].GrpHdr.MsgId;
