@@ -44,8 +44,8 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       const alert = new Alert();
       alert.tadpResult = toReturn;
       alert.status = review === true ? 'ALRT' : 'NALT';
-      alert.prcgTmCRSP = rawTransaction.prcgTmCRSP;
-      alert.prcgTmDP = rawTransaction.prcgTmDP;
+      alert.prcgTmCRSP = rawTransaction.transaction.prcgTmCRSP;
+      alert.prcgTmDP = rawTransaction.transaction.prcgTmDP;
 
       const result: CMSRequest = {
         message: `Successfully completed ${channelResults.length} channels`,
