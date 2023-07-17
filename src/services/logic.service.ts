@@ -9,6 +9,7 @@ import { cacheClient, databaseClient, server } from '../index';
 import { CMSRequest } from '../classes/cms-request';
 import { Alert } from '../classes/alert';
 import { TADPResult } from '../classes/tadp-result';
+import { MetaData } from '../interfaces/metaData';
 
 const calculateDuration = (startHrTime: Array<number>, endHrTime: Array<number>): number => {
   return (endHrTime[0] - startHrTime[0]) * 1000 + (endHrTime[1] - startHrTime[1]) / 1000000;
@@ -21,6 +22,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
     const transaction = rawTransaction.transaction;
     const networkMap = rawTransaction.networkMap as NetworkMap;
     const channelResult = rawTransaction.channelResult as ChannelResult;
+    const metaData = rawTransaction?.metaData as MetaData;
 
     // Send every channel request to the service function
     const toReturn: TADPResult = {
@@ -44,9 +46,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       const alert = new Alert();
       alert.tadpResult = toReturn;
       alert.status = review === true ? 'ALRT' : 'NALT';
-      alert.prcgTmCRSP = rawTransaction.prcgTmCRSP;
-      alert.prcgTmDP = rawTransaction.prcgTmDP;
-
+      alert.metaData = metaData;
       const result: CMSRequest = {
         message: `Successfully completed ${channelResults.length} channels`,
         alert: alert,
