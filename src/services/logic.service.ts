@@ -51,7 +51,6 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       alert.tadpResult = toReturn;
       alert.status = review === true ? 'ALRT' : 'NALT';
       alert.metaData = metaData;
-
       const result: CMSRequest = {
         message: `Successfully completed ${channelResults.length} channels`,
         alert: alert,
