@@ -9,15 +9,11 @@ import { cacheClient, databaseClient, server } from '../index';
 import { CMSRequest } from '../classes/cms-request';
 import { Alert } from '../classes/alert';
 import { TADPResult } from '../classes/tadp-result';
+import { MetaData } from '../interfaces/metaData';
 
 const calculateDuration = (startHrTime: Array<number>, endHrTime: Array<number>): number => {
   return (endHrTime[0] - startHrTime[0]) * 1000 + (endHrTime[1] - startHrTime[1]) / 1000000;
 };
-
-interface MetaData {
-  prcgTmDp: number;
-  prcgTmCRSP: number;
-}
 
 export const handleExecute = async (rawTransaction: any): Promise<any> => {
   try {
