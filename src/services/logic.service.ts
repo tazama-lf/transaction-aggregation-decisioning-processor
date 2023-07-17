@@ -14,6 +14,11 @@ const calculateDuration = (startHrTime: Array<number>, endHrTime: Array<number>)
   return (endHrTime[0] - startHrTime[0]) * 1000 + (endHrTime[1] - startHrTime[1]) / 1000000;
 };
 
+interface MetaData {
+  prcgTmDp: number;
+  prcgTmCRSP: number;
+}
+
 export const handleExecute = async (rawTransaction: any): Promise<any> => {
   try {
     const startHrTime = process.hrtime();
@@ -21,6 +26,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
     const transaction = rawTransaction.transaction;
     const networkMap = rawTransaction.networkMap as NetworkMap;
     const channelResult = rawTransaction.channelResult as ChannelResult;
+    const metaData = rawTransaction?.metaData as MetaData;
 
     // Send every channel request to the service function
     const toReturn: TADPResult = {
@@ -44,8 +50,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       const alert = new Alert();
       alert.tadpResult = toReturn;
       alert.status = review === true ? 'ALRT' : 'NALT';
-      alert.prcgTmCRSP = rawTransaction.prcgTmCRSP;
-      alert.prcgTmDP = rawTransaction.prcgTmDP;
+      alert.metaData = metaData;
 
       const result: CMSRequest = {
         message: `Successfully completed ${channelResults.length} channels`,
