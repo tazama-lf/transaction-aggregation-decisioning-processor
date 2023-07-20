@@ -11,13 +11,14 @@ import { Alert } from '../classes/alert';
 import { TADPResult } from '../classes/tadp-result';
 import { MetaData } from '../interfaces/metaData';
 
-const calculateDuration = (startHrTime: Array<number>, endHrTime: Array<number>): number => {
-  return (endHrTime[0] - startHrTime[0]) * 1000 + (endHrTime[1] - startHrTime[1]) / 1000000;
+const calculateDuration = (startTime: bigint): number => {
+  const endTime = process.hrtime.bigint();
+  return Number(endTime - startTime);
 };
 
 export const handleExecute = async (rawTransaction: any): Promise<any> => {
   try {
-    const startHrTime = process.hrtime();
+    const startTime = process.hrtime.bigint();
     // Get the request body and parse it to variables
     const transaction = rawTransaction.transaction;
     const networkMap = rawTransaction.networkMap as NetworkMap;
@@ -42,7 +43,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
 
       if (channelResults.some((c) => c.status === 'Review')) review = true;
       toReturn.channelResult = channelResults;
-      toReturn.prcgTm = calculateDuration(startHrTime, process.hrtime());
+      toReturn.prcgTm = calculateDuration(startTime);
       const alert = new Alert();
       alert.tadpResult = toReturn;
       alert.status = review === true ? 'ALRT' : 'NALT';
@@ -57,6 +58,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
         const transactionType = Object.keys(transaction).find((k) => k !== 'TxTp') ?? '';
         const transactionID = transaction[transactionType].GrpHdr.MsgId;
         await databaseClient.insertTransactionHistory(transactionID, transaction, networkMap, alert);
+        result.alert.tadpResult.prcgTm = calculateDuration(startTime);
         await server.handleResponse(result);
       }
       return channelResults;
