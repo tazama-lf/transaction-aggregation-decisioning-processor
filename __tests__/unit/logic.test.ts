@@ -1,8 +1,8 @@
 /* eslint-disable */
 import { NetworkMap } from '../../src/classes/network-map';
 import { TransactionConfiguration } from '../../src/classes/transaction-configuration';
-import { cacheClient, databaseClient, runServer, server } from '../../src/index';
-import { handleChannels, handleExecute } from '../../src/services/logic.service';
+import { databaseClient, databaseManager, runServer, server } from '../../src/index';
+import { handleExecute } from '../../src/services/logic.service';
 
 let cacheString = '';
 const requestBody = JSON.parse(
@@ -18,30 +18,17 @@ const invalidRequestBody = JSON.parse(
 );
 
 afterAll(() => {
-  cacheClient.quit();
   databaseClient.client.close();
 });
 
 describe('TADProc Service', () => {
-  let getTransactionConfigSpy: jest.SpyInstance;
-  let insertTransactionHistorySpy: jest.SpyInstance;
-  let getJsonSpy: jest.SpyInstance;
-  let setJsonSpy: jest.SpyInstance;
-  let deleteJsonSpy: jest.SpyInstance;
-  let postSpy: jest.SpyInstance;
-  let responseSpy: jest.SpyInstance;
-
-  beforeAll((done) => {
-    cacheClient.client.once('connect', () => {
-      done();
-    });
-
-    runServer();
-    responseSpy = jest.spyOn(server, 'handleResponse').mockImplementation(jest.fn());
+  beforeAll(async () => {
+    await runServer();
+    jest.spyOn(server, 'handleResponse').mockImplementation(jest.fn());
   });
 
   beforeEach(async () => {
-    getTransactionConfigSpy = jest.spyOn(databaseClient, 'getTransactionConfig').mockImplementation(() => {
+    jest.spyOn(databaseClient, 'getTransactionConfig').mockImplementation(() => {
       return new Promise((resolve, reject) => {
         resolve(
           Object.assign(
@@ -54,29 +41,29 @@ describe('TADProc Service', () => {
       });
     });
 
-    insertTransactionHistorySpy = jest.spyOn(databaseClient, 'insertTransactionHistory').mockImplementation(() => {
+    jest.spyOn(databaseClient, 'insertTransactionHistory').mockImplementation(() => {
       return new Promise((resolve, reject) => {
         resolve('');
       });
     });
 
-    getJsonSpy = jest.spyOn(cacheClient, 'getJson').mockImplementation((key: string): Promise<string[]> => {
+    jest.spyOn(databaseManager, 'getMembers').mockImplementation((key: string): Promise<string[]> => {
       return new Promise<string[]>((resolve, reject) => {
         resolve([]);
       });
     });
 
-    setJsonSpy = jest.spyOn(cacheClient, 'setJson').mockImplementation((key: string, value: string): Promise<string> => {
-      return new Promise<string>((resolve, reject) => {
+    jest.spyOn(databaseManager, 'setAdd').mockImplementation((key: string, value: string): Promise<void> => {
+      return new Promise<void>((resolve, reject) => {
         cacheString = value;
-        resolve('OK');
+        resolve();
       });
     });
 
-    deleteJsonSpy = jest.spyOn(cacheClient, 'deleteKey').mockImplementation((key: string): Promise<number> => {
-      return new Promise<number>((resolve, reject) => {
+    jest.spyOn(databaseManager, 'deleteKey').mockImplementation((key: string): Promise<void> => {
+      return new Promise<void>((resolve, reject) => {
         cacheString = '';
-        resolve(1);
+        resolve();
       });
     });
   });
@@ -85,13 +72,13 @@ describe('TADProc Service', () => {
     let getNetworkMapSpy: jest.SpyInstance;
 
     beforeEach(async () => {
-      getNetworkMapSpy = jest.spyOn(databaseClient, 'getTransactionConfig').mockImplementation(() => {
+      jest.spyOn(databaseClient, 'getTransactionConfig').mockImplementation(() => {
         return new Promise((resolve, reject) => {
           resolve('');
         });
       });
 
-      getTransactionConfigSpy = jest.spyOn(databaseClient, 'getTransactionConfig').mockImplementation(() => {
+      jest.spyOn(databaseClient, 'getTransactionConfig').mockImplementation(() => {
         return new Promise((resolve, reject) => {
           resolve(
             Object.assign(
@@ -104,22 +91,22 @@ describe('TADProc Service', () => {
         });
       });
 
-      getJsonSpy = jest.spyOn(cacheClient, 'getJson').mockImplementation((key: string): Promise<string[]> => {
+      jest.spyOn(databaseManager, 'getMembers').mockImplementation((key: string): Promise<string[]> => {
         return new Promise<string[]>((resolve, reject) => resolve([]));
       });
 
-      setJsonSpy = jest.spyOn(cacheClient, 'setJson').mockImplementation((key: string): Promise<string> => {
-        return new Promise<string>((resolve, reject) => resolve(''));
+      jest.spyOn(databaseManager, 'setAdd').mockImplementation((key: string): Promise<void> => {
+        return new Promise<void>((resolve, reject) => resolve());
       });
 
-      deleteJsonSpy = jest.spyOn(cacheClient, 'deleteKey').mockImplementation((key: string): Promise<number> => {
-        return new Promise<number>((resolve, reject) => resolve(1));
+      jest.spyOn(databaseManager, 'deleteKey').mockImplementation((key: string): Promise<void> => {
+        return new Promise<void>((resolve, reject) => resolve());
       });
     });
 
     describe('Handle Transaction', () => {
       it('should handle successful request', async () => {
-        getJsonSpy = jest.spyOn(cacheClient, 'getJson').mockImplementation((key: string): Promise<string[]> => {
+        jest.spyOn(databaseManager, 'getMembers').mockImplementation((key: string): Promise<string[]> => {
           return new Promise<string[]>((resolve, reject) =>
             resolve([
               '{"result":0,"id":"002@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}',
@@ -151,7 +138,7 @@ describe('TADProc Service', () => {
       });
 
       it('should handle successful request, above threshold', async () => {
-        getTransactionConfigSpy = jest.spyOn(databaseClient, 'getTransactionConfig').mockImplementation(() => {
+        jest.spyOn(databaseClient, 'getTransactionConfig').mockImplementation(() => {
           return new Promise((resolve, reject) => {
             resolve(
               Object.assign(
@@ -164,7 +151,7 @@ describe('TADProc Service', () => {
           });
         });
 
-        getJsonSpy = jest.spyOn(cacheClient, 'getJson').mockImplementation((key: string): Promise<string[]> => {
+        jest.spyOn(databaseManager, 'getMembers').mockImplementation((key: string): Promise<string[]> => {
           return new Promise<string[]>((resolve, reject) =>
             resolve([
               '{"result":0,"id":"002@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}',
@@ -184,7 +171,7 @@ describe('TADProc Service', () => {
       });
 
       it('should handle successful request, already processed', async () => {
-        getTransactionConfigSpy = jest.spyOn(databaseClient, 'getTransactionConfig').mockImplementation(() => {
+        jest.spyOn(databaseClient, 'getTransactionConfig').mockImplementation(() => {
           return new Promise((resolve, reject) => {
             resolve(
               Object.assign(
@@ -197,7 +184,7 @@ describe('TADProc Service', () => {
           });
         });
 
-        getJsonSpy = jest.spyOn(cacheClient, 'getJson').mockImplementation((key: string): Promise<string[]> => {
+        jest.spyOn(databaseManager, 'getMembers').mockImplementation((key: string): Promise<string[]> => {
           return new Promise<string[]>((resolve, reject) =>
             resolve([
               '{"result":0,"id":"001@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}',
@@ -217,7 +204,7 @@ describe('TADProc Service', () => {
       });
 
       it('should handle error in handleChannels', async () => {
-        getJsonSpy = jest.spyOn(cacheClient, 'getJson').mockRejectedValue(() => {
+        jest.spyOn(databaseManager, 'getMembers').mockRejectedValue(() => {
           return new Promise((resolve, reject) => {
             resolve(new Error('Test'));
           });
@@ -237,7 +224,7 @@ describe('TADProc Service', () => {
       });
 
       it('should handle successful request, channel not part of message', async () => {
-        getTransactionConfigSpy = jest.spyOn(databaseClient, 'getTransactionConfig').mockImplementation(() => {
+        jest.spyOn(databaseClient, 'getTransactionConfig').mockImplementation(() => {
           return new Promise((resolve, reject) => {
             resolve(
               Object.assign(
@@ -250,7 +237,7 @@ describe('TADProc Service', () => {
           });
         });
 
-        getJsonSpy = jest.spyOn(cacheClient, 'getJson').mockImplementation((key: string): Promise<string[]> => {
+        jest.spyOn(databaseManager, 'getMembers').mockImplementation((key: string): Promise<string[]> => {
           return new Promise<string[]>((resolve, reject) =>
             resolve([
               '{"result":0,"id":"001@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}',

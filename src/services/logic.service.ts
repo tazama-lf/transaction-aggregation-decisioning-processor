@@ -2,14 +2,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apm from 'elastic-apm-node';
 import { ChannelResult } from '../classes/channel-result';
-import { Message, NetworkMap } from '../classes/network-map';
-import { TransactionConfiguration } from '../classes/transaction-configuration';
+import { type Message, type NetworkMap } from '../classes/network-map';
+import { type TransactionConfiguration } from '../classes/transaction-configuration';
 import { LoggerService } from '../helpers';
-import { cacheClient, databaseClient, server } from '../index';
-import { CMSRequest } from '../classes/cms-request';
+import { databaseManager, databaseClient, server } from '../index';
+import { type CMSRequest } from '../classes/cms-request';
 import { Alert } from '../classes/alert';
-import { TADPResult } from '../classes/tadp-result';
-import { MetaData } from '../interfaces/metaData';
+import { type TADPResult } from '../classes/tadp-result';
+import { type MetaData } from '../interfaces/metaData';
 
 const calculateDuration = (startTime: bigint): number => {
   const endTime = process.hrtime.bigint();
@@ -46,13 +46,13 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       toReturn.prcgTm = calculateDuration(startTime);
       const alert = new Alert();
       alert.tadpResult = toReturn;
-      alert.status = review === true ? 'ALRT' : 'NALT';
+      alert.status = review ? 'ALRT' : 'NALT';
       alert.metaData = metaData;
       const result: CMSRequest = {
         message: `Successfully completed ${channelResults.length} channels`,
-        alert: alert,
-        transaction: transaction,
-        networkMap: networkMap,
+        alert,
+        transaction,
+        networkMap,
       };
       if (channelResults.length > 0) {
         const transactionType = Object.keys(transaction).find((k) => k !== 'TxTp') ?? '';
@@ -85,11 +85,12 @@ export const handleChannels = async (
     const transactionConfiguration = await databaseClient.getTransactionConfig();
     const transactionConfigMessages = transactionConfiguration[0] as TransactionConfiguration[];
     const requiredConfigMessage = transactionConfigMessages
-      .find((tc) => tc.messages.find((msg) => msg.id === message!.id && msg.cfg === message!.cfg && msg.txTp === transaction.TxTp))
-      ?.messages.find((msg) => msg.id === message!.id && msg.cfg === message!.cfg && msg.txTp === transaction.TxTp);
+      .find((tc) => tc.messages.find((msg) => msg.id === message.id && msg.cfg === message.cfg && msg.txTp === transaction.TxTp))
+      ?.messages.find((msg) => msg.id === message.id && msg.cfg === message.cfg && msg.txTp === transaction.TxTp);
 
-    const cacheKey = `tadp_${transactionID}_${message!.id}_${message!.cfg}`;
-    const jchannelResults = await cacheClient.getJson(cacheKey);
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    const cacheKey = `tadp_${transactionID}_${message.id}_${message.cfg}`;
+    const jchannelResults = await databaseManager.getMembers(cacheKey);
     const channelResults: ChannelResult[] = [];
     if (jchannelResults && jchannelResults.length > 0) {
       for (const jchannelResult of jchannelResults) {
@@ -99,7 +100,7 @@ export const handleChannels = async (
       }
     }
 
-    if (!message!.channels.some((c) => c.id === channelResult.id && c.cfg === channelResult.cfg)) {
+    if (!message.channels.some((c) => c.id === channelResult.id && c.cfg === channelResult.cfg)) {
       LoggerService.warn('Channel not part of Message - ignoring.');
       return [];
     }
@@ -111,8 +112,8 @@ export const handleChannels = async (
 
     channelResults.push(channelResult);
     // check if all Channel results for this transaction is found
-    if (channelResults.length < message!.channels.length) {
-      await cacheClient.setJson(cacheKey, JSON.stringify(channelResults));
+    if (channelResults.length < message.channels.length) {
+      await databaseManager.setAdd(cacheKey, JSON.stringify(channelResults));
       LoggerService.log('All channels not completed.');
       return [];
     }
@@ -142,10 +143,11 @@ export const handleChannels = async (
       reviewMessage = 'None';
     }
     channelResult.status = reviewMessage;
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     LoggerService.log(`Transaction: ${transactionID} has status: ${reviewMessage}`);
 
     // Delete interim cache as transaction processed to fulfilment
-    await cacheClient.deleteKey(cacheKey);
+    await databaseManager.deleteKey(cacheKey);
 
     span?.end();
     return channelResults;

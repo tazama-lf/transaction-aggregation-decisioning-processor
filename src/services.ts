@@ -1,9 +1,8 @@
 import { ArangoDBService } from './clients/arango';
-import { RedisService } from './clients/redis';
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class Services {
   private static databaseClient: ArangoDBService;
-  private static cacheClient: RedisService;
 
   public static getDatabaseInstance(): ArangoDBService {
     if (!Services.databaseClient) {
@@ -11,13 +10,5 @@ export class Services {
     }
 
     return Services.databaseClient;
-  }
-
-  public static getCacheClientInstance(): RedisService {
-    if (!Services.cacheClient) {
-      Services.cacheClient = new RedisService();
-    }
-
-    return Services.cacheClient;
   }
 }
