@@ -5,7 +5,7 @@ import os from 'os';
 import { configuration } from './config';
 import { LoggerService } from './helpers';
 import { Services } from './services';
-import { handleChannels, handleExecute } from './services/logic.service';
+import { handleExecute } from './services/logic.service';
 
 /*
  * Initialize the APM Logging

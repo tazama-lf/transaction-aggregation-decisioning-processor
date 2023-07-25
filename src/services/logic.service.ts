@@ -17,6 +17,7 @@ const calculateDuration = (startTime: bigint): number => {
 };
 
 export const handleExecute = async (rawTransaction: any): Promise<any> => {
+  const span = apm.startSpan('handle.execute');
   try {
     const startTime = process.hrtime.bigint();
     // Get the request body and parse it to variables
@@ -39,7 +40,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       toReturn.id = message.id;
       toReturn.cfg = message.cfg;
       let review = false;
-      const channelResults = await handleChannels(message, transaction, networkMap, channelResult);
+      const channelResults = await handleChannels(message, transaction, networkMap, channelResult, span?.ids['span.id']);
 
       if (channelResults.some((c) => c.status === 'Review')) review = true;
       toReturn.channelResult = channelResults;
@@ -57,7 +58,11 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       if (channelResults.length > 0) {
         const transactionType = Object.keys(transaction).find((k) => k !== 'TxTp') ?? '';
         const transactionID = transaction[transactionType].GrpHdr.MsgId;
+        const spanInsertTransactionHistory = apm.startSpan('db.insert.transactionHistory', {
+          childOf: span?.ids['span.id'],
+        });
         await databaseClient.insertTransactionHistory(transactionID, transaction, networkMap, alert);
+        spanInsertTransactionHistory?.end();
         result.alert.tadpResult.prcgTm = calculateDuration(startTime);
         await server.handleResponse(result);
       }
@@ -75,14 +80,22 @@ export const handleChannels = async (
   transaction: any,
   networkMap: NetworkMap,
   channelResult: ChannelResult,
+  parentSpanId: string | undefined,
 ): Promise<ChannelResult[]> => {
-  const span = apm.startSpan('handleChannels');
+  const span = apm.startSpan('handleChannels', {
+    childOf: parentSpanId,
+  });
 
   try {
     const transactionType = Object.keys(transaction).find((k) => k !== 'TxTp') ?? '';
     const transactionID = transaction[transactionType].GrpHdr.MsgId;
 
+    const spanTransactionHistory = apm.startSpan('db.get.transactionCfg', {
+      childOf: span?.ids['span.id'],
+    });
     const transactionConfiguration = await databaseClient.getTransactionConfig();
+    spanTransactionHistory!.end();
+
     const transactionConfigMessages = transactionConfiguration[0] as TransactionConfiguration[];
     const requiredConfigMessage = transactionConfigMessages
       .find((tc) => tc.messages.find((msg) => msg.id === message!.id && msg.cfg === message!.cfg && msg.txTp === transaction.TxTp))
