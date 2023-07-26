@@ -55,7 +55,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
         networkMap,
       };
       if (channelResults.length > 0) {
-        const transactionType = Object.keys(transaction).find((k) => k !== 'TxTp') ?? '';
+        const transactionType = 'FIToFIPmtSts';
         const transactionID = transaction[transactionType].GrpHdr.MsgId;
         await databaseClient.insertTransactionHistory(transactionID, transaction, networkMap, alert);
         result.alert.tadpResult.prcgTm = calculateDuration(startTime);
@@ -79,7 +79,7 @@ export const handleChannels = async (
   const span = apm.startSpan('handleChannels');
 
   try {
-    const transactionType = Object.keys(transaction).find((k) => k !== 'TxTp') ?? '';
+    const transactionType = 'FIToFIPmtSts';
     const transactionID = transaction[transactionType].GrpHdr.MsgId;
 
     const transactionConfiguration = await databaseClient.getTransactionConfig();
