@@ -1,4 +1,4 @@
-import { ChannelResult } from './channel-result';
+import { type ChannelResult } from './channel-result';
 
 export class TADPResult {
   prcgTm = 0;

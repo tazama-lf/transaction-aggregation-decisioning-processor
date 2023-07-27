@@ -1,4 +1,4 @@
-import { TypologyResult } from './typology-result';
+import { type TypologyResult } from './typology-result';
 
 export class ChannelResult {
   id = '';
