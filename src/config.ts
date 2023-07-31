@@ -2,6 +2,7 @@
 // config settings, env variables
 import * as path from 'path';
 import * as dotenv from 'dotenv';
+import { type RedisConfig } from '@frmscoe/frms-coe-lib/lib/interfaces';
 
 // Load .env file into process.env if it exists. This is convenient for running locally.
 dotenv.config({
@@ -31,43 +32,38 @@ export interface IConfig {
     host: string;
     port: number;
   };
-  redis: {
-    auth: string;
-    db: string;
-    host: string;
-    port: number;
-  };
+  redis: RedisConfig;
   cmsEndpoint: string;
 }
 
 export const configuration: IConfig = {
   maxCPU: parseInt(process.env.MAX_CPU!, 10) || 0,
-  serviceName: <string>process.env.FUNCTION_NAME,
+  serviceName: process.env.FUNCTION_NAME as string,
   apm: {
-    url: <string>process.env.APM_URL,
-    secretToken: <string>process.env.APM_SECRET_TOKEN,
-    active: <string>process.env.APM_ACTIVE,
+    url: process.env.APM_URL as string,
+    secretToken: process.env.APM_SECRET_TOKEN as string,
+    active: process.env.APM_ACTIVE as string,
   },
   db: {
-    name: <string>process.env.DATABASE_NAME,
-    password: <string>process.env.DATABASE_PASSWORD,
-    url: <string>process.env.DATABASE_URL,
-    user: <string>process.env.DATABASE_USER,
-    collectionName: <string>process.env.COLLECTION_NAME,
-    transactionConfigDb: <string>process.env.TRANSACTION_CONFIG_DB,
-    transactionConfigCollection: <string>process.env.TRANSACTION_CONFIG_COLLECTION,
+    name: process.env.DATABASE_NAME as string,
+    password: process.env.DATABASE_PASSWORD as string,
+    url: process.env.DATABASE_URL as string,
+    user: process.env.DATABASE_USER as string,
+    collectionName: process.env.COLLECTION_NAME as string,
+    transactionConfigDb: process.env.TRANSACTION_CONFIG_DB as string,
+    transactionConfigCollection: process.env.TRANSACTION_CONFIG_COLLECTION as string,
   },
-  env: <string>process.env.NODE_ENV,
+  env: process.env.NODE_ENV as string,
   logstash: {
-    host: <string>process.env.LOGSTASH_HOST,
+    host: process.env.LOGSTASH_HOST as string,
     port: parseInt(process.env.LOGSTASH_PORT!, 10),
   },
   port: parseInt(process.env.PORT!, 10) || 3000,
   redis: {
-    auth: <string>process.env.REDIS_AUTH,
-    db: <string>process.env.REDIS_DB,
-    host: <string>process.env.REDIS_HOST,
-    port: parseInt(process.env.REDIS_PORT!, 10),
+    db: parseInt(process.env.REDIS_DB!, 10) || 0,
+    servers: JSON.parse((process.env.REDIS_SERVERS as string) || '[{"hostname": "127.0.0.1", "port":6379}]'),
+    password: process.env.REDIS_AUTH as string,
+    isCluster: process.env.REDIS_IS_CLUSTER === 'true',
   },
-  cmsEndpoint: <string>process.env.CMS_ENDPOINT,
+  cmsEndpoint: process.env.CMS_ENDPOINT as string,
 };

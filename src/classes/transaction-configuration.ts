@@ -7,16 +7,16 @@ class Typology {
 class Channel {
   id = '';
   cfg = '';
-  typologies: Array<Typology> = [];
+  typologies: Typology[] = [];
 }
 
 export class Message {
   id = '';
   cfg = '';
   txTp = '';
-  channels: Array<Channel> = [];
+  channels: Channel[] = [];
 }
 
 export class TransactionConfiguration {
-  messages: Array<Message> = [];
+  messages: Message[] = [];
 }

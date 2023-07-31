@@ -7,14 +7,16 @@ import { IPain001Message } from '../interfaces/iPain001';
 import { NetworkMap } from '../classes/network-map';
 import { Alert } from '../classes/alert';
 import { TADPResult } from '../classes/tadp-result';
-import * as fs from 'fs'
+import * as fs from 'fs';
 
 export class ArangoDBService {
   client: Database;
   transactionConfig: Database;
 
   constructor() {
-    const caOption = fs.existsSync("/usr/local/share/ca-certificates/ca-certificates.crt") ? [fs.readFileSync("/usr/local/share/ca-certificates/ca-certificates.crt")] : []
+    const caOption = fs.existsSync('/usr/local/share/ca-certificates/ca-certificates.crt')
+      ? [fs.readFileSync('/usr/local/share/ca-certificates/ca-certificates.crt')]
+      : [];
     this.client = new Database({
       url: configuration.db.url,
       databaseName: configuration.db.name,
@@ -23,7 +25,7 @@ export class ArangoDBService {
         password: configuration.db.password,
       },
       agentOptions: {
-        ca: caOption
+        ca: caOption,
       },
     });
 
@@ -35,7 +37,7 @@ export class ArangoDBService {
         password: configuration.db.password,
       },
       agentOptions: {
-        ca: caOption
+        ca: caOption,
       },
     });
 
