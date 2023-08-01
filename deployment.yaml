@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: transaction-aggregation-decisioning-processor-rel-1-0-0
-          image: actio.azurecr.io/transaction-aggregation-decisioning-processor-rel-1-0-0:1.0.0
+          image: example.io/transaction-aggregation-decisioning-processor-rel-1-0-0:1.0.0
           ports:
             - name: http
               containerPort: 8080
