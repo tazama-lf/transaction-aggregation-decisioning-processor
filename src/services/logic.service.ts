@@ -17,6 +17,7 @@ const calculateDuration = (startTime: bigint): number => {
 };
 
 export const handleExecute = async (rawTransaction: any): Promise<any> => {
+  const apmTransaction = apm.startTransaction('handle.execute');
   try {
     const startTime = process.hrtime.bigint();
     // Get the request body and parse it to variables
@@ -57,16 +58,21 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       if (channelResults.length > 0) {
         const transactionType = 'FIToFIPmtSts';
         const transactionID = transaction[transactionType].GrpHdr.MsgId;
+        const spanInsertTransactionHistory = apm.startSpan('db.insert.transactionHistory');
         await databaseClient.insertTransactionHistory(transactionID, transaction, networkMap, alert);
+        spanInsertTransactionHistory?.end();
         result.alert.tadpResult.prcgTm = calculateDuration(startTime);
         await server.handleResponse(result);
       }
+      apmTransaction?.end();
       return channelResults;
     } else {
       LoggerService.log('Invalid message type');
     }
   } catch (e) {
     LoggerService.error('Error while calculating Transaction score', e as Error);
+  } finally {
+    apmTransaction?.end();
   }
 };
 
@@ -82,7 +88,10 @@ export const handleChannels = async (
     const transactionType = 'FIToFIPmtSts';
     const transactionID = transaction[transactionType].GrpHdr.MsgId;
 
+    const spanTransactionHistory = apm.startSpan('db.get.transactionCfg');
     const transactionConfiguration = await databaseClient.getTransactionConfig();
+    spanTransactionHistory!.end();
+
     const transactionConfigMessages = transactionConfiguration[0] as TransactionConfiguration[];
     const requiredConfigMessage = transactionConfigMessages
       .find((tc) => tc.messages.find((msg) => msg.id === message.id && msg.cfg === message.cfg && msg.txTp === transaction.TxTp))
@@ -90,7 +99,10 @@ export const handleChannels = async (
 
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const cacheKey = `tadp_${transactionID}_${message.id}_${message.cfg}`;
+
+    const spanDBMembers = apm.startSpan('db.get.members');
     const jchannelResults = await databaseManager.getMembers(cacheKey);
+    spanDBMembers?.end();
     const channelResults: ChannelResult[] = [];
     if (jchannelResults && jchannelResults.length > 0) {
       for (const jchannelResult of jchannelResults) {
@@ -113,7 +125,9 @@ export const handleChannels = async (
     channelResults.push(channelResult);
     // check if all Channel results for this transaction is found
     if (channelResults.length < message.channels.length) {
+      const spanCacheChannelResults = apm.startSpan('cache.add.channelResults');
       await databaseManager.setAdd(cacheKey, JSON.stringify(channelResults));
+      spanCacheChannelResults?.end();
       LoggerService.log('All channels not completed.');
       return [];
     }
@@ -152,8 +166,8 @@ export const handleChannels = async (
     span?.end();
     return channelResults;
   } catch (error) {
-    LoggerService.error(error as string);
     span?.end();
+    LoggerService.error(error as string);
     throw error;
   }
 };
