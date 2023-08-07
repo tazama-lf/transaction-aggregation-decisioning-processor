@@ -25,8 +25,9 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
     const transaction = rawTransaction.transaction;
     const networkMap = rawTransaction.networkMap as NetworkMap;
     const channelResult = rawTransaction.channelResult as ChannelResult;
+    const traceParent = metaData?.traceParent ?? undefined;
     apmTransaction = apm.startTransaction('handle.execute', {
-      childOf: metaData.traceParent!,
+      childOf: traceParent,
     });
 
     // Send every channel request to the service function
