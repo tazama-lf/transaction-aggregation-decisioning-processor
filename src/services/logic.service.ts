@@ -17,14 +17,18 @@ const calculateDuration = (startTime: bigint): number => {
 };
 
 export const handleExecute = async (rawTransaction: any): Promise<any> => {
-  const apmTransaction = apm.startTransaction('handle.execute');
+  let apmTransaction: apm.Transaction | null = null;
   try {
     const startTime = process.hrtime.bigint();
     // Get the request body and parse it to variables
+    const metaData = rawTransaction?.metaData as MetaData;
     const transaction = rawTransaction.transaction;
     const networkMap = rawTransaction.networkMap as NetworkMap;
     const channelResult = rawTransaction.channelResult as ChannelResult;
-    const metaData = rawTransaction?.metaData as MetaData;
+    const traceParent = metaData?.traceParent ?? undefined;
+    apmTransaction = apm.startTransaction('handle.execute', {
+      childOf: traceParent,
+    });
 
     // Send every channel request to the service function
     const toReturn: TADPResult = {
