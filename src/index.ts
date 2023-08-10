@@ -1,26 +1,12 @@
+import './apm';
 import { CreateDatabaseManager, type DatabaseManagerInstance } from '@frmscoe/frms-coe-lib';
 import { StartupFactory, type IStartupService } from '@frmscoe/frms-coe-startup-lib';
 import cluster from 'cluster';
-import apm from 'elastic-apm-node';
 import os from 'os';
 import { configuration } from './config';
 import { LoggerService } from './helpers';
 import { Services } from './services';
 import { handleExecute } from './services/logic.service';
-
-/*
- * Initialize the APM Logging
- **/
-if (configuration.apm.active === 'true') {
-  apm.start({
-    serviceName: configuration.serviceName,
-    secretToken: configuration.apm?.secretToken,
-    serverUrl: configuration.apm?.url,
-    usePathAsTransactionName: true,
-    active: Boolean(configuration.apm?.active),
-    transactionIgnoreUrls: ['/health'],
-  });
-}
 
 const databaseManagerConfig = {
   redisConfig: {
