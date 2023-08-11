@@ -5,7 +5,7 @@ import { ChannelResult } from '../classes/channel-result';
 import { type Message, type NetworkMap } from '../classes/network-map';
 import { type TransactionConfiguration } from '../classes/transaction-configuration';
 import { LoggerService } from '../helpers';
-import { databaseManager, databaseClient, server } from '../index';
+import { databaseManager, server } from '../index';
 import { type CMSRequest } from '../classes/cms-request';
 import { Alert } from '../classes/alert';
 import { type TADPResult } from '../classes/tadp-result';
@@ -63,7 +63,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
         const transactionType = 'FIToFIPmtSts';
         const transactionID = transaction[transactionType].GrpHdr.MsgId;
         const spanInsertTransactionHistory = apm.startSpan('db.insert.transactionHistory');
-        await databaseClient.insertTransactionHistory(transactionID, transaction, networkMap, alert);
+        await databaseManager.insertTransaction(transactionID, transaction, networkMap, alert);
         spanInsertTransactionHistory?.end();
         result.alert.tadpResult.prcgTm = calculateDuration(startTime);
         await server.handleResponse(result);
@@ -93,7 +93,7 @@ export const handleChannels = async (
     const transactionID = transaction[transactionType].GrpHdr.MsgId;
 
     const spanTransactionHistory = apm.startSpan('db.get.transactionCfg');
-    const transactionConfiguration = await databaseClient.getTransactionConfig();
+    const transactionConfiguration = (await databaseManager.getTransactionConfig()) as unknown[];
     spanTransactionHistory?.end();
 
     const transactionConfigMessages = transactionConfiguration[0] as TransactionConfiguration[];

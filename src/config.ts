@@ -27,6 +27,7 @@ export interface IConfig {
     collectionName: string;
     transactionConfigDb: string;
     transactionConfigCollection: string;
+    dbCertPath: string;
   };
   logstash: {
     host: string;
@@ -52,6 +53,7 @@ export const configuration: IConfig = {
     collectionName: process.env.COLLECTION_NAME as string,
     transactionConfigDb: process.env.TRANSACTION_CONFIG_DB as string,
     transactionConfigCollection: process.env.TRANSACTION_CONFIG_COLLECTION as string,
+    dbCertPath: process.env.DATABASE_CERT_PATH as string,
   },
   env: process.env.NODE_ENV as string,
   logstash: {
