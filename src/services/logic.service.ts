@@ -94,7 +94,7 @@ export const handleChannels = async (
 
     const spanTransactionHistory = apm.startSpan('db.get.transactionCfg');
     const transactionConfiguration = await databaseClient.getTransactionConfig();
-    spanTransactionHistory!.end();
+    spanTransactionHistory?.end();
 
     const transactionConfigMessages = transactionConfiguration[0] as TransactionConfiguration[];
     const requiredConfigMessage = transactionConfigMessages
@@ -118,11 +118,13 @@ export const handleChannels = async (
 
     if (!message.channels.some((c) => c.id === channelResult.id && c.cfg === channelResult.cfg)) {
       LoggerService.warn('Channel not part of Message - ignoring.');
+      span?.end();
       return [];
     }
 
     if (channelResults.some((t) => t.id === channelResult.id && t.cfg === channelResult.cfg)) {
       LoggerService.warn('Channel already processed - ignoring.');
+      span?.end();
       return [];
     }
 
@@ -132,6 +134,7 @@ export const handleChannels = async (
       const spanCacheChannelResults = apm.startSpan('cache.add.channelResults');
       await databaseManager.setAdd(cacheKey, JSON.stringify(channelResults));
       spanCacheChannelResults?.end();
+      span?.end();
       LoggerService.log('All channels not completed.');
       return [];
     }
