@@ -15,14 +15,14 @@ const databaseManagerConfig = {
     isCluster: configuration.redis.isCluster,
   },
   configuration: {
-    databaseName: configuration.db.name,
+    databaseName: configuration.db.configurationDb,
     certPath: configuration.db.dbCertPath,
     password: configuration.db.password,
     url: configuration.db.url,
     user: configuration.db.user,
   },
   transactionHistory: {
-    databaseName: configuration.db.transactionConfigDb,
+    databaseName: configuration.db.transactionDb,
     url: configuration.db.url,
     password: configuration.db.password,
     user: configuration.db.user,
