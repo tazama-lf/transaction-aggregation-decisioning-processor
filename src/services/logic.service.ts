@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apm from 'elastic-apm-node';
+import { type Message, type NetworkMap } from '@frmscoe/frms-coe-lib/lib/interfaces';
+import { Alert } from '../classes/alert';
 import { ChannelResult } from '../classes/channel-result';
-import { type Message, type NetworkMap } from '../classes/network-map';
+import { type CMSRequest } from '../classes/cms-request';
+import { type TADPResult } from '../classes/tadp-result';
 import { type TransactionConfiguration } from '../classes/transaction-configuration';
 import { LoggerService } from '../helpers';
-import { databaseManager, databaseClient, server } from '../index';
-import { type CMSRequest } from '../classes/cms-request';
-import { Alert } from '../classes/alert';
-import { type TADPResult } from '../classes/tadp-result';
+import { databaseManager, server } from '../index';
 import { type MetaData } from '../interfaces/metaData';
 
 const calculateDuration = (startTime: bigint): number => {
@@ -61,9 +61,9 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       };
       if (channelResults.length > 0) {
         const transactionType = 'FIToFIPmtSts';
-        const transactionID = transaction[transactionType].GrpHdr.MsgId;
+        const transactionID = transaction[transactionType].GrpHdr.MsgId as string;
         const spanInsertTransactionHistory = apm.startSpan('db.insert.transactionHistory');
-        await databaseClient.insertTransactionHistory(transactionID, transaction, networkMap, alert);
+        await databaseManager.insertTransaction(transactionID, transaction, networkMap, alert);
         spanInsertTransactionHistory?.end();
         result.alert.tadpResult.prcgTm = calculateDuration(startTime);
         await server.handleResponse(result);
@@ -93,7 +93,7 @@ export const handleChannels = async (
     const transactionID = transaction[transactionType].GrpHdr.MsgId;
 
     const spanTransactionHistory = apm.startSpan('db.get.transactionCfg');
-    const transactionConfiguration = await databaseClient.getTransactionConfig();
+    const transactionConfiguration = (await databaseManager.getTransactionConfig()) as unknown[];
     spanTransactionHistory?.end();
 
     const transactionConfigMessages = transactionConfiguration[0] as TransactionConfiguration[];

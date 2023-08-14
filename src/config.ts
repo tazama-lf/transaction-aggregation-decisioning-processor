@@ -20,13 +20,12 @@ export interface IConfig {
     active: string;
   };
   db: {
-    name: string;
     password: string;
     url: string;
     user: string;
-    collectionName: string;
-    transactionConfigDb: string;
-    transactionConfigCollection: string;
+    configurationDb: string;
+    transactionDb: string;
+    dbCertPath: string;
   };
   logstash: {
     host: string;
@@ -45,13 +44,12 @@ export const configuration: IConfig = {
     active: process.env.APM_ACTIVE as string,
   },
   db: {
-    name: process.env.DATABASE_NAME as string,
     password: process.env.DATABASE_PASSWORD as string,
     url: process.env.DATABASE_URL as string,
     user: process.env.DATABASE_USER as string,
-    collectionName: process.env.COLLECTION_NAME as string,
-    transactionConfigDb: process.env.TRANSACTION_CONFIG_DB as string,
-    transactionConfigCollection: process.env.TRANSACTION_CONFIG_COLLECTION as string,
+    configurationDb: process.env.CONFIGURATION_DB as string,
+    transactionDb: process.env.TRANSACTION_DB as string,
+    dbCertPath: process.env.DATABASE_CERT_PATH as string,
   },
   env: process.env.NODE_ENV as string,
   logstash: {

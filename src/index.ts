@@ -5,7 +5,6 @@ import cluster from 'cluster';
 import os from 'os';
 import { configuration } from './config';
 import { LoggerService } from './helpers';
-import { Services } from './services';
 import { handleExecute } from './services/logic.service';
 
 const databaseManagerConfig = {
@@ -14,6 +13,20 @@ const databaseManagerConfig = {
     servers: configuration.redis.servers,
     password: configuration.redis.password,
     isCluster: configuration.redis.isCluster,
+  },
+  configuration: {
+    databaseName: configuration.db.configurationDb,
+    certPath: configuration.db.dbCertPath,
+    password: configuration.db.password,
+    url: configuration.db.url,
+    user: configuration.db.user,
+  },
+  transactionHistory: {
+    databaseName: configuration.db.transactionDb,
+    url: configuration.db.url,
+    password: configuration.db.password,
+    user: configuration.db.user,
+    certPath: configuration.db.dbCertPath,
   },
 };
 
@@ -27,18 +40,17 @@ export const dbInit = async (): Promise<void> => {
  * Initialize the clients and start the server
  */
 export let server: IStartupService;
-export const databaseClient = Services.getDatabaseInstance();
 
 export const runServer = async (): Promise<void> => {
   await dbInit();
   server = new StartupFactory();
   if (configuration.env !== 'test')
     for (let retryCount = 0; retryCount < 10; retryCount++) {
-      console.log('Connecting to nats server...');
+      LoggerService.log('Connecting to nats server...');
       if (!(await server.init(handleExecute))) {
         await new Promise((resolve) => setTimeout(resolve, 5000));
       } else {
-        console.log('Connected to nats');
+        LoggerService.log('Connected to nats');
         break;
       }
     }

@@ -1,6 +1,6 @@
 /* eslint-disable */
+import { NetworkMap } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { Alert } from './alert';
-import { NetworkMap } from './network-map';
 
 export class CMSRequest {
   message = '';
