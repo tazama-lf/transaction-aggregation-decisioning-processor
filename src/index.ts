@@ -46,11 +46,11 @@ export const runServer = async (): Promise<void> => {
   server = new StartupFactory();
   if (configuration.env !== 'test')
     for (let retryCount = 0; retryCount < 10; retryCount++) {
-      console.log('Connecting to nats server...');
+      LoggerService.log('Connecting to nats server...');
       if (!(await server.init(handleExecute))) {
         await new Promise((resolve) => setTimeout(resolve, 5000));
       } else {
-        console.log('Connected to nats');
+        LoggerService.log('Connected to nats');
         break;
       }
     }
