@@ -27,9 +27,10 @@ export interface IConfig {
     transactionDb: string;
     dbCertPath: string;
   };
-  logstash: {
-    host: string;
-    port: number;
+  logger: {
+    logstashHost: string;
+    logstashPort: number;
+    logstashLevel: string;
   };
   redis: RedisConfig;
   cmsEndpoint: string;
@@ -52,9 +53,10 @@ export const configuration: IConfig = {
     dbCertPath: process.env.DATABASE_CERT_PATH as string,
   },
   env: process.env.NODE_ENV as string,
-  logstash: {
-    host: process.env.LOGSTASH_HOST as string,
-    port: parseInt(process.env.LOGSTASH_PORT!, 10),
+  logger: {
+    logstashHost: process.env.LOGSTASH_HOST as string,
+    logstashPort: parseInt(process.env.LOGSTASH_PORT ?? '0', 10),
+    logstashLevel: (process.env.LOGSTASH_LEVEL as string) || 'info',
   },
   port: parseInt(process.env.PORT!, 10) || 3000,
   redis: {

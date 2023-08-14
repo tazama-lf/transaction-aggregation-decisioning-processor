@@ -7,8 +7,7 @@ import { ChannelResult } from '../classes/channel-result';
 import { type CMSRequest } from '../classes/cms-request';
 import { type TADPResult } from '../classes/tadp-result';
 import { type TransactionConfiguration } from '../classes/transaction-configuration';
-import { LoggerService } from '../helpers';
-import { databaseManager, server } from '../index';
+import { databaseManager, server, loggerService } from '../index';
 import { type MetaData } from '../interfaces/metaData';
 
 const calculateDuration = (startTime: bigint): number => {
@@ -71,10 +70,10 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       apmTransaction?.end();
       return channelResults;
     } else {
-      LoggerService.log('Invalid message type');
+      loggerService.log('Invalid message type');
     }
   } catch (e) {
-    LoggerService.error('Error while calculating Transaction score', e as Error);
+    loggerService.error('Error while calculating Transaction score', e as Error);
   } finally {
     apmTransaction?.end();
   }
@@ -117,13 +116,13 @@ export const handleChannels = async (
     }
 
     if (!message.channels.some((c) => c.id === channelResult.id && c.cfg === channelResult.cfg)) {
-      LoggerService.warn('Channel not part of Message - ignoring.');
+      loggerService.warn('Channel not part of Message - ignoring.');
       span?.end();
       return [];
     }
 
     if (channelResults.some((t) => t.id === channelResult.id && t.cfg === channelResult.cfg)) {
-      LoggerService.warn('Channel already processed - ignoring.');
+      loggerService.warn('Channel already processed - ignoring.');
       span?.end();
       return [];
     }
@@ -135,7 +134,7 @@ export const handleChannels = async (
       await databaseManager.setAdd(cacheKey, JSON.stringify(channelResults));
       spanCacheChannelResults?.end();
       span?.end();
-      LoggerService.log('All channels not completed.');
+      loggerService.log('All channels not completed.');
       return [];
     }
     let review = false;
@@ -165,7 +164,7 @@ export const handleChannels = async (
     }
     channelResult.status = reviewMessage;
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    LoggerService.log(`Transaction: ${transactionID} has status: ${reviewMessage}`);
+    loggerService.log(`Transaction: ${transactionID} has status: ${reviewMessage}`);
 
     // Delete interim cache as transaction processed to fulfilment
     await databaseManager.deleteKey(cacheKey);
@@ -174,7 +173,7 @@ export const handleChannels = async (
     return channelResults;
   } catch (error) {
     span?.end();
-    LoggerService.error(error as string);
+    loggerService.error(error as string);
     throw error;
   }
 };
