@@ -1,4 +1,4 @@
-ARG BUILD_IMAGE=node:20
+ARG BUILD_IMAGE=node:20-bullseye
 ARG RUN_IMAGE=gcr.io/distroless/nodejs20-debian11:nonroot
 
 FROM ${BUILD_IMAGE} AS builder
