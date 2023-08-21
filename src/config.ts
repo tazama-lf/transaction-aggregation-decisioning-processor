@@ -12,7 +12,6 @@ dotenv.config({
 export interface IConfig {
   maxCPU: number;
   env: string;
-  port: number;
   serviceName: string;
   apm: {
     secretToken: string;
@@ -33,7 +32,6 @@ export interface IConfig {
     logstashLevel: string;
   };
   redis: RedisConfig;
-  cmsEndpoint: string;
 }
 
 export const configuration: IConfig = {
@@ -58,12 +56,10 @@ export const configuration: IConfig = {
     logstashPort: parseInt(process.env.LOGSTASH_PORT ?? '0', 10),
     logstashLevel: (process.env.LOGSTASH_LEVEL as string) || 'info',
   },
-  port: parseInt(process.env.PORT!, 10) || 3000,
   redis: {
     db: parseInt(process.env.REDIS_DB!, 10) || 0,
     servers: JSON.parse((process.env.REDIS_SERVERS as string) || '[{"hostname": "127.0.0.1", "port":6379}]'),
     password: process.env.REDIS_AUTH as string,
     isCluster: process.env.REDIS_IS_CLUSTER === 'true',
   },
-  cmsEndpoint: process.env.CMS_ENDPOINT as string,
 };

@@ -48,7 +48,6 @@ ENV prefix_logs="false"
 # Service-Based Enviroment Variables
 ENV FUNCTION_NAME=transaction-aggregation-decisioning-processor-rel-1-0-0
 ENV NODE_ENV=production
-ENV PORT=3000
 ENV SERVER_URL=
 
 ENV REDIS_DB=0
@@ -64,9 +63,9 @@ ENV TRANSACTION_DB=transactionHistory
 ENV DATABASE_CERT_PATH=
 
 ENV APM_ACTIVE=true
-ENV APM_URL=http://apm-server.development:8200
+ENV APM_URL=http://apm-server.development.svc.cluster.local:8200/
 ENV APM_SECRET_TOKEN=
-ENV LOGSTASH_HOST=logstash.development
+ENV LOGSTASH_HOST=logstash.development.svc.cluster.local
 ENV LOGSTASH_PORT=8080
 ENV LOGSTASH_LEVEL='info'
 
