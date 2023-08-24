@@ -41,6 +41,12 @@ describe('TADProc Service', () => {
       });
     });
 
+    jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((...args: unknown[]): Promise<number> => {
+      return new Promise<number>((resolve, reject) => {
+        resolve(1);
+      });
+    });
+
     jest.spyOn(databaseManager, 'setAdd').mockImplementation((key: string, value: string): Promise<void> => {
       return new Promise<void>((resolve, reject) => {
         cacheString = value;

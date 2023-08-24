@@ -102,8 +102,19 @@ export const handleChannels = async (
 
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const cacheKey = `tadp_${transactionID}_${message.id}_${message.cfg}`;
-
     const spanDBMembers = apm.startSpan('db.get.members');
+    const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, channelResult);
+
+    // check if all Channel results for this transaction is found
+    if (jtypologyCount && jtypologyCount.length < message.channels.length) {
+      const spanCacheChannelResults = apm.startSpan('cache.add.channelResults');
+      // await databaseManager.setAdd(cacheKey, JSON.stringify(channelResults));
+      spanCacheChannelResults?.end();
+      span?.end();
+      loggerService.log('All channels not completed.');
+      return [];
+    }
+
     const jchannelResults = await databaseManager.getMembers(cacheKey);
     spanDBMembers?.end();
     const channelResults: ChannelResult[] = [];
@@ -115,28 +126,20 @@ export const handleChannels = async (
       }
     }
 
-    if (!message.channels.some((c) => c.id === channelResult.id && c.cfg === channelResult.cfg)) {
-      loggerService.warn('Channel not part of Message - ignoring.');
-      span?.end();
-      return [];
-    }
+    // if (!message.channels.some((c) => c.id === channelResult.id && c.cfg === channelResult.cfg)) {
+    //   loggerService.warn('Channel not part of Message - ignoring.');
+    //   span?.end();
+    //   return [];
+    // }
 
-    if (channelResults.some((t) => t.id === channelResult.id && t.cfg === channelResult.cfg)) {
-      loggerService.warn('Channel already processed - ignoring.');
-      span?.end();
-      return [];
-    }
+    // if (channelResults.some((t) => t.id === channelResult.id && t.cfg === channelResult.cfg)) {
+    //   loggerService.warn('Channel already processed - ignoring.');
+    //   span?.end();
+    //   return [];
+    // }
 
     channelResults.push(channelResult);
-    // check if all Channel results for this transaction is found
-    if (channelResults.length < message.channels.length) {
-      const spanCacheChannelResults = apm.startSpan('cache.add.channelResults');
-      await databaseManager.setAdd(cacheKey, JSON.stringify(channelResults));
-      spanCacheChannelResults?.end();
-      span?.end();
-      loggerService.log('All channels not completed.');
-      return [];
-    }
+
     let review = false;
     if (requiredConfigMessage)
       for (const configuredChannel of requiredConfigMessage.channels) {
