@@ -107,9 +107,6 @@ export const handleChannels = async (
 
     // check if all Channel results for this transaction is found
     if (jtypologyCount && jtypologyCount < message.channels.length) {
-      const spanCacheChannelResults = apm.startSpan('cache.add.channelResults');
-      // await databaseManager.setAdd(cacheKey, JSON.stringify(channelResults));
-      spanCacheChannelResults?.end();
       span?.end();
       loggerService.log('All channels not completed.');
       return [];
@@ -126,24 +123,11 @@ export const handleChannels = async (
       }
     }
 
-    // if (!message.channels.some((c) => c.id === channelResult.id && c.cfg === channelResult.cfg)) {
-    //   loggerService.warn('Channel not part of Message - ignoring.');
-    //   span?.end();
-    //   return [];
-    // }
-
-    // if (channelResults.some((t) => t.id === channelResult.id && t.cfg === channelResult.cfg)) {
-    //   loggerService.warn('Channel already processed - ignoring.');
-    //   span?.end();
-    //   return [];
-    // }
-
     channelResults.push(channelResult);
 
     let review = false;
     if (requiredConfigMessage)
       for (const configuredChannel of requiredConfigMessage.channels) {
-        // const requiredChannel = requiredConfigMessage?.channels.find((chan) => chan.id === channelResult.id && chan.cfg === channelResult.cfg);
         if (configuredChannel) {
           const channelRes = channelResults.find((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
           for (const typology of configuredChannel.typologies) {
