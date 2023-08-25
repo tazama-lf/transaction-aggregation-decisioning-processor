@@ -103,10 +103,10 @@ export const handleChannels = async (
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const cacheKey = `tadp_${transactionID}_${message.id}_${message.cfg}`;
     const spanDBMembers = apm.startSpan('db.get.members');
-    const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, channelResult);
+    const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, JSON.stringify(channelResult));
 
     // check if all Channel results for this transaction is found
-    if (jtypologyCount && jtypologyCount.length < message.channels.length) {
+    if (jtypologyCount && jtypologyCount < message.channels.length) {
       const spanCacheChannelResults = apm.startSpan('cache.add.channelResults');
       // await databaseManager.setAdd(cacheKey, JSON.stringify(channelResults));
       spanCacheChannelResults?.end();
