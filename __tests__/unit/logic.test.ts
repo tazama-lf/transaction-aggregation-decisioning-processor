@@ -41,6 +41,12 @@ describe('TADProc Service', () => {
       });
     });
 
+    jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((...args: unknown[]): Promise<number> => {
+      return new Promise<number>((resolve, reject) => {
+        resolve(1);
+      });
+    });
+
     jest.spyOn(databaseManager, 'setAdd').mockImplementation((key: string, value: string): Promise<void> => {
       return new Promise<void>((resolve, reject) => {
         cacheString = value;
@@ -102,6 +108,12 @@ describe('TADProc Service', () => {
           );
         });
 
+        jest.spyOn(databaseManager, 'addOneGetCount').mockImplementationOnce((...args: unknown[]): Promise<number> => {
+          return new Promise<number>((resolve, reject) => {
+            resolve(2);
+          });
+        });
+
         const transaction = requestBody.transaction;
         const networkMap = requestBody.networkMap as NetworkMap;
         const channelResult = requestBody.channelResult;
@@ -126,7 +138,7 @@ describe('TADProc Service', () => {
       });
 
       it('should handle successful request, above threshold', async () => {
-        jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementation(() => {
+        jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
           return new Promise((resolve, reject) => {
             resolve(
               Object.assign(
@@ -139,12 +151,18 @@ describe('TADProc Service', () => {
           });
         });
 
-        jest.spyOn(databaseManager, 'getMembers').mockImplementation((key: string): Promise<string[]> => {
+        jest.spyOn(databaseManager, 'getMembers').mockImplementationOnce((key: string): Promise<string[]> => {
           return new Promise<string[]>((resolve, reject) =>
             resolve([
               '{"result":0,"id":"002@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}',
             ]),
           );
+        });
+
+        jest.spyOn(databaseManager, 'addOneGetCount').mockImplementationOnce((...args: unknown[]): Promise<number> => {
+          return new Promise<number>((resolve, reject) => {
+            resolve(2);
+          });
         });
 
         const transaction = requestBody.transaction;
@@ -209,6 +227,17 @@ describe('TADProc Service', () => {
             expect(await thrownFunction).toThrow();
           } catch (err) {}
         }
+      });
+
+      it('should handle error in handleChannels, wrong transaction type.', async () => {
+        const tempRequestBody = JSON.parse(
+          '{"transaction":{"TxTp":"pacs.002.001.12","FIToFIPmtSts":{"GrpHdr":{"MsgId":"136a-dbb6-43d8-a565-86b8f322411e","CreDtTm":"2023-02-03T09:53:58.069Z"},"TxInfAndSts":{"OrgnlInstrId":"5d158d92f70142a6ac7ffba30ac6c2db","OrgnlEndToEndId":"701b-ae14-46fd-a2cf-88dda2875fdd","TxSts":"ACCC","ChrgsInf":[{"Amt":{"Amt":307.14,"Ccy":"USD"},"Agt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"typolog028"}}}},{"Amt":{"Amt":153.57,"Ccy":"USD"},"Agt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"typolog028"}}}},{"Amt":{"Amt":300.71,"Ccy":"USD"},"Agt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"dfsp002"}}}}],"AccptncDtTm":"2023-02-03T09:53:58.069Z","InstgAgt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"typolog028"}}},"InstdAgt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"dfsp002"}}}}}},"networkMap":{"messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"","channels":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"028@1.0","rules":[{"id":"003@1.0","host":"https://frmfaas.sybrin.com/function/off-rule-003","cfg":"1.0"},{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-rule-028","cfg":"1.0"}]},{"id":"029@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"029@1.0","rules":[{"id":"003@1.0","host":"https://frmfaas.sybrin.com/function/off-rule-003","cfg":"1.0"},{"id":"005@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]},{"id":"002@1.0","host":"http://openfaas:8080","cfg":"1.0","typologies":[{"id":"030@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"030@1.0","rules":[{"id":"003@1.0","host":"https://frmfaas.sybrin.com/function/off-rule-003","cfg":"1.0"},{"id":"006@1.0","host":"http://openfaas:8080","cfg":"1.0"}]},{"id":"031@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"031@1.0","rules":[{"id":"003@1.0","host":"https://frmfaas.sybrin.com/function/off-rule-003","cfg":"1.0"},{"id":"007@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}]},"channelResult":{"result":0,"id":"001@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}}',
+        );
+
+        const transaction = tempRequestBody.transaction;
+        const networkMap = tempRequestBody.networkMap as NetworkMap;
+        const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
+        handleExecute(tempRequestBody);
       });
 
       it('should handle successful request, channel not part of message', async () => {
