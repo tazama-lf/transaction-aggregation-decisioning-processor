@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import apm from 'elastic-apm-node';
+import apm from '../apm';
 import { type Message, type NetworkMap } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { Alert } from '../classes/alert';
 import { ChannelResult } from '../classes/channel-result';
@@ -16,7 +16,7 @@ const calculateDuration = (startTime: bigint): number => {
 };
 
 export const handleExecute = async (rawTransaction: any): Promise<any> => {
-  let apmTransaction: apm.Transaction | null = null;
+  let apmTransaction = null;
   try {
     const startTime = process.hrtime.bigint();
     // Get the request body and parse it to variables
