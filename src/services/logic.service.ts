@@ -123,8 +123,6 @@ export const handleChannels = async (
       }
     }
 
-    channelResults.push(channelResult);
-
     let review = false;
     if (requiredConfigMessage)
       for (const configuredChannel of requiredConfigMessage.channels) {
