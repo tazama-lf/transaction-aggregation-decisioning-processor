@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NetworkMap } from '@frmscoe/frms-coe-lib/lib/interfaces';
-import { TransactionConfiguration } from '../../src/classes/transaction-configuration';
+import { TransactionConfiguration } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TransactionConfiguration';
 import { databaseManager, runServer, server } from '../../src/index';
 import { handleExecute } from '../../src/services/logic.service';
 

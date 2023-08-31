@@ -2,12 +2,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apm from '../apm';
 import { type Message, type NetworkMap } from '@frmscoe/frms-coe-lib/lib/interfaces';
-import { Alert } from '../classes/alert';
-import { ChannelResult } from '../classes/channel-result';
-import { type CMSRequest } from '../classes/cms-request';
-import { type TADPResult } from '../classes/tadp-result';
-import { type TransactionConfiguration } from '../classes/transaction-configuration';
-import { databaseManager, server, loggerService } from '../index';
+import { Alert } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/Alert';
+import { type CMSRequest } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/CMSRequest';
+import { ChannelResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/ChannelResult';
+import { type TADPResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TADPResult';
+import { type TransactionConfiguration } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TransactionConfiguration';
+import { databaseManager, loggerService, server } from '../index';
 import { type MetaData } from '../interfaces/metaData';
 
 const calculateDuration = (startTime: bigint): number => {
