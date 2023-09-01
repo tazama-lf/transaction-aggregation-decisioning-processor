@@ -92,13 +92,22 @@ export const handleChannels = async (
     const transactionID = transaction[transactionType].GrpHdr.MsgId;
 
     const spanTransactionHistory = apm.startSpan('db.get.transactionCfg');
-    const transactionConfiguration = (await databaseManager.getTransactionConfig()) as unknown[];
-    spanTransactionHistory?.end();
 
-    const transactionConfigMessages = transactionConfiguration[0] as TransactionConfiguration[];
-    const requiredConfigMessage = transactionConfigMessages
-      .find((tc) => tc.messages.find((msg) => msg.id === message.id && msg.cfg === message.cfg && msg.txTp === transaction.TxTp))
-      ?.messages.find((msg) => msg.id === message.id && msg.cfg === message.cfg && msg.txTp === transaction.TxTp);
+    if (!networkMap.messages[0]?.id || !networkMap.messages[0]?.cfg) {
+      loggerService.error(`Network map is missing configured messages.`);
+      throw new Error('Network map is missing configured messages.');
+    }
+
+    const transactionConfiguration = (await databaseManager.getTransactionConfig(
+      networkMap.messages[0]?.id,
+      networkMap.messages[0]?.cfg,
+    )) as unknown[][];
+
+    if (!transactionConfiguration?.[0]?.[0]) {
+      loggerService.error(`Transaction Configuration could not be retrieved`);
+      throw new Error('Transaction Configuration could not be retrieved');
+    }
+    spanTransactionHistory?.end();
 
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const cacheKey = `tadp_${transactionID}_${message.id}_${message.cfg}`;
@@ -124,22 +133,23 @@ export const handleChannels = async (
     }
 
     let review = false;
-    if (requiredConfigMessage)
-      for (const configuredChannel of requiredConfigMessage.channels) {
-        if (configuredChannel) {
-          const channelRes = channelResults.find((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
-          for (const typology of configuredChannel.typologies) {
-            const typologyResult = channelRes?.typologyResult.find((t) => t.id === typology.id && t.cfg === typology.cfg);
-            if (!typologyResult) continue;
 
-            if (typologyResult.result >= typology.threshold) {
-              review = true;
-              typologyResult.review = true;
-            }
-            typologyResult.threshold = typology.threshold;
+    const currentConfiguration = transactionConfiguration[0][0] as TransactionConfiguration;
+    for (const configuredChannel of currentConfiguration.channels) {
+      if (configuredChannel) {
+        const channelRes = channelResults.find((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
+        for (const typology of configuredChannel.typologies) {
+          const typologyResult = channelRes?.typologyResult.find((t) => t.id === typology.id && t.cfg === typology.cfg);
+          if (!typologyResult) continue;
+
+          if (typologyResult.result >= typology.threshold) {
+            review = true;
+            typologyResult.review = true;
           }
+          typologyResult.threshold = typology.threshold;
         }
       }
+    }
 
     let reviewMessage: string;
     if (review) {
