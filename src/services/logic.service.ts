@@ -54,7 +54,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       alert.metaData = metaData;
       const result: CMSRequest = {
         message: `Successfully completed ${channelResults.length} channels`,
-        alert,
+        report: alert,
         transaction,
         networkMap,
       };
@@ -64,7 +64,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
         const spanInsertTransactionHistory = apm.startSpan('db.insert.transactionHistory');
         await databaseManager.insertTransaction(transactionID, transaction, networkMap, alert);
         spanInsertTransactionHistory?.end();
-        result.alert.tadpResult.prcgTm = calculateDuration(startTime);
+        result.report.tadpResult.prcgTm = calculateDuration(startTime);
         await server.handleResponse(result);
       }
       apmTransaction?.end();

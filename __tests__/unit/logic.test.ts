@@ -3,6 +3,7 @@ import { NetworkMap } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { TransactionConfiguration } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TransactionConfiguration';
 import { databaseManager, runServer, server } from '../../src/index';
 import { handleExecute } from '../../src/services/logic.service';
+import { CMSRequest } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/CMSRequest';
 
 let cacheString = '';
 const requestBody = JSON.parse(
@@ -12,7 +13,6 @@ const requestBody = JSON.parse(
 describe('TADProc Service', () => {
   beforeAll(async () => {
     await runServer();
-    jest.spyOn(server, 'handleResponse').mockImplementation(jest.fn());
   });
 
   beforeEach(async () => {
@@ -59,6 +59,10 @@ describe('TADProc Service', () => {
         cacheString = '';
         resolve();
       });
+    });
+
+    jest.spyOn(server, 'handleResponse').mockImplementation((response: unknown, subject?: string[] | undefined) => {
+      return Promise.resolve();
     });
   });
 
