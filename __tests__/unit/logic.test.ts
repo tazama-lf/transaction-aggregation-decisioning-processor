@@ -252,7 +252,7 @@ describe('TADProc Service', () => {
         const channelResult = requestBody.channelResult;
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
         const result = await handleExecute(requestBody);
-        //TODO check if res is something
+
         if (res?.report?.status) expect(res.report.status).toBe('NALT');
         else throw 'Test failed - expect response to be called';
       });
