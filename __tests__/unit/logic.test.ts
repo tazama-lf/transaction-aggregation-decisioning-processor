@@ -142,6 +142,25 @@ describe('TADProc Service', () => {
       });
 
       it('should handle successful request, above threshold', async () => {
+        let res: any = {};
+        jest.spyOn(server, 'handleResponse').mockImplementationOnce((response: unknown, subject?: string[] | undefined) => {
+          res = response;
+          return Promise.resolve();
+        });
+
+        jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
+          return new Promise((resolve, reject) => {
+            resolve(
+              Object.assign(
+                new TransactionConfiguration(),
+                JSON.parse(
+                  '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]}]}]]',
+                ),
+              ),
+            );
+          });
+        });
+
         jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
           return new Promise((resolve, reject) => {
             resolve(
@@ -174,10 +193,68 @@ describe('TADProc Service', () => {
         const channelResult = requestBody.channelResult;
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
-        if (message) {
-          const result = await handleExecute(requestBody);
-          expect(result).toBeDefined();
-        }
+        const result = await handleExecute(requestBody);
+        expect(result).toBeDefined();
+        if (res?.report?.status) expect(res.report.status).toBe('ALRT');
+        else throw 'Test failed - expect response to be called';
+      });
+
+      it('should handle successful request, below threshold', async () => {
+        let res: any = {};
+        const handleResponseSpy = jest
+          .spyOn(server, 'handleResponse')
+          .mockImplementationOnce((response: unknown, subject?: string[] | undefined) => {
+            res = response;
+            return Promise.resolve();
+          });
+        jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
+          return new Promise((resolve, reject) => {
+            resolve(
+              Object.assign(
+                new TransactionConfiguration(),
+                JSON.parse(
+                  '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":2000},{"id":"029@1.0","cfg":"1.0","threshold":2000}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":2000},{"id":"029@1.0","cfg":"1.0","threshold":2000}]}]}]]',
+                ),
+              ),
+            );
+          });
+        });
+
+        jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
+          return new Promise((resolve, reject) => {
+            resolve(
+              Object.assign(
+                new TransactionConfiguration(),
+                JSON.parse(
+                  '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]}]}]]',
+                ),
+              ),
+            );
+          });
+        });
+
+        jest.spyOn(databaseManager, 'getMembers').mockImplementationOnce((key: string): Promise<string[]> => {
+          return new Promise<string[]>((resolve, reject) =>
+            resolve([
+              '{"result":0,"id":"002@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}',
+            ]),
+          );
+        });
+
+        jest.spyOn(databaseManager, 'addOneGetCount').mockImplementationOnce((...args: unknown[]): Promise<number> => {
+          return new Promise<number>((resolve, reject) => {
+            resolve(2);
+          });
+        });
+
+        const transaction = requestBody.transaction;
+        const networkMap = requestBody.networkMap as NetworkMap;
+        const channelResult = requestBody.channelResult;
+        const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
+        const result = await handleExecute(requestBody);
+        //TODO check if res is something
+        if (res?.report?.status) expect(res.report.status).toBe('NALT');
+        else throw 'Test failed - expect response to be called';
       });
 
       it('should handle successful request, already processed', async () => {
@@ -210,6 +287,24 @@ describe('TADProc Service', () => {
         if (message) {
           const result = await handleExecute(requestBody);
           expect(result).toBeDefined();
+        }
+      });
+
+      it('should throw error if no config', async () => {
+        jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementation(() => {
+          return new Promise((resolve, reject) => {
+            resolve(undefined);
+          });
+        });
+
+        const transaction = requestBody.transaction;
+        const networkMap = requestBody.networkMap as NetworkMap;
+        const channelResult = requestBody.channelResult;
+        const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
+
+        if (message) {
+          const result = await handleExecute(requestBody);
+          expect(server.handleResponse).toHaveBeenCalledTimes(0);
         }
       });
 
