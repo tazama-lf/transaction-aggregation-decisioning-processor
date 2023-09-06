@@ -56,7 +56,8 @@ const config: Config.InitialOptions = {
   // An object that configures minimum threshold enforcement for coverage results
   coverageThreshold: {
     global: {
-      branches: 60,
+      // 71 is the magic number where we test all branches except APM stuff'n things.
+      branches: 71,
       functions: 95,
       lines: 95,
       statements: 95,

@@ -99,8 +99,8 @@ export const handleChannels = async (
     }
 
     const transactionConfiguration = (await databaseManager.getTransactionConfig(
-      networkMap.messages[0]?.id,
-      networkMap.messages[0]?.cfg,
+      networkMap.messages[0].id,
+      networkMap.messages[0].cfg,
     )) as unknown[][];
 
     if (!transactionConfiguration?.[0]?.[0]) {
@@ -148,18 +148,14 @@ export const handleChannels = async (
           }
           typologyResult.threshold = typology.threshold;
         }
+
+        if (channelRes) {
+          channelRes.status = review ? 'Review' : 'None';
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          loggerService.log(`Transaction: ${transactionID} has status: ${channelRes.status}`);
+        }
       }
     }
-
-    let reviewMessage: string;
-    if (review) {
-      reviewMessage = 'Review';
-    } else {
-      reviewMessage = 'None';
-    }
-    channelResult.status = reviewMessage;
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    loggerService.log(`Transaction: ${transactionID} has status: ${reviewMessage}`);
 
     // Delete interim cache as transaction processed to fulfilment
     await databaseManager.deleteKey(cacheKey);
