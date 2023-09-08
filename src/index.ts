@@ -20,8 +20,17 @@ const databaseManagerConfig = {
     url: configuration.db.url,
     user: configuration.db.user,
   },
+  transaction: configuration.db.transactionDb
+    ? {
+        databaseName: configuration.db.transactionDb,
+        url: configuration.db.url,
+        password: configuration.db.password,
+        user: configuration.db.user,
+        certPath: configuration.db.dbCertPath,
+      }
+    : undefined,
   transactionHistory: {
-    databaseName: configuration.db.transactionDb,
+    databaseName: configuration.db.transactionHistoryDb,
     url: configuration.db.url,
     password: configuration.db.password,
     user: configuration.db.user,

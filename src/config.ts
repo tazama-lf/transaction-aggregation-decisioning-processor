@@ -24,6 +24,7 @@ export interface IConfig {
     user: string;
     configurationDb: string;
     transactionDb: string;
+    transactionHistoryDb: string;
     dbCertPath: string;
   };
   logger: {
@@ -47,6 +48,7 @@ export const configuration: IConfig = {
     url: process.env.DATABASE_URL as string,
     user: process.env.DATABASE_USER as string,
     configurationDb: process.env.CONFIGURATION_DB as string,
+    transactionHistoryDb: process.env.TRANSACTION_HISTORY_DB as string,
     transactionDb: process.env.TRANSACTION_DB as string,
     dbCertPath: process.env.DATABASE_CERT_PATH as string,
   },
