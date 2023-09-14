@@ -54,7 +54,7 @@ export const configuration: IConfig = {
     transactionDb: process.env.TRANSACTION_DB as string,
     dbCertPath: process.env.DATABASE_CERT_PATH as string,
     cacheEnabled: process.env.CACHE_ENABLED === 'true',
-    cacheTTL: parseInt(process.env.CACHE_TTL!, 10),
+    cacheTTL: parseInt(process.env.CACHE_TTL!, 10) || 3000,
   },
   env: process.env.NODE_ENV as string,
   logger: {
