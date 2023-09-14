@@ -19,6 +19,8 @@ const databaseManagerConfig = {
     password: configuration.db.password,
     url: configuration.db.url,
     user: configuration.db.user,
+    localCacheEnabled: configuration.db.cacheEnabled,
+    localCacheTTL: configuration.db.cacheTTL,
   },
   transaction: configuration.db.transactionDb
     ? {
