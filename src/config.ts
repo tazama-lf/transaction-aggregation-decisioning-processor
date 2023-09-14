@@ -26,6 +26,8 @@ export interface IConfig {
     transactionDb: string;
     transactionHistoryDb: string;
     dbCertPath: string;
+    cacheEnabled: boolean;
+    cacheTTL: number;
   };
   logger: {
     logstashHost: string;
@@ -51,6 +53,8 @@ export const configuration: IConfig = {
     transactionHistoryDb: process.env.TRANSACTION_HISTORY_DB as string,
     transactionDb: process.env.TRANSACTION_DB as string,
     dbCertPath: process.env.DATABASE_CERT_PATH as string,
+    cacheEnabled: process.env.CACHE_ENABLED === 'true',
+    cacheTTL: parseInt(process.env.CACHE_TTL!, 10),
   },
   env: process.env.NODE_ENV as string,
   logger: {
