@@ -147,7 +147,6 @@ export const handleTypologies = async (
     const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
     const channelResults = await handleChannels(message!, transaction, networkMap, channelResult);
 
-    loggerService.error('Error while processing Channels');
     apmTadProc?.end();
     span = apm.startSpan(`[${transactionID}] Delete Typology interim cache key`);
     await databaseManager.deleteKey(cacheKey);
