@@ -154,10 +154,8 @@ describe('TADProc Service', () => {
         const channelResult = requestBody.channelResult;
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
-        if (message) {
-          const result = await handleChannels(message, transaction, networkMap, channelResult);
-          expect(result).toBeDefined();
-        }
+        const result = await handleChannels(message!, transaction, networkMap, channelResult);
+        expect(result).toBeDefined();
       });
 
       it('should handle successful request, all channels not found', async () => {
@@ -166,10 +164,8 @@ describe('TADProc Service', () => {
         const channelResult = requestBody.channelResult;
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
-        if (message) {
-          const result = await handleChannels(message, transaction, networkMap, channelResult);
-          expect(result).toBeDefined();
-        }
+        const result = await handleChannels(message!, transaction, networkMap, channelResult);
+        expect(result).toBeDefined();
       });
 
       it('should handle successful request, above threshold', async () => {
@@ -224,12 +220,10 @@ describe('TADProc Service', () => {
         const channelResult = requestBody.channelResult;
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
-        if (message) {
-          const result = await handleChannels(message, transaction, networkMap, channelResult);
-          expect(result).toBeDefined();
-          if (result[0]?.status) expect(result[0].status).toBe('ALRT');
-          else throw 'Test failed - expect response to be called';
-        }
+        const result = await handleChannels(message!, transaction, networkMap, channelResult);
+        expect(result).toBeDefined();
+        if (result[0]?.status) expect(result[0].status).toBe('ALRT');
+        else throw 'Test failed - expect response to be called';
       });
 
       it('should handle successful request, below threshold', async () => {
@@ -285,13 +279,10 @@ describe('TADProc Service', () => {
         const networkMap = requestBody.networkMap as NetworkMap;
         const channelResult = requestBody.channelResult;
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
+        const result = await handleChannels(message!, transaction, networkMap, channelResult);
 
-        if (message) {
-          const result = await handleChannels(message, transaction, networkMap, channelResult);
-
-          if (result[0]?.status) expect(result[0].status).toBe('NALT');
-          else throw 'Test failed - expect response to be called';
-        }
+        if (result[0]?.status) expect(result[0].status).toBe('NALT');
+        else throw 'Test failed - expect response to be called';
       });
 
       it('should handle successful request, already processed', async () => {
@@ -321,10 +312,8 @@ describe('TADProc Service', () => {
         const channelResult = requestBody.channelResult;
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
-        if (message) {
-          const result = await handleChannels(message, transaction, networkMap, channelResult);
-          expect(result).toBeDefined();
-        }
+        const result = await handleChannels(message!, transaction, networkMap, channelResult);
+        expect(result).toBeDefined();
       });
 
       it('should throw error if no config', async () => {
@@ -339,10 +328,8 @@ describe('TADProc Service', () => {
         const channelResult = requestBody.channelResult;
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
-        if (message) {
-          const result = await handleChannels(message, transaction, networkMap, channelResult);
-          expect(server.handleResponse).toHaveBeenCalledTimes(0);
-        }
+        const result = await handleChannels(message!, transaction, networkMap, channelResult);
+        expect(server.handleResponse).toHaveBeenCalledTimes(0);
       });
 
       it('should handle error in handleChannels', async () => {
@@ -357,12 +344,10 @@ describe('TADProc Service', () => {
         const channelResult = requestBody.channelResult;
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
-        if (message) {
-          const thrownFunction = await handleChannels(message, transaction, networkMap, channelResult);
-          try {
-            expect(await thrownFunction).toThrow();
-          } catch (err) {}
-        }
+        const thrownFunction = await handleChannels(message!, transaction, networkMap, channelResult);
+        try {
+          expect(await thrownFunction).toThrow();
+        } catch (err) {}
       });
 
       it('should handle error in handleChannels, wrong transaction type.', async () => {
@@ -375,9 +360,13 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
         const channelResult = requestBody.channelResult;
 
-        if (message) {
-          const result = await handleChannels(message, transaction, networkMap, channelResult);
+        try {
+          const result = await handleChannels(message!, transaction, networkMap, channelResult);
+          expect(result).toBeNull();
+        } catch (error) {
+          expect(error).toStrictEqual(new TypeError(`Cannot read properties of undefined (reading 'id')`));
         }
+        // await handleChannels(message!, transaction, networkMap, channelResult);
       });
 
       it('should handle error in networkmap', async () => {
@@ -390,9 +379,7 @@ describe('TADProc Service', () => {
         const channelResult = errorRequestBody.channelResult;
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
-        if (message) {
-          await handleChannels(message, transaction, networkMap, channelResult);
-        }
+        await handleChannels(message!, transaction, networkMap, channelResult);
       });
 
       it('should handle error in networkmap, no configuration returned', async () => {
@@ -458,10 +445,8 @@ describe('TADProc Service', () => {
         const channelResult = requestBody.channelResult;
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
-        if (message) {
-          const result = await handleChannels(message, transaction, networkMap, channelResult);
-          expect(result).toBeDefined();
-        }
+        const result = await handleChannels(message!, transaction, networkMap, channelResult);
+        expect(result).toBeDefined();
       });
     });
 
