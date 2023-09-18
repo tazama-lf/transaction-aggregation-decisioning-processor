@@ -7,7 +7,7 @@ import { type CMSRequest } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-
 import { ChannelResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/ChannelResult';
 import { type TADPResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TADPResult';
 import { type TransactionConfiguration } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TransactionConfiguration';
-import { databaseManager, loggerService, server } from '../index';
+import { databaseManager, loggerService, server, serialiseMessage } from '../index';
 import { type MetaData } from '../interfaces/metaData';
 
 const calculateDuration = (startTime: bigint): number => {
@@ -112,7 +112,7 @@ export const handleChannels = async (
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const cacheKey = `tadp_${transactionID}_${message.id}_${message.cfg}`;
     const spanDBMembers = apm.startSpan('db.get.members');
-    const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, JSON.stringify(channelResult));
+    const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, serialiseMessage({ channelResult }));
 
     // check if all Channel results for this transaction is found
     if (jtypologyCount && jtypologyCount < message.channels.length) {
@@ -127,7 +127,7 @@ export const handleChannels = async (
     if (jchannelResults && jchannelResults.length > 0) {
       for (const jchannelResult of jchannelResults) {
         const channelResult: ChannelResult = new ChannelResult();
-        Object.assign(channelResult, JSON.parse(jchannelResult));
+        Object.assign(channelResult, JSON.parse(jchannelResult).channelResult);
         channelResults.push(channelResult);
       }
     }
