@@ -49,7 +49,7 @@ describe('TADProc Service', () => {
       });
     });
 
-    jest.spyOn(databaseManager, 'setAdd').mockImplementation((key: string, value: string): Promise<void> => {
+    jest.spyOn(databaseManager, 'setAdd').mockImplementation((key: string, value: any): Promise<void> => {
       return new Promise<void>((resolve, reject) => {
         cacheString = value;
         resolve();
