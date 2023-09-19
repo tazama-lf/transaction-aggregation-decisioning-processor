@@ -36,6 +36,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       prcgTm: 0,
     };
 
+    // Messages is hardcoded at the moment since we only ever have 1. Should we move to include more messages, we will have to revist.
     const channel = networkMap.messages[0].channels.filter((c) =>
       c.typologies.some((t) => t.id === typologyResult.id && t.cfg === typologyResult.cfg),
     )[0];
@@ -46,8 +47,11 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
 
     if (channelResults.length > 0 && channelResults.length === networkMap.messages[0].channels.length) {
       if (channelResults.some((c: ChannelResult) => c.status === 'Review')) review = true;
+      toReturn.id = networkMap.messages[0].id;
+      toReturn.cfg = networkMap.messages[0].cfg;
       toReturn.channelResult = channelResults;
       toReturn.prcgTm = calculateDuration(startTime);
+
       const alert = new Alert();
       alert.tadpResult = toReturn;
       alert.status = review ? 'ALRT' : 'NALT';
