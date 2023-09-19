@@ -148,7 +148,7 @@ export const handleTypologies = async (
     const channelResults = await handleChannels(message!, transaction, networkMap, channelResult);
 
     apmTadProc?.end();
-    span = apm.startSpan(`[${transactionID}] Delete Typology interim cache key`);
+    span = apm.startSpan(`[${transactionID}] Delete Channel interim cache key`);
     await databaseManager.deleteKey(cacheKey);
     span?.end();
     return channelResults;
