@@ -145,9 +145,18 @@ export const handleTypologies = async (
     const apmTadProc = apm.startSpan('tadProc.exec');
 
     const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
-    const channelResults = await handleChannels(message!, transaction, networkMap, channelResult);
 
+    if (!message) {
+      loggerService.error(`Failed to process Channel ${channel.id} request , Message missing from networkmap.`);
+      return {
+        result: 'Error',
+        tadpReqBody: undefined,
+      };
+    }
+
+    const channelResults = await handleChannels(message, transaction, networkMap, channelResult);
     apmTadProc?.end();
+
     span = apm.startSpan(`[${transactionID}] Delete Channel interim cache key`);
     await databaseManager.deleteKey(cacheKey);
     span?.end();

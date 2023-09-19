@@ -84,6 +84,14 @@ describe('TADProc Service', () => {
     return networkMap;
   };
 
+  const getMockNetworkMapNoMessages = () => {
+    const jNetworkMap = JSON.parse(
+      '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"","channels":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"028@1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}]}',
+    );
+    const networkMap: NetworkMap = Object.assign(new NetworkMap(), jNetworkMap);
+    return networkMap;
+  };
+
   const getMockTypologyResult = (ruleResults: RuleResult[]): TypologyResult => {
     return { result: 50, id: '028@1.0', cfg: '028@1.0', desc: 'test', threshold: 0, ruleResults };
   };
@@ -590,6 +598,18 @@ describe('TADProc Service', () => {
         await handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
 
         expect(responseSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should respond with error if message is missing from networkmap', async () => {
+        const expectedReq = getMockTransaction();
+
+        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+        const networkMap = getMockNetworkMapNoMessages();
+        const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
+
+        const result = await helpers.handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
+        expect(JSON.stringify(result)).toEqual('{"result":"Error"}');
+        expect(responseSpy).toHaveBeenCalledTimes(0);
       });
     });
   });
