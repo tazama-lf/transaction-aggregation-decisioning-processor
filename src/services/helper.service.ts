@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { type Channel, type Message, type NetworkMap, type Pacs002 } from '@frmscoe/frms-coe-lib/lib/interfaces';
-import { ChannelResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/ChannelResult';
-import { TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
-import { databaseManager, loggerService, serialiseMessage } from '..';
+import { type ChannelResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/ChannelResult';
+import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
+import { databaseManager, loggerService } from '..';
 import { type TransactionConfiguration } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TransactionConfiguration';
 import apm from '../apm';
 import { type MetaData } from '../interfaces/metaData';
@@ -24,7 +24,7 @@ export const handleChannels = async (
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const cacheKey = `tadp_${transactionID}_${message.id}_${message.cfg}`;
     const spanDBMembers = apm.startSpan('db.get.members');
-    const jchannelCount = await databaseManager.addOneGetCount(cacheKey, serialiseMessage({ channelResult }));
+    const jchannelCount = await databaseManager.addOneGetCount(cacheKey, { channelResult: { ...channelResult } });
 
     // check if all Channel results for this transaction is found
     if (jchannelCount && jchannelCount < message.channels.length) {
@@ -45,16 +45,9 @@ export const handleChannels = async (
     }
     spanTransactionHistory?.end();
 
-    const jchannelResults = await databaseManager.getMembers(cacheKey);
+    const jchannelResults = await databaseManager.getMemberValues(cacheKey);
     spanDBMembers?.end();
-    const channelResults: ChannelResult[] = [];
-    if (jchannelResults && jchannelResults.length > 0) {
-      for (const jchannelResult of jchannelResults) {
-        const channelResult: ChannelResult = new ChannelResult();
-        Object.assign(channelResult, JSON.parse(jchannelResult).channelResult); // channelResult, JSON.parse(jchannelResult).channelResult
-        channelResults.push(channelResult);
-      }
-    }
+    const channelResults: ChannelResult[] = jchannelResults.map((jchannelResult) => jchannelResult.channelResult as ChannelResult);
 
     let review = false;
 
@@ -105,7 +98,7 @@ export const handleTypologies = async (
   try {
     const transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
     const cacheKey = `CADP_${transactionID}_${channel.id}_${channel.cfg}`;
-    const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, serialiseMessage({ typologyResult }));
+    const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, { typologyResult: { ...typologyResult } });
 
     // check if all results for this Channel is found
     if (jtypologyCount && jtypologyCount < channel.typologies.length) {
@@ -116,15 +109,9 @@ export const handleTypologies = async (
     }
 
     // else means we have all results for Channel, so lets evaluate result
-    const jtypologyResults = await databaseManager.getMembers(`${cacheKey}`);
-    const typologyResults: TypologyResult[] = [];
-    if (jtypologyResults && jtypologyResults.length > 0) {
-      for (const jtypologyResult of jtypologyResults) {
-        const typoRes: TypologyResult = new TypologyResult();
-        Object.assign(typoRes, JSON.parse(jtypologyResult).typologyResult);
-        typologyResults.push(typoRes);
-      }
-    } else
+    const jtypologyResults = await databaseManager.getMemberValues(cacheKey);
+    const typologyResults: TypologyResult[] = jtypologyResults.map((jtypologyResult) => jtypologyResult.typologyResult as TypologyResult);
+    if (!typologyResults || !typologyResults.length)
       return {
         result: 'Error',
         tadpReqBody: undefined,
