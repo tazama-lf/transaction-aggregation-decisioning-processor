@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type Pacs002, type NetworkMap, type Channel } from '@frmscoe/frms-coe-lib/lib/interfaces';
+import { type Pacs002, type NetworkMap } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { Alert } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/Alert';
 import { type CMSRequest } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/CMSRequest';
 import { type ChannelResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/ChannelResult';
