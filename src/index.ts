@@ -55,16 +55,23 @@ export let server: IStartupService;
 export const runServer = async (): Promise<void> => {
   await dbInit();
   server = new StartupFactory();
-  if (configuration.env !== 'test')
+  if (configuration.env !== 'test') {
+    let isConnected = false;
     for (let retryCount = 0; retryCount < 10; retryCount++) {
       loggerService.log('Connecting to nats server...');
       if (!(await server.init(handleExecute))) {
         await new Promise((resolve) => setTimeout(resolve, 5000));
       } else {
         loggerService.log('Connected to nats');
+        isConnected = true;
         break;
       }
     }
+
+    if (!isConnected) {
+      throw new Error('Unable to connect to nats after 10 retries');
+    }
+  }
 };
 
 process.on('uncaughtException', (err) => {
@@ -94,9 +101,12 @@ if (cluster.isPrimary && configuration.maxCPU !== 1) {
   // In this case it is an HTTP server
   (async () => {
     try {
-      if (configuration.env !== 'test') await runServer();
+      if (configuration.env !== 'test') {
+        await runServer();
+      }
     } catch (err) {
-      loggerService.error(`Error while starting HTTP server on Worker ${process.pid}`, err);
+      loggerService.error(`Error while starting services on Worker ${process.pid}`, err);
+      process.exit(1);
     }
   })();
   loggerService.log(`Worker ${process.pid} started`);
