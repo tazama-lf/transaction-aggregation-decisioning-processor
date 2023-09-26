@@ -2,7 +2,7 @@
 import { NetworkMap, Pacs002, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { TransactionConfiguration } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TransactionConfiguration';
 import { TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
-import { databaseManager, runServer, server } from '../../src/index';
+import { databaseManager, dbInit, runServer, server } from '../../src/index';
 import * as helpers from '../../src/services/helper.service';
 import { handleChannels, handleTypologies } from '../../src/services/helper.service';
 import { handleExecute } from '../../src/services/logic.service';
@@ -14,6 +14,7 @@ const requestBody = JSON.parse(
 
 describe('TADProc Service', () => {
   beforeAll(async () => {
+    await dbInit();
     await runServer();
   });
 
