@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /* eslint-disable */
 import { NetworkMap, Pacs002, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { TransactionConfiguration } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TransactionConfiguration';
