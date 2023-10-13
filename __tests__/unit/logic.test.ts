@@ -94,7 +94,7 @@ describe('TADProc Service', () => {
   };
 
   const getMockTypologyResult = (ruleResults: RuleResult[]): TypologyResult => {
-    return { result: 50, id: '028@1.0', cfg: '028@1.0', desc: 'test', threshold: 0, ruleResults };
+    return { result: 50, id: '028@1.0', cfg: '028@1.0', threshold: 0, ruleResults };
   };
 
   const getMockNetworkMapWithMultipleChannels = () => {
@@ -487,26 +487,24 @@ describe('TADProc Service', () => {
           return Promise.resolve();
         });
 
-        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
         jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((...args: unknown[]): Promise<number> => {
           return Promise.resolve(1);
         });
 
         jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((...args: unknown[]): Promise<Record<string, unknown>[]> => {
-          return Promise.resolve([
-            { typologyResult: { result: 50, id: '028@1.0', cfg: '028@1.0', desc: 'test', threshold: 0, ruleResults } },
-          ]);
+          return Promise.resolve([{ typologyResult: { result: 50, id: '028@1.0', cfg: '028@1.0', threshold: 0, ruleResults } }]);
         });
       });
 
       it('should handle successful request, with an unmatched number', async () => {
         const expectedReq = getMockTransaction();
 
-        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
         const networkMap = getMockNetworkMapWithMultipleChannels();
-        const typologyResult: TypologyResult = { result: 50, id: '030@1.0', cfg: '030@1.0', desc: 'test', threshold: 0, ruleResults };
+        const typologyResult: TypologyResult = { result: 50, id: '030@1.0', cfg: '030@1.0', threshold: 0, ruleResults };
 
         await helpers.handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
 
@@ -516,7 +514,7 @@ describe('TADProc Service', () => {
       it('should handle successful request, with a matched number', async () => {
         const expectedReq = getMockTransaction();
 
-        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
         const networkMap = getMockNetworkMap();
         const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
@@ -535,7 +533,7 @@ describe('TADProc Service', () => {
           );
         });
 
-        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
         const networkMap = getMockNetworkMapWithMultipleChannels();
         const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
@@ -550,7 +548,7 @@ describe('TADProc Service', () => {
         });
         const expectedReq = getMockTransaction();
 
-        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
         const networkMap = getMockNetworkMap();
         const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
@@ -561,7 +559,7 @@ describe('TADProc Service', () => {
 
       it('should handle successful request, not all results yet', async () => {
         const expectedReq = getMockTransaction();
-        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
         const networkMap = getMockNetworkMapWithMultipleChannels();
         const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
@@ -573,7 +571,7 @@ describe('TADProc Service', () => {
 
       it('should respond with error if cache key deletion fails', async () => {
         const expectedReq = getMockTransaction();
-        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
         const networkMap = getMockNetworkMapWithMultipleChannels();
         const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
@@ -585,7 +583,7 @@ describe('TADProc Service', () => {
 
       it('should respond with error if nothing comes back from cache', async () => {
         const expectedReq = getMockTransaction();
-        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
         jest.spyOn(databaseManager, 'deleteKey').mockRejectedValueOnce((key: string) => {
           return Promise.reject();
@@ -601,7 +599,7 @@ describe('TADProc Service', () => {
 
       it('should respond with error if NATS communication Error Occures', async () => {
         const expectedReq = getMockTransaction();
-        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
         jest.spyOn(server, 'handleResponse').mockRejectedValueOnce((value: string) => {
           return Promise.reject();
@@ -618,7 +616,7 @@ describe('TADProc Service', () => {
       it('should respond with error if message is missing from networkmap', async () => {
         const expectedReq = getMockTransaction();
 
-        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+        const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
         const networkMap = getMockNetworkMapNoMessages();
         const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
@@ -633,10 +631,10 @@ describe('TADProc Service', () => {
     it('should handle a successful transaction, incomplete.', async () => {
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMapWithMultipleChannels();
-      const typologyResult: TypologyResult = { result: 50, id: '030@1.0', cfg: '030@1.0', desc: 'test', threshold: 0, ruleResults };
+      const typologyResult: TypologyResult = { result: 50, id: '030@1.0', cfg: '030@1.0', threshold: 0, ruleResults };
 
       await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
 
@@ -645,10 +643,10 @@ describe('TADProc Service', () => {
 
     it('should handle a successful transaction, complete.', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMap();
-      const typologyResult: TypologyResult = { result: 50, id: '028@1.0', cfg: '028@1.0', desc: 'test', threshold: 0, ruleResults };
+      const typologyResult: TypologyResult = { result: 50, id: '028@1.0', cfg: '028@1.0', threshold: 0, ruleResults };
 
       const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockImplementationOnce(() => {
         return Promise.resolve([
@@ -683,10 +681,10 @@ describe('TADProc Service', () => {
 
     it('should handle a successful transaction, with review.', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMap();
-      const typologyResult: TypologyResult = { result: 50, id: '028@1.0', cfg: '028@1.0', desc: 'test', threshold: 100, ruleResults };
+      const typologyResult: TypologyResult = { result: 50, id: '028@1.0', cfg: '028@1.0', threshold: 100, ruleResults };
 
       const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockImplementationOnce(() => {
         return Promise.resolve([
@@ -723,10 +721,10 @@ describe('TADProc Service', () => {
 
     it('should handle a unsuccessful transaction, catch error.', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '', desc: '' }];
+      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMap();
-      const typologyResult: TypologyResult = { result: 50, id: '028@1.0', cfg: '028@1.0', desc: 'test', threshold: 0, ruleResults };
+      const typologyResult: TypologyResult = { result: 50, id: '028@1.0', cfg: '028@1.0', threshold: 0, ruleResults };
 
       const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockRejectedValueOnce(() => {
         return Promise.reject();
