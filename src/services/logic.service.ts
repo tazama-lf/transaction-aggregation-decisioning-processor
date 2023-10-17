@@ -46,7 +46,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
     const channelResults: ChannelResult[] = await handleTypologies(transaction, channel, networkMap, typologyResult, metaData);
 
     if (channelResults.length > 0 && channelResults.length === networkMap.messages[0].channels.length) {
-      if (channelResults.some((c: ChannelResult) => c.status === 'Review')) review = true;
+      if (channelResults.some((c: ChannelResult) => c.status === 'ALRT')) review = true;
       toReturn.id = networkMap.messages[0].id;
       toReturn.cfg = networkMap.messages[0].cfg;
       toReturn.channelResult = channelResults;

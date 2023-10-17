@@ -47,27 +47,23 @@ export const handleChannels = async (
 
     const jchannelResults = await databaseManager.getMemberValues(cacheKey);
     spanDBMembers?.end();
-    const channelResults: ChannelResult[] = jchannelResults.map((jchannelResult) => jchannelResult.channelResult as ChannelResult);
 
+    const channelResults: ChannelResult[] = jchannelResults.map((jchannelResult) => jchannelResult.channelResult as ChannelResult);
+    const currentConfiguration = transactionConfiguration[0][0] as TransactionConfiguration;
     let review = false;
 
-    const currentConfiguration = transactionConfiguration[0][0] as TransactionConfiguration;
     for (const configuredChannel of currentConfiguration.channels) {
       if (configuredChannel) {
         const channelRes = channelResults.find((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
+        const channelCount = channelResults.findIndex((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
         for (const typology of configuredChannel.typologies) {
           const typologyResult = channelRes?.typologyResult.find((t) => t.id === typology.id && t.cfg === typology.cfg);
           if (!typologyResult) continue;
-
-          if (typologyResult.result >= typology.threshold) {
-            review = true;
-            typologyResult.review = true;
-          }
-          typologyResult.threshold = typology.threshold;
+          review = typologyResult.review!;
         }
 
         if (channelRes) {
-          channelRes.status = review ? 'ALRT' : 'NALT';
+          channelResults[channelCount].status = review ? 'ALRT' : 'NALT';
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           loggerService.log(`Transaction: ${transactionID} has status: ${channelRes.status}`);
         }
