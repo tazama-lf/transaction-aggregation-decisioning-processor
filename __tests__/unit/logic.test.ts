@@ -94,7 +94,7 @@ describe('TADProc Service', () => {
   };
 
   const getMockTypologyResult = (ruleResults: RuleResult[]): TypologyResult => {
-    return { result: 50, id: '028@1.0', cfg: '028@1.0', threshold: 0, ruleResults };
+    return { result: 50, id: '028@1.0', cfg: '028@1.0', workflow: { alertThreshold: '50', interdictionThreshold: '' }, ruleResults };
   };
 
   const getMockNetworkMapWithMultipleChannels = () => {
@@ -148,7 +148,7 @@ describe('TADProc Service', () => {
           return new Promise<Record<string, unknown>[]>((resolve, reject) =>
             resolve([
               JSON.parse(
-                '{"channelResult":{"result":0,"id":"002@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}}',
+                '{"channelResult":{"result":0,"id":"002@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","review": false, "cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}}',
               ),
             ]),
           );
@@ -186,18 +186,18 @@ describe('TADProc Service', () => {
           return Promise.resolve();
         });
 
-        jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
-          return new Promise((resolve, reject) => {
-            resolve(
-              Object.assign(
-                new TransactionConfiguration(),
-                JSON.parse(
-                  '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]}]}]]',
-                ),
-              ),
-            );
-          });
-        });
+        // jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
+        //   return new Promise((resolve, reject) => {
+        //     resolve(
+        //       Object.assign(
+        //         new TransactionConfiguration(),
+        //         JSON.parse(
+        //           '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]}]}]]',
+        //         ),
+        //       ),
+        //     );
+        //   });
+        // });
 
         jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
           return new Promise((resolve, reject) => {
@@ -205,7 +205,7 @@ describe('TADProc Service', () => {
               Object.assign(
                 new TransactionConfiguration(),
                 JSON.parse(
-                  '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]}]}]]',
+                  '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","workflow":{"alertThreshold":"25","interdictionThreshold":"50"}},{"id":"029@1.0","cfg":"1.0","workflow":{"alertThreshold":"25","interdictionThreshold":"50"}}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","workflow":{"alertThreshold":"25","interdictionThreshold":"50"}},{"id":"029@1.0","cfg":"1.0","workflow":{"alertThreshold":"25","interdictionThreshold":"50"}}]}]}]]',
                 ),
               ),
             );
@@ -216,7 +216,7 @@ describe('TADProc Service', () => {
           return new Promise<Record<string, unknown>[]>((resolve) =>
             resolve([
               JSON.parse(
-                '{"channelResult":{"result":0,"id":"002@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}}',
+                '{"channelResult":{"result":0,"id":"001@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","review":true,"result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}}',
               ),
             ]),
           );
@@ -261,18 +261,18 @@ describe('TADProc Service', () => {
           });
         });
 
-        jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
-          return new Promise((resolve, reject) => {
-            resolve(
-              Object.assign(
-                new TransactionConfiguration(),
-                JSON.parse(
-                  '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]}]}]]',
-                ),
-              ),
-            );
-          });
-        });
+        // jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
+        //   return new Promise((resolve, reject) => {
+        //     resolve(
+        //       Object.assign(
+        //         new TransactionConfiguration(),
+        //         JSON.parse(
+        //           '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]}]}]]',
+        //         ),
+        //       ),
+        //     );
+        //   });
+        // });
 
         jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((...args: unknown[]): Promise<Record<string, unknown>[]> => {
           return new Promise<Record<string, unknown>[]>((resolve, reject) =>
@@ -494,7 +494,17 @@ describe('TADProc Service', () => {
         });
 
         jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((...args: unknown[]): Promise<Record<string, unknown>[]> => {
-          return Promise.resolve([{ typologyResult: { result: 50, id: '028@1.0', cfg: '028@1.0', threshold: 0, ruleResults } }]);
+          return Promise.resolve([
+            {
+              typologyResult: {
+                result: 50,
+                id: '028@1.0',
+                cfg: '028@1.0',
+                workflow: { alertThreshold: '0', interdictionThreshold: '' },
+                ruleResults,
+              },
+            },
+          ]);
         });
       });
 
@@ -504,7 +514,13 @@ describe('TADProc Service', () => {
         const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
         const networkMap = getMockNetworkMapWithMultipleChannels();
-        const typologyResult: TypologyResult = { result: 50, id: '030@1.0', cfg: '030@1.0', threshold: 0, ruleResults };
+        const typologyResult: TypologyResult = {
+          result: 50,
+          id: '030@1.0',
+          cfg: '030@1.0',
+          workflow: { alertThreshold: '0', interdictionThreshold: '' },
+          ruleResults,
+        };
 
         await helpers.handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
 
@@ -634,7 +650,13 @@ describe('TADProc Service', () => {
       const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMapWithMultipleChannels();
-      const typologyResult: TypologyResult = { result: 50, id: '030@1.0', cfg: '030@1.0', threshold: 0, ruleResults };
+      const typologyResult: TypologyResult = {
+        result: 50,
+        id: '030@1.0',
+        cfg: '030@1.0',
+        workflow: { alertThreshold: '0', interdictionThreshold: '' },
+        ruleResults,
+      };
 
       await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
 
@@ -646,7 +668,14 @@ describe('TADProc Service', () => {
       const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMap();
-      const typologyResult: TypologyResult = { result: 50, id: '028@1.0', cfg: '028@1.0', threshold: 0, ruleResults };
+      const typologyResult: TypologyResult = {
+        result: 50,
+        id: '028@1.0',
+        cfg: '028@1.0',
+        review: false,
+        workflow: { alertThreshold: '0', interdictionThreshold: '' },
+        ruleResults,
+      };
 
       const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockImplementationOnce(() => {
         return Promise.resolve([
@@ -684,7 +713,14 @@ describe('TADProc Service', () => {
       const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMap();
-      const typologyResult: TypologyResult = { result: 50, id: '028@1.0', cfg: '028@1.0', threshold: 100, ruleResults };
+      const typologyResult: TypologyResult = {
+        result: 50,
+        id: '028@1.0',
+        cfg: '028@1.0',
+        review: true,
+        workflow: { alertThreshold: '100', interdictionThreshold: '' },
+        ruleResults,
+      };
 
       const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockImplementationOnce(() => {
         return Promise.resolve([
@@ -692,13 +728,13 @@ describe('TADProc Service', () => {
             result: 0,
             id: '028@1.0',
             cfg: '028@1.0',
-            status: 'Review',
+            status: 'ALRT',
             typologyResult: [
               {
                 id: '028@1.0',
                 cfg: '1.0',
                 result: 50,
-                status: 'Review',
+                status: 'ALRT',
                 ruleResults: [
                   { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
                   { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
@@ -724,7 +760,13 @@ describe('TADProc Service', () => {
       const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMap();
-      const typologyResult: TypologyResult = { result: 50, id: '028@1.0', cfg: '028@1.0', threshold: 0, ruleResults };
+      const typologyResult: TypologyResult = {
+        result: 50,
+        id: '028@1.0',
+        cfg: '028@1.0',
+        workflow: { alertThreshold: '0', interdictionThreshold: '' },
+        ruleResults,
+      };
 
       const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockRejectedValueOnce(() => {
         return Promise.reject();
