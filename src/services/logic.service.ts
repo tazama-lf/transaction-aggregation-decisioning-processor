@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type Pacs002, type NetworkMap } from '@frmscoe/frms-coe-lib/lib/interfaces';
