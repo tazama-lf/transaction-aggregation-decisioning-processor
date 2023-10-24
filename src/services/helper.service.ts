@@ -5,7 +5,6 @@ import { type Channel, type Message, type NetworkMap, type Pacs002 } from '@frms
 import { type ChannelResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/ChannelResult';
 import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 import { databaseManager, loggerService } from '..';
-import { type TransactionConfiguration } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TransactionConfiguration';
 import apm from '../apm';
 import { type MetaData } from '../interfaces/metaData';
 
@@ -32,27 +31,13 @@ export const handleChannels = async (
       loggerService.log('All channels not completed.');
       return [];
     }
-
-    const spanTransactionHistory = apm.startSpan('db.get.transactionCfg');
-    const transactionConfiguration = (await databaseManager.getTransactionConfig(
-      networkMap.messages[0].id,
-      networkMap.messages[0].cfg,
-    )) as unknown[][];
-
-    if (!transactionConfiguration?.[0]?.[0]) {
-      loggerService.error(`Transaction Configuration could not be retrieved`);
-      throw new Error('Transaction Configuration could not be retrieved');
-    }
-    spanTransactionHistory?.end();
-
     const jchannelResults = await databaseManager.getMemberValues(cacheKey);
     spanDBMembers?.end();
 
     const channelResults: ChannelResult[] = jchannelResults.map((jchannelResult) => jchannelResult.channelResult as ChannelResult);
-    const currentConfiguration = transactionConfiguration[0][0] as TransactionConfiguration;
-    let review = false;
 
-    for (const configuredChannel of currentConfiguration.channels) {
+    let review = false;
+    for (const configuredChannel of networkMap.messages[0].channels) {
       if (configuredChannel) {
         const channelRes = channelResults.find((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
         const channelCount = channelResults.findIndex((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
