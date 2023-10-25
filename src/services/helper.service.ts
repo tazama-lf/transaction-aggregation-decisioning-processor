@@ -44,7 +44,7 @@ export const handleChannels = async (
         for (const typology of configuredChannel.typologies) {
           const typologyResult = channelRes?.typologyResult.find((t) => t.id === typology.id && t.cfg === typology.cfg);
           if (!typologyResult) continue;
-          review = typologyResult.review!;
+          if (typologyResult.review) review = true;
         }
 
         if (channelRes) {
