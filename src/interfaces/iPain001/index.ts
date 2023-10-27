@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import { GrpHdr } from './GrpHdr';
 import { PmtInf } from './PmtInf';
 import { SplmtryData } from './SplmtryData';
