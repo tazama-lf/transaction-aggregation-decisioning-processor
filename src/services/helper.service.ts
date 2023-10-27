@@ -41,14 +41,14 @@ export const handleChannels = async (
       if (configuredChannel) {
         const channelRes = channelResults.find((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
         if (!channelRes) continue;
-        const channelCount = channelResults.findIndex((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
+        const channelIndex = channelResults.findIndex((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
         for (const typology of configuredChannel.typologies) {
           const typologyResult = channelRes?.typologyResult.find((t) => t.id === typology.id && t.cfg === typology.cfg);
           if (!typologyResult) continue;
           if (typologyResult.review) review = true;
         }
 
-        channelResults[channelCount].status = review ? 'ALRT' : 'NALT';
+        channelResults[channelIndex].status = review ? 'ALRT' : 'NALT';
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         loggerService.log(`Transaction: ${transactionID} has status: ${channelRes.status}`);
       }
