@@ -6,7 +6,6 @@ import { type Channel, type Message, type NetworkMap, type Pacs002 } from '@frms
 import { type ChannelResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/ChannelResult';
 import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 import { databaseManager, loggerService } from '..';
-import { type TransactionConfiguration } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TransactionConfiguration';
 import apm from '../apm';
 import { type MetaData } from '../interfaces/metaData';
 
@@ -33,45 +32,26 @@ export const handleChannels = async (
       loggerService.log('All channels not completed.');
       return [];
     }
-
-    const spanTransactionHistory = apm.startSpan('db.get.transactionCfg');
-    const transactionConfiguration = (await databaseManager.getTransactionConfig(
-      networkMap.messages[0].id,
-      networkMap.messages[0].cfg,
-    )) as unknown[][];
-
-    if (!transactionConfiguration?.[0]?.[0]) {
-      loggerService.error(`Transaction Configuration could not be retrieved`);
-      throw new Error('Transaction Configuration could not be retrieved');
-    }
-    spanTransactionHistory?.end();
-
     const jchannelResults = await databaseManager.getMemberValues(cacheKey);
     spanDBMembers?.end();
+
     const channelResults: ChannelResult[] = jchannelResults.map((jchannelResult) => jchannelResult.channelResult as ChannelResult);
 
     let review = false;
-
-    const currentConfiguration = transactionConfiguration[0][0] as TransactionConfiguration;
-    for (const configuredChannel of currentConfiguration.channels) {
+    for (const configuredChannel of networkMap.messages[0].channels) {
       if (configuredChannel) {
         const channelRes = channelResults.find((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
+        if (!channelRes) continue;
+        const channelIndex = channelResults.findIndex((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
         for (const typology of configuredChannel.typologies) {
           const typologyResult = channelRes?.typologyResult.find((t) => t.id === typology.id && t.cfg === typology.cfg);
           if (!typologyResult) continue;
-
-          if (typologyResult.result >= typology.threshold) {
-            review = true;
-            typologyResult.review = true;
-          }
-          typologyResult.threshold = typology.threshold;
+          if (typologyResult.review) review = true;
         }
 
-        if (channelRes) {
-          channelRes.status = review ? 'ALRT' : 'NALT';
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          loggerService.log(`Transaction: ${transactionID} has status: ${channelRes.status}`);
-        }
+        channelResults[channelIndex].status = review ? 'ALRT' : 'NALT';
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        loggerService.log(`Transaction: ${transactionID} has status: ${channelRes.status}`);
       }
     }
 

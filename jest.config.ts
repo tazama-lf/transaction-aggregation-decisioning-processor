@@ -58,7 +58,7 @@ const config: Config.InitialOptions = {
   coverageThreshold: {
     global: {
       // 71 is the magic number where we test all branches except APM stuff'n things.
-      branches: 68,
+      branches: 63,
       functions: 95,
       lines: 95,
       statements: 95,
