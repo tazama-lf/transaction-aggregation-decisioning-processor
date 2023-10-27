@@ -94,7 +94,7 @@ describe('TADProc Service', () => {
   };
 
   const getMockTypologyResult = (ruleResults: RuleResult[]): TypologyResult => {
-    return { result: 50, id: '028@1.0', cfg: '1.0', workflow: { alertThreshold: '50', interdictionThreshold: '' }, ruleResults };
+    return { result: 50, id: '028@1.0', cfg: '1.0', workflow: { alertThreshold: 50, interdictionThreshold: 0 }, ruleResults };
   };
 
   const getMockNetworkMapWithMultipleChannels = () => {
@@ -518,7 +518,7 @@ describe('TADProc Service', () => {
           result: 50,
           id: '030@1.0',
           cfg: '030@1.0',
-          workflow: { alertThreshold: '0', interdictionThreshold: '' },
+          workflow: { alertThreshold: 0, interdictionThreshold: 0 },
           ruleResults,
         };
 
@@ -654,7 +654,7 @@ describe('TADProc Service', () => {
         result: 50,
         id: '030@1.0',
         cfg: '030@1.0',
-        workflow: { alertThreshold: '0', interdictionThreshold: '' },
+        workflow: { alertThreshold: 0, interdictionThreshold: 0 },
         ruleResults,
       };
 
@@ -673,7 +673,7 @@ describe('TADProc Service', () => {
         id: '028@1.0',
         cfg: '1.0',
         review: false,
-        workflow: { alertThreshold: '0', interdictionThreshold: '' },
+        workflow: { alertThreshold: 0, interdictionThreshold: 0 },
         ruleResults,
       };
 
@@ -718,7 +718,7 @@ describe('TADProc Service', () => {
         id: '028@1.0',
         cfg: '1.0',
         review: true,
-        workflow: { alertThreshold: '100', interdictionThreshold: '' },
+        workflow: { alertThreshold: 100, interdictionThreshold: 0 },
         ruleResults,
       };
 
@@ -764,7 +764,7 @@ describe('TADProc Service', () => {
         result: 50,
         id: '028@1.0',
         cfg: '1.0',
-        workflow: { alertThreshold: '0', interdictionThreshold: '' },
+        workflow: { alertThreshold: 0, interdictionThreshold: 0 },
         ruleResults,
       };
 
