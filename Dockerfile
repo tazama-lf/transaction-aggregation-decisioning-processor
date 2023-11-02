@@ -46,7 +46,7 @@ ENV read_timeout="15s"
 ENV prefix_logs="false"
 
 # Service-Based Environment Variables
-ENV FUNCTION_NAME=transaction-aggregation-decisioning-processor-rel-1-0-0
+ENV FUNCTION_NAME=transaction-aggregation-decisioning-processor
 ENV NODE_ENV=production
 ENV SERVER_URL=
 ENV CMS_ENDPOINT=
