@@ -4,13 +4,13 @@
 import { type Pacs002, type NetworkMap } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { Alert } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/Alert';
 import { type CMSRequest } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/CMSRequest';
-import { type ChannelResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/ChannelResult';
 import { type TADPResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TADPResult';
 import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 import apm from '../apm';
 import { databaseManager, loggerService, server } from '../index';
-import { type MetaData } from '../interfaces/metaData';
-import { calculateDuration, handleTypologies } from './helper.service';
+import { type MetaData } from '@frmscoe/frms-coe-lib/lib/interfaces/metaData';
+import { handleTypologies } from './helper.service';
+import { CalculateDuration } from '@frmscoe/frms-coe-lib/lib/helpers/calculatePrcg';
 
 export const handleExecute = async (rawTransaction: any): Promise<any> => {
   let apmTransaction = null;
@@ -43,15 +43,13 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
     )[0];
 
     loggerService.debug(`Processing Channel ${channel.id}.`);
-    let review = false;
-    const channelResults: ChannelResult[] = await handleTypologies(transaction, channel, networkMap, typologyResult, metaData);
+    const { channelResults, review } = await handleTypologies(transaction, channel, networkMap, typologyResult, metaData);
 
     if (channelResults.length > 0 && channelResults.length === networkMap.messages[0].channels.length) {
-      if (channelResults.some((c: ChannelResult) => c.status === 'ALRT')) review = true;
       toReturn.id = networkMap.messages[0].id;
       toReturn.cfg = networkMap.messages[0].cfg;
       toReturn.channelResult = channelResults;
-      toReturn.prcgTm = calculateDuration(startTime);
+      toReturn.prcgTm = CalculateDuration(startTime);
 
       const alert = new Alert();
       alert.tadpResult = toReturn;
@@ -69,7 +67,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       const spanInsertTransactionHistory = apm.startSpan('db.insert.transactionHistory');
       await databaseManager.insertTransaction(transactionID, transaction, networkMap, alert);
       spanInsertTransactionHistory?.end();
-      result.report.tadpResult.prcgTm = calculateDuration(startTime);
+      result.report.tadpResult.prcgTm = CalculateDuration(startTime);
       await server.handleResponse(result);
     }
     apmTransaction?.end();
