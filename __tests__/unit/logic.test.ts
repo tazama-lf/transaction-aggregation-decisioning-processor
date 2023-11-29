@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 /* eslint-disable */
-import { NetworkMap, Pacs002, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
+import { Channel, NetworkMap, Pacs002, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { TransactionConfiguration } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TransactionConfiguration';
 import { TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 import { databaseManager, dbInit, runServer, server } from '../../src/index';
@@ -21,7 +21,7 @@ describe('TADProc Service', () => {
 
   beforeEach(async () => {
     jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementation(() => {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve, _reject) => {
         resolve(
           Object.assign(
             new TransactionConfiguration(),
@@ -34,38 +34,38 @@ describe('TADProc Service', () => {
     });
 
     jest.spyOn(databaseManager, 'insertTransaction').mockImplementation(() => {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve, _reject) => {
         resolve('');
       });
     });
 
-    jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((...args: unknown[]): Promise<Record<string, unknown>[]> => {
-      return new Promise<Record<string, unknown>[]>((resolve, reject) => {
+    jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+      return new Promise<Record<string, unknown>[]>((resolve, _reject) => {
         resolve([]);
       });
     });
 
-    jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((...args: unknown[]): Promise<number> => {
-      return new Promise<number>((resolve, reject) => {
+    jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((..._args: unknown[]): Promise<number> => {
+      return new Promise<number>((resolve, _reject) => {
         resolve(1);
       });
     });
 
-    jest.spyOn(databaseManager, 'setAdd').mockImplementation((key: string, value: any): Promise<void> => {
-      return new Promise<void>((resolve, reject) => {
+    jest.spyOn(databaseManager, 'setAdd').mockImplementation((_key: string, value: any): Promise<void> => {
+      return new Promise<void>((resolve, _reject) => {
         cacheString = value;
         resolve();
       });
     });
 
-    jest.spyOn(databaseManager, 'deleteKey').mockImplementation((...args: unknown[]): Promise<void> => {
-      return new Promise<void>((resolve, reject) => {
+    jest.spyOn(databaseManager, 'deleteKey').mockImplementation((..._args: unknown[]): Promise<void> => {
+      return new Promise<void>((resolve, _reject) => {
         cacheString = '';
         resolve();
       });
     });
 
-    jest.spyOn(server, 'handleResponse').mockImplementation((response: unknown, subject?: string[] | undefined) => {
+    jest.spyOn(server, 'handleResponse').mockImplementation((_response: unknown, _subject?: string[] | undefined) => {
       return Promise.resolve();
     });
   });
@@ -112,13 +112,13 @@ describe('TADProc Service', () => {
 
     beforeEach(async () => {
       jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementation(() => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, _reject) => {
           resolve('');
         });
       });
 
       jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementation(() => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, _reject) => {
           resolve(
             Object.assign(
               new TransactionConfiguration(),
@@ -130,23 +130,23 @@ describe('TADProc Service', () => {
         });
       });
 
-      jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((...args: unknown[]): Promise<Record<string, unknown>[]> => {
-        return new Promise<Record<string, unknown>[]>((resolve, reject) => resolve([]));
+      jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+        return new Promise<Record<string, unknown>[]>((resolve, _reject) => resolve([]));
       });
 
-      jest.spyOn(databaseManager, 'setAdd').mockImplementation((...args: unknown[]): Promise<void> => {
-        return new Promise<void>((resolve, reject) => resolve());
+      jest.spyOn(databaseManager, 'setAdd').mockImplementation((..._args: unknown[]): Promise<void> => {
+        return new Promise<void>((resolve, _reject) => resolve());
       });
 
-      jest.spyOn(databaseManager, 'deleteKey').mockImplementation((...args: unknown[]): Promise<void> => {
-        return new Promise<void>((resolve, reject) => resolve());
+      jest.spyOn(databaseManager, 'deleteKey').mockImplementation((..._args: unknown[]): Promise<void> => {
+        return new Promise<void>((resolve, _reject) => resolve());
       });
     });
 
     describe('Handle Channels', () => {
       it('should handle successful request', async () => {
-        jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((...args: unknown[]): Promise<Record<string, unknown>[]> => {
-          return new Promise<Record<string, unknown>[]>((resolve, reject) =>
+        jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+          return new Promise<Record<string, unknown>[]>((resolve, _reject) =>
             resolve([
               JSON.parse(
                 '{"channelResult":{"result":0,"id":"002@1.0","cfg":"1.0","typologyResult":[{"id":"030@1.0","review": false, "cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}}',
@@ -155,8 +155,8 @@ describe('TADProc Service', () => {
           );
         });
 
-        jest.spyOn(databaseManager, 'addOneGetCount').mockImplementationOnce((...args: unknown[]): Promise<number> => {
-          return new Promise<number>((resolve, reject) => {
+        jest.spyOn(databaseManager, 'addOneGetCount').mockImplementationOnce((..._args: unknown[]): Promise<number> => {
+          return new Promise<number>((resolve, _reject) => {
             resolve(2);
           });
         });
@@ -180,130 +180,15 @@ describe('TADProc Service', () => {
         expect(result).toBeDefined();
       });
 
-      // it('should handle successful request, above threshold', async () => {
-      //   let res: any = {};
-      //   jest.spyOn(server, 'handleResponse').mockImplementationOnce((response: unknown, subject?: string[] | undefined) => {
-      //     res = response;
-      //     return Promise.resolve();
-      //   });
-
-      //   // jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
-      //   //   return new Promise((resolve, reject) => {
-      //   //     resolve(
-      //   //       Object.assign(
-      //   //         new TransactionConfiguration(),
-      //   //         JSON.parse(
-      //   //           '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]}]}]]',
-      //   //         ),
-      //   //       ),
-      //   //     );
-      //   //   });
-      //   // });
-
-      //   jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
-      //     return new Promise((resolve, reject) => {
-      //       resolve(
-      //         Object.assign(
-      //           new TransactionConfiguration(),
-      //           JSON.parse(
-      //             '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","workflow":{"alertThreshold":"25","interdictionThreshold":"50"}},{"id":"029@1.0","cfg":"1.0","workflow":{"alertThreshold":"25","interdictionThreshold":"50"}}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","workflow":{"alertThreshold":"25","interdictionThreshold":"50"}},{"id":"029@1.0","cfg":"1.0","workflow":{"alertThreshold":"25","interdictionThreshold":"50"}}]}]}]]',
-      //           ),
-      //         ),
-      //       );
-      //     });
-      //   });
-
-      //   jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((...args: unknown[]): Promise<Record<string, unknown>[]> => {
-      //     return new Promise<Record<string, unknown>[]>((resolve) =>
-      //       resolve([
-      //         JSON.parse(
-      //           '{"channelResult":{"result":0,"id":"001@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","review":true,"result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}}',
-      //         ),
-      //       ]),
-      //     );
-      //   });
-
-      //   jest.spyOn(databaseManager, 'addOneGetCount').mockImplementationOnce((...args: unknown[]): Promise<number> => {
-      //     return new Promise<number>((resolve, reject) => {
-      //       resolve(2);
-      //     });
-      //   });
-
-      //   const transaction = requestBody.transaction;
-      //   const networkMap = requestBody.networkMap as NetworkMap;
-      //   const channelResult = requestBody.channelResult;
-      //   const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
-
-      //   const result = await handleChannels(message!, transaction, networkMap, channelResult);
-      //   expect(result).toBeDefined();
-      //   if (result[0]?.status) expect(result[0].status).toBe('ALRT');
-      //   else throw 'Test failed - expect response to be called';
-      // });
-
-      it('should handle successful request', async () => {
+      it('should handle successful request, above threshold', async () => {
         let res: any = {};
-        const handleResponseSpy = jest
-          .spyOn(server, 'handleResponse')
-          .mockImplementationOnce((response: unknown, subject?: string[] | undefined) => {
-            res = response;
-            return Promise.resolve();
-          });
+        jest.spyOn(server, 'handleResponse').mockImplementationOnce((response: unknown, _subject?: string[] | undefined) => {
+          res = response;
+          return Promise.resolve();
+        });
 
         jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
-          return new Promise((resolve, reject) => {
-            resolve(
-              Object.assign(
-                new TransactionConfiguration(),
-                JSON.parse(
-                  '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":2000},{"id":"029@1.0","cfg":"1.0","threshold":2000}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":2000},{"id":"029@1.0","cfg":"1.0","threshold":2000}]}]}]]',
-                ),
-              ),
-            );
-          });
-        });
-
-        // jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
-        //   return new Promise((resolve, reject) => {
-        //     resolve(
-        //       Object.assign(
-        //         new TransactionConfiguration(),
-        //         JSON.parse(
-        //           '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]}]}]]',
-        //         ),
-        //       ),
-        //     );
-        //   });
-        // });
-
-        jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((...args: unknown[]): Promise<Record<string, unknown>[]> => {
-          return new Promise<Record<string, unknown>[]>((resolve, reject) =>
-            resolve([
-              JSON.parse(
-                '{"channelResult":{"result":0,"id":"002@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}}',
-              ),
-            ]),
-          );
-        });
-
-        jest.spyOn(databaseManager, 'addOneGetCount').mockImplementationOnce((...args: unknown[]): Promise<number> => {
-          return new Promise<number>((resolve, reject) => {
-            resolve(2);
-          });
-        });
-
-        const transaction = requestBody.transaction;
-        const networkMap = requestBody.networkMap as NetworkMap;
-        const channelResult = requestBody.channelResult;
-        const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
-        const result = await handleChannels(message!, transaction, networkMap, channelResult);
-
-        if (result[0]?.status) expect(result[0].status).toBe('NALT');
-        else throw 'Test failed - expect response to be called';
-      });
-
-      it('should handle successful request, already processed', async () => {
-        jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementation(() => {
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve, _reject) => {
             resolve(
               Object.assign(
                 new TransactionConfiguration(),
@@ -315,8 +200,123 @@ describe('TADProc Service', () => {
           });
         });
 
-        jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((...args: unknown[]): Promise<Record<string, unknown>[]> => {
-          return new Promise<Record<string, unknown>[]>((resolve, reject) =>
+        jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
+          return new Promise((resolve, _reject) => {
+            resolve(
+              Object.assign(
+                new TransactionConfiguration(),
+                JSON.parse(
+                  '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","workflow":{"alertThreshold":"25","interdictionThreshold":"50"}},{"id":"029@1.0","cfg":"1.0","workflow":{"alertThreshold":"25","interdictionThreshold":"50"}}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","workflow":{"alertThreshold":"25","interdictionThreshold":"50"}},{"id":"029@1.0","cfg":"1.0","workflow":{"alertThreshold":"25","interdictionThreshold":"50"}}]}]}]]',
+                ),
+              ),
+            );
+          });
+        });
+
+        jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+          return new Promise<Record<string, unknown>[]>((resolve) =>
+            resolve([
+              JSON.parse(
+                '{"channelResult":{"result":0,"id":"001@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","review":true,"result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}}',
+              ),
+            ]),
+          );
+        });
+
+        jest.spyOn(databaseManager, 'addOneGetCount').mockImplementationOnce((..._args: unknown[]): Promise<number> => {
+          return new Promise<number>((resolve, _reject) => {
+            resolve(2);
+          });
+        });
+
+        const transaction = requestBody.transaction;
+        const networkMap = requestBody.networkMap as NetworkMap;
+        const channelResult = requestBody.channelResult;
+        const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
+
+        const result = await handleChannels(message!, transaction, networkMap, channelResult);
+        expect(result).toBeDefined();
+        if (result?.review) expect(result?.review).toBe(true); // ARLT Review
+        else throw 'Test failed - expect response to be called';
+      });
+
+      it('should handle successful request', async () => {
+        let res: any = {};
+        const handleResponseSpy = jest
+          .spyOn(server, 'handleResponse')
+          .mockImplementationOnce((response: unknown, _subject?: string[] | undefined) => {
+            res = response;
+            return Promise.resolve();
+          });
+
+        jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
+          return new Promise((resolve, _reject) => {
+            resolve(
+              Object.assign(
+                new TransactionConfiguration(),
+                JSON.parse(
+                  '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":2000},{"id":"029@1.0","cfg":"1.0","threshold":2000}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":2000},{"id":"029@1.0","cfg":"1.0","threshold":2000}]}]}]]',
+                ),
+              ),
+            );
+          });
+        });
+
+        jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementationOnce(() => {
+          return new Promise((resolve, _reject) => {
+            resolve(
+              Object.assign(
+                new TransactionConfiguration(),
+                JSON.parse(
+                  '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]}]}]]',
+                ),
+              ),
+            );
+          });
+        });
+
+        jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+          return new Promise<Record<string, unknown>[]>((resolve, _reject) =>
+            resolve([
+              JSON.parse(
+                '{"channelResult":{"result":0,"id":"002@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}}',
+              ),
+            ]),
+          );
+        });
+
+        jest.spyOn(databaseManager, 'addOneGetCount').mockImplementationOnce((..._args: unknown[]): Promise<number> => {
+          return new Promise<number>((resolve, _reject) => {
+            resolve(2);
+          });
+        });
+
+        const transaction = requestBody.transaction;
+        const networkMap = requestBody.networkMap as NetworkMap;
+        const channelResult = requestBody.channelResult;
+        const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
+        const result = await handleChannels(message!, transaction, networkMap, channelResult);
+        expect(result).toBeDefined();
+        if (result) expect(result.review).toBe(false); //NALT Review
+        else throw 'Test failed - expect response to be called';
+      });
+
+      it('should handle successful request, already processed', async () => {
+        jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementation(() => {
+          return new Promise((resolve, _reject) => {
+            resolve(
+              Object.assign(
+                new TransactionConfiguration(),
+                JSON.parse(
+                  '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]}]}]]',
+                ),
+              ),
+            );
+          });
+        });
+
+        jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+          return new Promise<Record<string, unknown>[]>((resolve, _reject) =>
             resolve([
               JSON.parse(
                 '{"channelResults" :{"result":0,"id":"001@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}}',
@@ -336,7 +336,7 @@ describe('TADProc Service', () => {
 
       it('should throw error if no config', async () => {
         jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementation(() => {
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve, _reject) => {
             resolve(undefined);
           });
         });
@@ -352,7 +352,7 @@ describe('TADProc Service', () => {
 
       it('should handle error in handleChannels', async () => {
         jest.spyOn(databaseManager, 'getMemberValues').mockRejectedValue(() => {
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve, _reject) => {
             resolve(new Error('Test'));
           });
         });
@@ -438,7 +438,7 @@ describe('TADProc Service', () => {
 
       it('should handle successful request, channel not part of message', async () => {
         jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementation(() => {
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve, _reject) => {
             resolve(
               Object.assign(
                 new TransactionConfiguration(),
@@ -450,8 +450,8 @@ describe('TADProc Service', () => {
           });
         });
 
-        jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((...args: unknown[]): Promise<Record<string, unknown>[]> => {
-          return new Promise<Record<string, unknown>[]>((resolve, reject) =>
+        jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+          return new Promise<Record<string, unknown>[]>((resolve, _reject) =>
             resolve([
               JSON.parse(
                 '{"channelResults":{"result":0,"id":"001@1.0","cfg":"1.0","typologyResult":[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"003@1.0","cfg":"1.0","result":true,"reason":"asdf","subRuleRef":"123"},{"id":"028@1.0","cfg":"1.0","result":true,"subRuleRef":"04","reason":"Thedebtoris50orolder"}]}]}}',
@@ -476,25 +476,25 @@ describe('TADProc Service', () => {
       beforeEach(() => {
         responseSpy = jest.spyOn(helpers, 'handleChannels').mockImplementation(jest.fn());
 
-        jest.spyOn(databaseManager, 'getJson').mockImplementation((...args: unknown[]): Promise<string> => {
+        jest.spyOn(databaseManager, 'getJson').mockImplementation((..._args: unknown[]): Promise<string> => {
           return Promise.resolve('[]');
         });
 
-        jest.spyOn(databaseManager, 'setJson').mockImplementation((...args: unknown[]): Promise<void> => {
+        jest.spyOn(databaseManager, 'setJson').mockImplementation((..._args: unknown[]): Promise<void> => {
           return Promise.resolve();
         });
 
-        jest.spyOn(databaseManager, 'deleteKey').mockImplementation((...args: unknown[]): Promise<void> => {
+        jest.spyOn(databaseManager, 'deleteKey').mockImplementation((..._args: unknown[]): Promise<void> => {
           return Promise.resolve();
         });
 
         const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
-        jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((...args: unknown[]): Promise<number> => {
+        jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((..._args: unknown[]): Promise<number> => {
           return Promise.resolve(1);
         });
 
-        jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((...args: unknown[]): Promise<Record<string, unknown>[]> => {
+        jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
           return Promise.resolve([
             {
               typologyResult: {
@@ -542,8 +542,8 @@ describe('TADProc Service', () => {
       it('should handle successful request, have existing typology results already', async () => {
         const expectedReq = getMockTransaction();
 
-        jest.spyOn(databaseManager, 'getJson').mockImplementation((...args: unknown[]): Promise<string> => {
-          return new Promise<string>((resolve, reject) =>
+        jest.spyOn(databaseManager, 'getJson').mockImplementation((..._args: unknown[]): Promise<string> => {
+          return new Promise<string>((resolve, _reject) =>
             resolve(
               '[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"result":true,"id":"","cfg":"","subRuleRef":"","reason":""}]}]',
             ),
@@ -560,7 +560,7 @@ describe('TADProc Service', () => {
       });
 
       it('should handle successful request, cache error', async () => {
-        jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((...args: unknown[]): Promise<Record<string, unknown>[]> => {
+        jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
           return Promise.resolve([]);
         });
         const expectedReq = getMockTransaction();
@@ -602,7 +602,7 @@ describe('TADProc Service', () => {
         const expectedReq = getMockTransaction();
         const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
-        jest.spyOn(databaseManager, 'deleteKey').mockRejectedValueOnce((key: string) => {
+        jest.spyOn(databaseManager, 'deleteKey').mockRejectedValueOnce((_key: string) => {
           return Promise.reject();
         });
 
@@ -618,7 +618,7 @@ describe('TADProc Service', () => {
         const expectedReq = getMockTransaction();
         const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
 
-        jest.spyOn(server, 'handleResponse').mockRejectedValueOnce((value: string) => {
+        jest.spyOn(server, 'handleResponse').mockRejectedValueOnce((_value: string) => {
           return Promise.reject();
         });
 
@@ -638,7 +638,7 @@ describe('TADProc Service', () => {
         const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
         const result = await helpers.handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
-        expect(JSON.stringify(result)).toEqual('{"result":"Error"}');
+        expect(JSON.stringify(result)).toEqual('{"review":false,"channelResults":[]}');
         expect(responseSpy).toHaveBeenCalledTimes(0);
       });
     });
@@ -679,27 +679,33 @@ describe('TADProc Service', () => {
       };
 
       const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockImplementationOnce(() => {
-        return Promise.resolve([
-          {
-            result: 0,
-            id: '028@1.0',
-            cfg: '1.0',
-            typologyResult: [
-              {
-                id: '028@1.0',
-                cfg: '1.0',
-                result: 50,
-                ruleResults: [
-                  { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
-                  { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
-                ],
-              },
-            ],
-          },
-        ]);
+        return Promise.resolve({
+          review: false,
+          channelResults: [
+            {
+              result: 0,
+              id: '028@1.0',
+              cfg: '1.0',
+              typologyResult: [
+                {
+                  id: '028@1.0',
+                  cfg: '1.0',
+                  result: 50,
+                  workflow: { alertThreshold: 0 },
+                  review: true,
+                  prcgTm: 0,
+                  ruleResults: [
+                    { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
+                    { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
+                  ],
+                },
+              ],
+            },
+          ],
+        });
       });
 
-      const responseSpy = jest.spyOn(server, 'handleResponse').mockImplementation((response: unknown, subject?: string[] | undefined) => {
+      const responseSpy = jest.spyOn(server, 'handleResponse').mockImplementation((_response: unknown, _subject?: string[] | undefined) => {
         return Promise.resolve();
       });
 
@@ -724,26 +730,31 @@ describe('TADProc Service', () => {
       };
 
       const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockImplementationOnce(() => {
-        return Promise.resolve([
-          {
-            result: 0,
-            id: '028@1.0',
-            cfg: '1.0',
-            status: 'ALRT',
-            typologyResult: [
-              {
-                id: '028@1.0',
-                cfg: '1.0',
-                result: 50,
-                status: 'ALRT',
-                ruleResults: [
-                  { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
-                  { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
-                ],
-              },
-            ],
-          },
-        ]);
+        return Promise.resolve({
+          review: true,
+          channelResults: [
+            {
+              result: 0,
+              id: '028@1.0',
+              cfg: '1.0',
+              prcgTm: 0,
+              typologyResult: [
+                {
+                  id: '028@1.0',
+                  cfg: '1.0',
+                  result: 50,
+                  review: true,
+                  workflow: { alertThreshold: 0 },
+                  prcgTm: 0,
+                  ruleResults: [
+                    { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
+                    { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
+                  ],
+                },
+              ],
+            },
+          ],
+        });
       });
 
       const responseSpy = jest.spyOn(server, 'handleResponse').mockImplementation((response: unknown, subject?: string[] | undefined) => {
@@ -775,7 +786,7 @@ describe('TADProc Service', () => {
 
       const responseSpy = jest
         .spyOn(server, 'handleResponse')
-        .mockImplementationOnce((response: unknown, subject?: string[] | undefined) => {
+        .mockImplementationOnce((_response: unknown, _subject?: string[] | undefined) => {
           return Promise.resolve();
         });
 
