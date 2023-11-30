@@ -43,7 +43,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
     )[0];
 
     loggerService.debug(`Processing Channel ${channel.id}.`);
-    const { channelResults, review } = await handleTypologies(transaction, channel, networkMap, typologyResult, metaData);
+    const { channelResults, review } = await handleTypologies(transaction, channel, networkMap, typologyResult);
 
     if (channelResults.length > 0 && channelResults.length === networkMap.messages[0].channels.length) {
       toReturn.id = networkMap.messages[0].id;

@@ -7,7 +7,6 @@ import { type ChannelResult } from '@frmscoe/frms-coe-lib/lib/interfaces/process
 import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 import { databaseManager, loggerService } from '..';
 import apm from '../apm';
-import { type MetaData } from '@frmscoe/frms-coe-lib/lib/interfaces/metaData';
 import { CalculateDuration } from '@frmscoe/frms-coe-lib/lib/helpers/calculatePrcg';
 
 export const handleChannels = async (
@@ -68,7 +67,6 @@ export const handleTypologies = async (
   channel: Channel,
   networkMap: NetworkMap,
   typologyResult: TypologyResult,
-  metaData?: MetaData,
 ): Promise<{ channelResults: ChannelResult[]; review: boolean }> => {
   let span;
   const startTime = process.hrtime.bigint();
