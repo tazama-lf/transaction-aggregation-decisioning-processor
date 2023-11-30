@@ -10,17 +10,12 @@ import apm from '../apm';
 import { type MetaData } from '@frmscoe/frms-coe-lib/lib/interfaces/metaData';
 import { CalculateDuration } from '@frmscoe/frms-coe-lib/lib/helpers/calculatePrcg';
 
-interface HandleResults {
-  channelResults: ChannelResult[];
-  review: boolean;
-}
-
 export const handleChannels = async (
   message: Message,
   transaction: Pacs002,
   networkMap: NetworkMap,
   channelResult: ChannelResult,
-): Promise<HandleResults> => {
+): Promise<{ channelResults: ChannelResult[]; review: boolean }> => {
   const span = apm.startSpan('handleChannels');
 
   try {
@@ -74,7 +69,7 @@ export const handleTypologies = async (
   networkMap: NetworkMap,
   typologyResult: TypologyResult,
   metaData?: MetaData,
-): Promise<HandleResults> => {
+): Promise<{ channelResults: ChannelResult[]; review: boolean }> => {
   let span;
   const startTime = process.hrtime.bigint();
   try {
