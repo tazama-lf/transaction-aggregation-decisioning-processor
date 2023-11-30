@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
+import apm from '../apm';
+import { CalculateDuration } from '@frmscoe/frms-coe-lib/lib/helpers/calculatePrcg';
+import { databaseManager, loggerService } from '..';
 import { type Channel, type Message, type NetworkMap, type Pacs002 } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { type ChannelResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/ChannelResult';
 import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
-import { databaseManager, loggerService } from '..';
-import apm from '../apm';
-import { CalculateDuration } from '@frmscoe/frms-coe-lib/lib/helpers/calculatePrcg';
 
 export const handleChannels = async (
   message: Message,
@@ -20,8 +18,6 @@ export const handleChannels = async (
   try {
     const transactionType = 'FIToFIPmtSts';
     const transactionID = transaction[transactionType].GrpHdr.MsgId;
-
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const cacheKey = `tadp_${transactionID}_${message.id}_${message.cfg}`;
     const spanDBMembers = apm.startSpan('db.get.members');
     const jchannelCount = await databaseManager.addOneGetCount(cacheKey, { channelResult: { ...channelResult } });
