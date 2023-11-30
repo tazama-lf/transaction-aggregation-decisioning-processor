@@ -93,7 +93,6 @@ export const handleTypologies = async (
       result: 0.0,
       cfg: channel.cfg,
       id: channel.id,
-      status: 'NON',
       typologyResult: typologyResults,
     };
     const apmTadProc = apm.startSpan('tadProc.exec');
