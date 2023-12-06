@@ -14,6 +14,7 @@ export const handleChannels = async (
   channelResult: ChannelResult,
 ): Promise<{ channelResults: ChannelResult[]; review: boolean }> => {
   const span = apm.startSpan('handleChannels');
+  const functionName = 'handleChannels()';
 
   try {
     const transactionType = 'FIToFIPmtSts';
@@ -25,7 +26,7 @@ export const handleChannels = async (
     // check if all Channel results for this transaction is found
     if (jchannelCount && jchannelCount < message.channels.length) {
       span?.end();
-      loggerService.log('All channels not completed.');
+      loggerService.log('All channels not completed.', functionName, transactionID);
       return { channelResults: [], review: false };
     }
     const jchannelResults = await databaseManager.getMemberValues(cacheKey);
@@ -53,7 +54,8 @@ export const handleChannels = async (
     return { channelResults, review };
   } catch (error) {
     span?.end();
-    loggerService.error(error as string);
+    let innerError;
+    loggerService.error(error as string, innerError, functionName);
     throw error;
   }
 };
@@ -66,6 +68,7 @@ export const handleTypologies = async (
 ): Promise<{ channelResults: ChannelResult[]; review: boolean }> => {
   let span;
   const startTime = process.hrtime.bigint();
+  const functionName = 'handleTypologies()';
   try {
     const transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
     const cacheKey = `CADP_${transactionID}_${channel.id}_${channel.cfg}`;
@@ -100,7 +103,13 @@ export const handleTypologies = async (
     const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
     if (!message) {
-      loggerService.error(`Failed to process Channel ${channel.id} request , Message missing from networkmap.`);
+      let innerError;
+      loggerService.error(
+        `Failed to process Channel ${channel.id} request , Message missing from networkmap.`,
+        innerError,
+        functionName,
+        transactionID,
+      );
       return {
         review: false,
         channelResults: [],
@@ -116,7 +125,7 @@ export const handleTypologies = async (
     return { channelResults, review };
   } catch (error) {
     span?.end();
-    loggerService.error(`Failed to process Channel ${channel.id} request`, error as Error, 'executeRequest');
+    loggerService.error(`Failed to process Channel ${channel.id} request`, error as Error, functionName);
     return {
       review: false,
       channelResults: [],

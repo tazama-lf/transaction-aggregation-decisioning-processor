@@ -12,6 +12,7 @@ import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/proces
 import { type MetaData } from '@frmscoe/frms-coe-lib/lib/interfaces/metaData';
 
 export const handleExecute = async (rawTransaction: any): Promise<any> => {
+  const functionName = 'handleExecute()';
   let apmTransaction = null;
   try {
     const startTime = process.hrtime.bigint();
@@ -19,6 +20,8 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
     // Get the request body and parse it to variables
     const metaData = rawTransaction?.metaData as MetaData;
     const transaction = rawTransaction.transaction as Pacs002;
+    const transactionType = 'FIToFIPmtSts';
+    const transactionID = transaction[transactionType].GrpHdr.MsgId;
     const networkMap = rawTransaction.networkMap as NetworkMap;
     const typologyResult = rawTransaction.typologyResult as TypologyResult;
 
@@ -41,7 +44,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       c.typologies.some((t) => t.id === typologyResult.id && t.cfg === typologyResult.cfg),
     )[0];
 
-    loggerService.debug(`Processing Channel ${channel.id}.`);
+    loggerService.debug(`Processing Channel ${channel.id}.`, functionName, transactionID);
     const { channelResults, review } = await handleTypologies(transaction, channel, networkMap, typologyResult);
 
     if (channelResults.length > 0 && channelResults.length === networkMap.messages[0].channels.length) {
@@ -61,8 +64,6 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
         networkMap,
       };
 
-      const transactionType = 'FIToFIPmtSts';
-      const transactionID = transaction[transactionType].GrpHdr.MsgId;
       const spanInsertTransactionHistory = apm.startSpan('db.insert.transactionHistory');
       await databaseManager.insertTransaction(transactionID, transaction, networkMap, alert);
       spanInsertTransactionHistory?.end();
@@ -72,7 +73,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
     apmTransaction?.end();
     return channelResults;
   } catch (e) {
-    loggerService.error('Error while calculating Transaction score', e as Error);
+    loggerService.error('Error while calculating Transaction score', e as Error, functionName);
   } finally {
     apmTransaction?.end();
   }
