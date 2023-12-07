@@ -29,6 +29,7 @@ export interface IConfig {
     dbCertPath: string;
     cacheEnabled: boolean;
     cacheTTL: number;
+    networkMap: string;
   };
   logger: {
     logstashHost: string;
@@ -37,6 +38,7 @@ export interface IConfig {
   };
   redis: RedisConfig;
   sidecarHost: string;
+  producerStream: string;
 }
 
 export const configuration: IConfig = {
@@ -57,6 +59,7 @@ export const configuration: IConfig = {
     dbCertPath: process.env.DATABASE_CERT_PATH as string,
     cacheEnabled: process.env.CACHE_ENABLED === 'true',
     cacheTTL: parseInt(process.env.CACHE_TTL!, 10) || 3000,
+    networkMap: process.env.DATABASE_NETWORKMAP as string,
   },
   env: process.env.NODE_ENV as string,
   logger: {
@@ -71,4 +74,5 @@ export const configuration: IConfig = {
     isCluster: process.env.REDIS_IS_CLUSTER === 'true',
   },
   sidecarHost: process.env.SIDECAR_HOST as string,
+  producerStream: process.env.PRODUCER_STREAM as string,
 };
