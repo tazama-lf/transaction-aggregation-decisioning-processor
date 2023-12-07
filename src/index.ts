@@ -2,6 +2,7 @@
 import './apm';
 import { LoggerService, type DatabaseManagerInstance } from '@frmscoe/frms-coe-lib';
 import { StartupFactory, type IStartupService } from '@frmscoe/frms-coe-startup-lib';
+import { getRoutesFromNetworkMap } from '@frmscoe/frms-coe-lib/lib/helpers/networkMapIdentifiers';
 import cluster from 'cluster';
 import os from 'os';
 import { configuration } from './config';
@@ -9,6 +10,13 @@ import { handleExecute } from './services/logic.service';
 import { Singleton } from './services/services';
 
 const databaseManagerConfig = {
+  networkMap: {
+    certPath: configuration.db.dbCertPath,
+    databaseName: configuration.db.networkMap,
+    user: configuration.db.user,
+    password: configuration.db.password,
+    url: configuration.db.url,
+  },
   redisConfig: {
     db: configuration.redis.db,
     servers: configuration.redis.servers,
@@ -60,7 +68,8 @@ export const runServer = async (): Promise<void> => {
     let isConnected = false;
     for (let retryCount = 0; retryCount < 10; retryCount++) {
       loggerService.log('Connecting to nats server...');
-      if (!(await server.init(handleExecute))) {
+      const consumers = (await getRoutesFromNetworkMap(databaseManager, configuration.serviceName)).consumers;
+      if (!(await server.init(handleExecute, undefined, consumers, configuration.producerStream))) {
         await new Promise((resolve) => setTimeout(resolve, 5000));
       } else {
         loggerService.log('Connected to nats');
