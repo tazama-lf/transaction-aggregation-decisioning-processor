@@ -44,6 +44,7 @@ ENV exec_timeout="10s"
 ENV write_timeout="15s"
 ENV read_timeout="15s"
 ENV prefix_logs="false"
+ENV MAX_CPU=
 
 # Service-Based Environment Variables
 ENV FUNCTION_NAME=transaction-aggregation-decisioning-processor
