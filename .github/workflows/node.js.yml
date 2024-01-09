@@ -93,9 +93,8 @@ jobs:
           DATABASE_URL: 'http://localhost:8529/'
           DATABASE_USER: root
           DATABASE_PASSWORD:
-          COLLECTION_NAME: history
-          TRANSACTION_CONFIG_DB: Configuration
-          TRANSACTION_CONFIG_COLLECTION: transactionConfiguration
+          CONFIGURATION_DB: Configuration
+          TRANSACTION_HISTORY_DB: transactionHistory
 
       - name: Test Processor
         run: newman run https://raw.githubusercontent.com/frmscoe/postman/indexes/NATS_RES_TADP_TEST.postman_collection.json -e https://raw.githubusercontent.com/frmscoe/postman/indexes/environments/Ekuta-LOCAL.postman_environment.json --timeout-request 10200 -r json --reporter-json-export fullReport.json
