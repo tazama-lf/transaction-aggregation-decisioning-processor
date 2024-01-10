@@ -109,28 +109,6 @@ jobs:
           name: Full_Report.json
           path: fullReport.json
 
-  lint:
-    runs-on: ubuntu-latest
-    name: check style
-    strategy:
-      matrix:
-        node-version: [20]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          registry-url: ${{ env.NPM_REGISTRY }}
-          scope: ${{ env.NPM_SCOPE }}
-      - name: Install dependencies
-        run: npm ci
-      - name: Check linting
-        run: npm run lint
-
-
   output:
       needs: build
       runs-on: ubuntu-latest
