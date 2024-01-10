@@ -23,20 +23,15 @@ env:
   DATABASE_PASSWORD:
   CONFIGURATION_DB: Configuration
   TRANSACTION_HISTORY_DB: transactionHistory
+  GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 jobs:
-  build:
+  setup:
     runs-on: ubuntu-latest
-    outputs:
-      responseAverage: ${{ steps.newman_test.outputs.responseAverage }}
-      responseMin: ${{ steps.newman_test.outputs.responseMin }}
-      responseMax: ${{ steps.newman_test.outputs.responseMax }}
-      responseSd: ${{ steps.newman_test.outputs.responseSd }}
-      numberOfTest: ${{ steps.newman_test.outputs.numberOfTest }}
     name: install, build, test
     permissions:
       packages: write
@@ -79,10 +74,19 @@ jobs:
           registry-url: https://npm.pkg.github.com/
           scope: '@frmscoe'
 
+  startup:
+      needs: setup
+      runs-on: ubuntu-latest
+      outputs:
+        responseAverage: ${{ steps.newman_test.outputs.responseAverage }}
+        responseMin: ${{ steps.newman_test.outputs.responseMin }}
+        responseMax: ${{ steps.newman_test.outputs.responseMax }}
+        responseSd: ${{ steps.newman_test.outputs.responseSd }}
+        numberOfTest: ${{ steps.newman_test.outputs.numberOfTest }}
+      steps:
+
       - name: Install dependencies
         run: npm install -g newman && npm ci
-        env:
-          GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 
       - name: Run unit tests
         run: npm run test
@@ -115,13 +119,13 @@ jobs:
           path: fullReport.json
 
   output:
-      needs: build
+      needs: startup
       runs-on: ubuntu-latest
       steps:
       - name: Comment on PR
 
         run: |
-              COMMENT_BODY="⚠️ Newman Test Results  <br /><br />Number of tests ${{ needs.build.outputs.numberOfTest }} <br /><br />Response stats<blockquote> <li> Response Average ${{ needs.build.outputs.responseAverage }}ms <br /><li>Response Min ${{ needs.build.outputs.responseMin }}ms <br /><li>Response max ${{ needs.build.outputs.responseMax }}ms <br /><li>Response standard dev ${{ needs.build.outputs.responseSd }}ms"
+              COMMENT_BODY="⚠️ Newman Test Results  <br /><br />Number of tests ${{ needs.startup.outputs.numberOfTest }} <br /><br />Response stats<blockquote> <li> Response Average ${{ needs.startup.outputs.responseAverage }}ms <br /><li>Response Min ${{ needs.startup.outputs.responseMin }}ms <br /><li>Response max ${{ needs.startup.outputs.responseMax }}ms <br /><li>Response standard dev ${{ needs.startup.outputs.responseSd }}ms"
 
               API_URL="https://api.github.com/repos/${{github.repository}}/issues/${{github.event.number}}/comments"
               curl -X POST \
