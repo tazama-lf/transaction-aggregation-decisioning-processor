@@ -131,7 +131,7 @@ jobs:
       - name: Check linting
         run: npm run lint
 
-  utest:
+  test:
     runs-on: ubuntu-latest
     name: check tests
     strategy:
@@ -149,8 +149,6 @@ jobs:
           scope: ${{ env.NPM_SCOPE }}
       - name: Install dependencies
         run: npm ci
-      - name: Run npm build
-        run: npm run build
       - name: Run tests
         run: npm test
 
