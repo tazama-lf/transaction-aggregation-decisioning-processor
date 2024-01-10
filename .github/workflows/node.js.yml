@@ -40,7 +40,7 @@ jobs:
       responseMax: ${{ steps.newman_test.outputs.responseMax }}
       responseSd: ${{ steps.newman_test.outputs.responseSd }}
       numberOfTest: ${{ steps.newman_test.outputs.numberOfTest }}
-    name: install, build, test
+    name: intergration test
     permissions:
       packages: write
       contents: read
@@ -87,7 +87,6 @@ jobs:
       - name: Processor Start
         run: npm run start &
 
-
       - name: Test Processor
         run: newman run https://raw.githubusercontent.com/frmscoe/postman/main/micro_processors/TransactionAggregationDecisioningProcessor_Proxt_Test.postman_collection.json -e https://raw.githubusercontent.com/frmscoe/postman/main/environments/Ekuta-LOCAL.postman_environment.json --timeout-request 10200 -r json --reporter-json-export fullReport.json
 
@@ -105,6 +104,22 @@ jobs:
         with:
           name: Full_Report.json
           path: fullReport.json
+
+  output:
+      needs: build
+      runs-on: ubuntu-latest
+      steps:
+      - name: Comment on PR
+
+        run: |
+              COMMENT_BODY="⚠️ Newman Test Results  <br /><br />Number of tests ${{ needs.build.outputs.numberOfTest }} <br /><br />Response stats<blockquote> <li> Response Average ${{ needs.build.outputs.responseAverage }}ms <br /><li>Response Min ${{ needs.build.outputs.responseMin }}ms <br /><li>Response max ${{ needs.build.outputs.responseMax }}ms <br /><li>Response standard dev ${{ needs.build.outputs.responseSd }}ms"
+
+              API_URL="https://api.github.com/repos/${{github.repository}}/issues/${{github.event.number}}/comments"
+              curl -X POST \
+                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Content-Type: application/json" \
+                --data-raw "{\"body\":\"$COMMENT_BODY\"}" \
+                $API_URL
 
   lint:
     runs-on: ubuntu-latest
@@ -129,7 +144,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    name: check tests
+    name: unit tests
     strategy:
       matrix:
         node-version: [20]
@@ -147,19 +162,3 @@ jobs:
         run: npm ci
         env:
           NODE_ENV: 'test'
-
-  output:
-      needs: build
-      runs-on: ubuntu-latest
-      steps:
-      - name: Comment on PR
-
-        run: |
-              COMMENT_BODY="⚠️ Newman Test Results  <br /><br />Number of tests ${{ needs.build.outputs.numberOfTest }} <br /><br />Response stats<blockquote> <li> Response Average ${{ needs.build.outputs.responseAverage }}ms <br /><li>Response Min ${{ needs.build.outputs.responseMin }}ms <br /><li>Response max ${{ needs.build.outputs.responseMax }}ms <br /><li>Response standard dev ${{ needs.build.outputs.responseSd }}ms"
-
-              API_URL="https://api.github.com/repos/${{github.repository}}/issues/${{github.event.number}}/comments"
-              curl -X POST \
-                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                -H "Content-Type: application/json" \
-                --data-raw "{\"body\":\"$COMMENT_BODY\"}" \
-                $API_URL
