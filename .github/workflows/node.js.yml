@@ -50,10 +50,6 @@ jobs:
         redis-version: [6]
     steps:
       - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 7
-
       - name: Start Arango
         uses: xinova/arangodb-action@v1
         with:
@@ -150,7 +146,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run tests
-        run: npm test
+        run: npm run test
 
   output:
       needs: build
