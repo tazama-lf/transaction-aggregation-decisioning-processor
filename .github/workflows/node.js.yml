@@ -2,6 +2,27 @@
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
 name: Node.js CI
+env:
+  NODE_ENV: 'dev'
+  STARTUP_TYPE: 'nats'
+  SERVER_URL: 'nats://localhost:4222'
+  PRODUCER_STREAM: CMS
+  ACK_POLICY: 'None'
+  STREAM_SUBJECT:
+  APM_ACTIVE: false
+  APM_LOGGING: false
+  FUNCTION_NAME: 'transaction-aggregation-decisioning-processor'
+  REDIS_DB: 0
+  REDIS_AUTH:
+  REDIS_SERVERS: '[{"host":"127.0.0.1", "port":6379}]'
+  REDIS_IS_CLUSTER: false
+  DATABASE_NAME: Configuration
+  DATABASE_NETWORKMAP: networkmap
+  DATABASE_URL: 'http://localhost:8529/'
+  DATABASE_USER: root
+  DATABASE_PASSWORD:
+  CONFIGURATION_DB: Configuration
+  TRANSACTION_HISTORY_DB: transactionHistory
 on:
   push:
     branches: [ "main" ]
@@ -67,34 +88,13 @@ jobs:
         run: npm run test
         env:
             NODE_ENV: 'test'
-            STARTUP_TYPE: 'nats'
 
       - name: Processor Build
         run: npm run build
 
       - name: Processor Start
         run: npm run start &
-        env:
-          NODE_ENV: 'dev'
-          STARTUP_TYPE: 'nats'
-          SERVER_URL: 'nats://localhost:4222'
-          PRODUCER_STREAM: CMS
-          ACK_POLICY: 'None'
-          STREAM_SUBJECT:
-          APM_ACTIVE: false
-          APM_LOGGING: false
-          FUNCTION_NAME: 'transaction-aggregation-decisioning-processor'
-          REDIS_DB: 0
-          REDIS_AUTH:
-          REDIS_SERVERS: '[{"host":"127.0.0.1", "port":6379}]'
-          REDIS_IS_CLUSTER: false
-          DATABASE_NAME: Configuration
-          DATABASE_NETWORKMAP: networkmap
-          DATABASE_URL: 'http://localhost:8529/'
-          DATABASE_USER: root
-          DATABASE_PASSWORD:
-          CONFIGURATION_DB: Configuration
-          TRANSACTION_HISTORY_DB: transactionHistory
+
 
       - name: Test Processor
         run: newman run https://raw.githubusercontent.com/frmscoe/postman/main/micro_processors/TransactionAggregationDecisioningProcessor_Proxt_Test.postman_collection.json -e https://raw.githubusercontent.com/frmscoe/postman/main/environments/Ekuta-LOCAL.postman_environment.json --timeout-request 10200 -r json --reporter-json-export fullReport.json
