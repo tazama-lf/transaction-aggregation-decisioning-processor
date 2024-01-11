@@ -40,7 +40,7 @@ jobs:
       responseMax: ${{ steps.newman_test.outputs.responseMax }}
       responseSd: ${{ steps.newman_test.outputs.responseSd }}
       numberOfTest: ${{ steps.newman_test.outputs.numberOfTest }}
-    name: intergration test
+    name: integration test
     permissions:
       packages: write
       contents: read
