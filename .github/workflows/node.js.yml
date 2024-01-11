@@ -26,6 +26,7 @@ env:
   GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
   NPM_SCOPE: "@frmscoe"
   NPM_REGISTRY: "https://npm.pkg.github.com/"
+  ENV_NEWMAN: https://raw.githubusercontent.com/frmscoe/postman/indexes/environments/Ekuta-LOCAL.postman_environment.json
 on:
   push:
     branches: [ "main" ]
