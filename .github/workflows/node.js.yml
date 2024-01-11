@@ -80,7 +80,7 @@ jobs:
           scope: '@frmscoe'
 
       - name: Install dependencies
-        run: npm install -g newman && npm ci
+        run: npm ci
 
       - name: Processor Build
         run: npm run build
