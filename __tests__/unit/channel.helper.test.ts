@@ -196,7 +196,8 @@ describe('TADProc Service', () => {
 
         const result = await handleChannels(message!, transaction, networkMap, channelResult);
         expect(result).toBeDefined();
-        if (result?.review) expect(result?.review).toBe(true); // ARLT Review
+        if (result?.review)
+          expect(result?.review).toBe(true); // ARLT Review
         else throw 'Test failed - expect response to be called';
       });
 
@@ -257,7 +258,8 @@ describe('TADProc Service', () => {
         const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
         const result = await handleChannels(message!, transaction, networkMap, channelResult);
         expect(result).toBeDefined();
-        if (result) expect(result.review).toBe(false); //NALT Review
+        if (result)
+          expect(result.review).toBe(false); //NALT Review
         else throw 'Test failed - expect response to be called';
       });
 
