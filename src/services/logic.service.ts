@@ -65,10 +65,18 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       };
 
       const spanInsertTransactionHistory = apm.startSpan('db.insert.transactionHistory');
-      await databaseManager.insertTransaction(transactionID, transaction, networkMap, alert);
-      spanInsertTransactionHistory?.end();
-      result.report.tadpResult.prcgTm = CalculateDuration(startTime);
-      await server.handleResponse(result);
+      databaseManager
+        .insertTransaction(transactionID, transaction, networkMap, alert)
+        .then(() => {
+          spanInsertTransactionHistory?.end();
+          result.report.tadpResult.prcgTm = CalculateDuration(startTime);
+          server.handleResponse(result).catch((e) => {
+            loggerService.error('error sending to cms', e as Error, functionName);
+          });
+        })
+        .catch((e) => {
+          loggerService.error('Error while writing to db', e as Error, functionName);
+        });
     }
     apmTransaction?.end();
     return channelResults;
