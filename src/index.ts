@@ -9,46 +9,7 @@ import { configuration } from './config';
 import { handleExecute } from './services/logic.service';
 import { Singleton } from './services/services';
 
-const databaseManagerConfig = {
-  networkMap: {
-    certPath: configuration.db.dbCertPath,
-    databaseName: configuration.db.networkMap,
-    user: configuration.db.user,
-    password: configuration.db.password,
-    url: configuration.db.url,
-  },
-  redisConfig: {
-    db: configuration.redis.db,
-    servers: configuration.redis.servers,
-    password: configuration.redis.password,
-    isCluster: configuration.redis.isCluster,
-  },
-  configuration: {
-    databaseName: configuration.db.configurationDb,
-    certPath: configuration.db.dbCertPath,
-    password: configuration.db.password,
-    url: configuration.db.url,
-    user: configuration.db.user,
-    localCacheEnabled: configuration.db.cacheEnabled,
-    localCacheTTL: configuration.db.cacheTTL,
-  },
-  transaction: configuration.db.transactionDb
-    ? {
-        databaseName: configuration.db.transactionDb,
-        url: configuration.db.url,
-        password: configuration.db.password,
-        user: configuration.db.user,
-        certPath: configuration.db.dbCertPath,
-      }
-    : undefined,
-  transactionHistory: {
-    databaseName: configuration.db.transactionHistoryDb,
-    url: configuration.db.url,
-    password: configuration.db.password,
-    user: configuration.db.user,
-    certPath: configuration.db.dbCertPath,
-  },
-};
+const databaseManagerConfig = configuration.db;
 
 export const loggerService: LoggerService = new LoggerService(configuration.sidecarHost);
 let databaseManager: DatabaseManagerInstance<typeof databaseManagerConfig>;
