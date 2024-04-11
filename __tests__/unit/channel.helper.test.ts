@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 /* eslint-disable */
-import { Channel, NetworkMap, Pacs002, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
+import { NetworkMap } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { TransactionConfiguration } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TransactionConfiguration';
 import { databaseManager, dbInit, runServer, server } from '../../src/index';
 import { handleChannels } from '../../src/services/helper.service';
@@ -48,7 +48,7 @@ describe('TADProc Service', () => {
       });
     });
 
-    jest.spyOn(databaseManager, 'setAdd').mockImplementation((_key: string, value: any): Promise<void> => {
+    jest.spyOn(databaseManager, 'setAdd').mockImplementation((_key: unknown, value: any): Promise<void> => {
       return new Promise<void>((resolve, _reject) => {
         cacheString = value;
         resolve();
@@ -67,8 +67,8 @@ describe('TADProc Service', () => {
     });
   });
   describe('Helper Service', () => {
-    let getNetworkMapSpy: jest.SpyInstance;
-    let responseSpy: jest.SpyInstance;
+    // let getNetworkMapSpy: jest.SpyInstance;
+    // let responseSpy: jest.SpyInstance;
 
     beforeEach(async () => {
       jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementation(() => {
