@@ -32,7 +32,9 @@ export const handleChannels = async (
     const jchannelResults = await databaseManager.getMemberValues(cacheKey);
     spanDBMembers?.end();
 
-    const channelResults: ChannelResult[] = jchannelResults.map((jchannelResult) => jchannelResult.channelResult as ChannelResult);
+    const channelResults: ChannelResult[] = jchannelResults.map(
+      (jchannelResult: { channelResult: ChannelResult }) => jchannelResult.channelResult,
+    );
 
     let review = false;
     for (const configuredChannel of networkMap.messages[0].channels) {
@@ -84,7 +86,9 @@ export const handleTypologies = async (
 
     // else means we have all results for Channel, so lets evaluate result
     const jtypologyResults = await databaseManager.getMemberValues(cacheKey);
-    const typologyResults: TypologyResult[] = jtypologyResults.map((jtypologyResult) => jtypologyResult.typologyResult as TypologyResult);
+    const typologyResults: TypologyResult[] = jtypologyResults.map(
+      (jtypologyResult: { typologyResult: TypologyResult }) => jtypologyResult.typologyResult,
+    );
     if (!typologyResults || !typologyResults.length)
       return {
         review: false,

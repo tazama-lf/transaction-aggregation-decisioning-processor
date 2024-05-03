@@ -3,7 +3,7 @@
 // config settings, env variables
 import * as path from 'path';
 import * as dotenv from 'dotenv';
-import { type RedisConfig } from '@frmscoe/frms-coe-lib/lib/interfaces';
+import { type ManagerConfig } from '@frmscoe/frms-coe-lib';
 
 // Load .env file into process.env if it exists. This is convenient for running locally.
 dotenv.config({
@@ -19,24 +19,12 @@ export interface IConfig {
     url: string;
     active: string;
   };
-  db: {
-    password: string;
-    url: string;
-    user: string;
-    configurationDb: string;
-    transactionDb: string;
-    transactionHistoryDb: string;
-    dbCertPath: string;
-    cacheEnabled: boolean;
-    cacheTTL: number;
-    networkMap: string;
-  };
+  db: ManagerConfig;
   logger: {
     logstashHost: string;
     logstashPort: number;
     logstashLevel: string;
   };
-  redis: RedisConfig;
   sidecarHost: string;
   producerStream: string;
 }
@@ -50,28 +38,48 @@ export const configuration: IConfig = {
     active: process.env.APM_ACTIVE!,
   },
   db: {
-    password: process.env.DATABASE_PASSWORD!,
-    url: process.env.DATABASE_URL!,
-    user: process.env.DATABASE_USER!,
-    configurationDb: process.env.CONFIGURATION_DB!,
-    transactionHistoryDb: process.env.TRANSACTION_HISTORY_DB!,
-    transactionDb: process.env.TRANSACTION_DB!,
-    dbCertPath: process.env.DATABASE_CERT_PATH!,
-    cacheEnabled: process.env.CACHE_ENABLED === 'true',
-    cacheTTL: parseInt(process.env.CACHE_TTL!, 10) || 3000,
-    networkMap: process.env.DATABASE_NETWORKMAP!,
+    redisConfig: {
+      db: parseInt(process.env.REDIS_DB!, 10) || 0,
+      servers: JSON.parse(process.env.REDIS_SERVERS! || '[{"hostname": "127.0.0.1", "port":6379}]'),
+      password: process.env.REDIS_AUTH!,
+      isCluster: process.env.REDIS_IS_CLUSTER === 'true',
+    },
+    networkMap: {
+      password: process.env.NETWORK_MAP_DATABASE_PASSWORD!,
+      url: process.env.NETWORK_MAP_DATABASE_URL!,
+      user: process.env.NETWORK_MAP_DATABASE_USER!,
+      databaseName: process.env.NETWORK_MAP_DATABASE!,
+      certPath: process.env.NETWORK_MAP_DATABASE_CERT_PATH!,
+    },
+    configuration: {
+      password: process.env.CONFIG_DATABASE_PASSWORD!,
+      url: process.env.CONFIG_DATABASE_URL!,
+      user: process.env.CONFIG_DATABASE_USER!,
+      databaseName: process.env.CONFIG_DATABASE!,
+      certPath: process.env.CONFIG_DATABASE_CERT_PATH!,
+      localCacheEnabled: process.env.CACHE_ENABLED === 'true',
+      localCacheTTL: parseInt(process.env.CACHE_TTL!, 10) || 3000,
+    },
+    transactionHistory: {
+      password: process.env.TRANSACTION_HISTORY_DATABASE_PASSWORD!,
+      url: process.env.TRANSACTION_HISTORY_DATABASE_URL!,
+      user: process.env.TRANSACTION_HISTORY_DATABASE_USER!,
+      databaseName: process.env.TRANSACTION_HISTORY_DATABASE!,
+      certPath: process.env.TRANSACTION_HISTORY_DATABASE_CERT_PATH!,
+    },
+    transaction: {
+      password: process.env.TRANSACTION_DATABASE_PASSWORD!,
+      url: process.env.TRANSACTION_DATABASE_URL!,
+      user: process.env.TRANSACTION_DATABASE_USER!,
+      databaseName: process.env.TRANSACTION_DATABASE!,
+      certPath: process.env.TRANSACTION_DATABASE_CERT_PATH!,
+    },
   },
   env: process.env.NODE_ENV!,
   logger: {
     logstashHost: process.env.LOGSTASH_HOST!,
     logstashPort: parseInt(process.env.LOGSTASH_PORT ?? '0', 10),
     logstashLevel: process.env.LOGSTASH_LEVEL! || 'info',
-  },
-  redis: {
-    db: parseInt(process.env.REDIS_DB!, 10) || 0,
-    servers: JSON.parse(process.env.REDIS_SERVERS! || '[{"hostname": "127.0.0.1", "port":6379}]'),
-    password: process.env.REDIS_AUTH!,
-    isCluster: process.env.REDIS_IS_CLUSTER === 'true',
   },
   sidecarHost: process.env.SIDECAR_HOST!,
   producerStream: process.env.PRODUCER_STREAM!,
