@@ -25,19 +25,19 @@ flowchart TD
     note1 --> loop1{for each channel result received}
     loop1 -->|More channel results| determineTransaction[Determine transaction]
     determineTransaction --> determineChannels[Determine all channels]
-    determineChannels --> readConfig[Read Transaction Configuration from database to determine review Message]
+    determineChannels --> readConfig[Read Transaction Configuration from database to determine review message]
     readConfig --> loop2{Channels results outstanding}
     loop2 -->|More channel results| writeCache[Write channel result to cache]
     writeCache --> loop2
     loop2 -->|Channels complete| checkReview{Review any typologies?}
-    checkReview -->|ALRT| sendAlert[send alert to CMS]
-    checkReview -->|NALT| noAlert[don't send alert to CMS]
-    sendAlert --> clearCache[clear cache]
+    checkReview -->|ALRT| sendAlert[Send alert to CMS]
+    checkReview -->|NALT| noAlert[Don't send alert to CMS]
+    sendAlert --> clearCache[Clear cache]
     noAlert --> clearCache
-    clearCache --> writeHistory[write transactions to transaction history DB]
-    writeHistory --> logReview[Log review message (Review/None)]
+    clearCache --> writeHistory[Write transactions to transaction history DB]
+    writeHistory --> logReview[Log review message - Review or None]
     logReview --> loop1
-    loop1 -->|No more channel results| sendResponse[send 200 response back to CADProc]
+    loop1 -->|No more channel results| sendResponse[Send 200 response back to CADProc]
     sendResponse --> note2["Response includes: Channel-ID, Channel Results"]
     note2 --> stop([Stop])
 ```
