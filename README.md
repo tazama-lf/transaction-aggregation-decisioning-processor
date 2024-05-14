@@ -14,17 +14,35 @@ This page should be a developers guide and include;
   
 The below sequence diagram for the Transaction Aggregation and Decisioning Processor
 
-![](./images/Transaction_Aggregation_Decisioning_Processor.png)
+![](images/Transaction_Aggregation_Decisioning_Processor.png)
 
 ### Code Activity Diagram
 
-[https://github.com/ActioFRM/uml-diagrams/blob/main/services/TADProc.plantuml](https://github.com/ActioFRM/uml-diagrams/blob/main/services/TADProc.plantuml)
+```mermaid
+flowchart TD
+    start([Start]) --> receivePayload[Receive payload from CADProc]
+    receivePayload --> note1["Channel output payload includes: Rule results, Typology results, Channel trigger results, Network sub-map, Original transaction data"]
+    note1 --> loop1{for each channel result received}
+    loop1 -->|More channel results| determineTransaction[Determine transaction]
+    determineTransaction --> determineChannels[Determine all channels]
+    determineChannels --> readConfig[Read Transaction Configuration from database to determine review Message]
+    readConfig --> loop2{Channels results outstanding}
+    loop2 -->|More channel results| writeCache[Write channel result to cache]
+    writeCache --> loop2
+    loop2 -->|Channels complete| checkReview{Review any typologies?}
+    checkReview -->|ALRT| sendAlert[send alert to CMS]
+    checkReview -->|NALT| noAlert[don't send alert to CMS]
+    sendAlert --> clearCache[clear cache]
+    noAlert --> clearCache
+    clearCache --> writeHistory[write transactions to transaction history DB]
+    writeHistory --> logReview[Log review message (Review/None)]
+    logReview --> loop1
+    loop1 -->|No more channel results| sendResponse[send 200 response back to CADProc]
+    sendResponse --> note2["Response includes: Channel-ID, Channel Results"]
+    note2 --> stop([Stop])
+```
 
-![](./Images/TADProc_activity_diagram.png)
-
-### GitHub Repository
-
-[https://github.com/ActioFRM/transaction-aggregation-decisioning-processor](https://github.com/ActioFRM/transaction-aggregation-decisioning-processor)
+![](images/TADProc_activity_diagram.png)
 
 ### Sample JSON Request and Response
 
