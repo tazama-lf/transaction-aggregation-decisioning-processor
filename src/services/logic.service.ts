@@ -11,7 +11,7 @@ import { type TADPResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-
 import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 import { type MetaData } from '@frmscoe/frms-coe-lib/lib/interfaces/metaData';
 
-export const handleExecute = async (rawTransaction: any): Promise<any> => {
+export const handleExecute = async (rawTransaction: any): Promise<void> => {
   const functionName = 'handleExecute()';
   let apmTransaction = null;
   try {
@@ -35,22 +35,24 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
     const toReturn: TADPResult = {
       id: '',
       cfg: '',
-      channelResult: [],
+      typologyResult: [],
       prcgTm: 0,
     };
 
-    // Messages is hardcoded at the moment since we only ever have 1. Should we move to include more messages, we will have to revist.
-    const channel = networkMap.messages[0].channels.filter((c) =>
-      c.typologies.some((t) => t.id === typologyResult.id && t.cfg === typologyResult.cfg),
-    )[0];
+    const typologies = networkMap.messages[0].typologies.filter((t) => t.id === typologyResult.id && t.cfg === typologyResult.cfg);
+    /* typologies.find()
 
-    loggerService.debug(`Processing Channel ${channel.id}.`, functionName, transactionID);
-    const { channelResults, review } = await handleTypologies(transaction, channel, networkMap, typologyResult);
+    const typologyResult = channelRes?.typologyResult.find((t) => t.id === typology.id && t.cfg === typology.cfg);
+    if (!typologyResult) continue;
+    if (typologyResult.review) review = true; */
 
-    if (channelResults.length > 0 && channelResults.length === networkMap.messages[0].channels.length) {
+    loggerService.debug(`Processing Typology ${typologyResult.id}.`, functionName, transactionID);
+    const { typologyResult: typologyResults, review } = await handleTypologies(transaction, networkMap, typologyResult);
+
+    if (typologyResults.length && typologyResults.length === networkMap.messages[0].typologies.length) {
       toReturn.id = networkMap.messages[0].id;
       toReturn.cfg = networkMap.messages[0].cfg;
-      toReturn.channelResult = channelResults;
+      toReturn.typologyResult = typologyResults;
       toReturn.prcgTm = CalculateDuration(startTime);
 
       const alert = new Alert();
@@ -58,7 +60,7 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       alert.status = review ? 'ALRT' : 'NALT';
       alert.metaData = metaData;
       const result: CMSRequest = {
-        message: `Successfully completed ${channelResults.length} channels`,
+        message: `Successfully completed ${typologies.length} typologies`,
         report: alert,
         transaction,
         networkMap,
@@ -71,7 +73,6 @@ export const handleExecute = async (rawTransaction: any): Promise<any> => {
       await server.handleResponse(result);
     }
     apmTransaction?.end();
-    return channelResults;
   } catch (e) {
     loggerService.error('Error while calculating Transaction score', e as Error, functionName);
   } finally {
