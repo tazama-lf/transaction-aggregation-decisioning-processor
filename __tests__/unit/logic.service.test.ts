@@ -94,7 +94,7 @@ describe('TADProc Service', () => {
     it('should handle a successful transaction, incomplete.', async () => {
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMapWithMultipleChannels();
       const typologyResult: TypologyResult = {
@@ -107,12 +107,12 @@ describe('TADProc Service', () => {
 
       await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
 
-      expect(server.handleResponse).toBeCalledTimes(0);
+      expect(server.handleResponse).toHaveReturnedTimes(0);
     });
 
     it('should handle a successful transaction, complete.', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = {
@@ -127,24 +127,17 @@ describe('TADProc Service', () => {
       const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockImplementationOnce(() => {
         return Promise.resolve({
           review: false,
-          channelResults: [
+          typologyResult: [
             {
-              result: 0,
               id: '028@1.0',
               cfg: '1.0',
-              typologyResult: [
-                {
-                  id: '028@1.0',
-                  cfg: '1.0',
-                  result: 50,
-                  workflow: { alertThreshold: 0 },
-                  review: true,
-                  prcgTm: 0,
-                  ruleResults: [
-                    { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
-                    { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
-                  ],
-                },
+              result: 50,
+              workflow: { alertThreshold: 0 },
+              review: true,
+              prcgTm: 0,
+              ruleResults: [
+                { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
+                { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
               ],
             },
           ],
@@ -157,13 +150,13 @@ describe('TADProc Service', () => {
 
       await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
 
-      expect(typologySpy).toBeCalledTimes(1);
-      expect(responseSpy).toBeCalled();
+      expect(typologySpy).toHaveBeenCalledTimes(1);
+      expect(responseSpy).toHaveBeenCalled();
     });
 
     it('should handle a successful transaction, with review.', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = {
@@ -178,25 +171,17 @@ describe('TADProc Service', () => {
       const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockImplementationOnce(() => {
         return Promise.resolve({
           review: true,
-          channelResults: [
+          typologyResult: [
             {
-              result: 0,
               id: '028@1.0',
               cfg: '1.0',
+              result: 50,
+              review: true,
+              workflow: { alertThreshold: 0 },
               prcgTm: 0,
-              typologyResult: [
-                {
-                  id: '028@1.0',
-                  cfg: '1.0',
-                  result: 50,
-                  review: true,
-                  workflow: { alertThreshold: 0 },
-                  prcgTm: 0,
-                  ruleResults: [
-                    { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
-                    { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
-                  ],
-                },
+              ruleResults: [
+                { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
+                { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
               ],
             },
           ],
@@ -209,13 +194,13 @@ describe('TADProc Service', () => {
 
       await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
 
-      expect(typologySpy).toBeCalledTimes(1);
-      expect(responseSpy).toBeCalled();
+      expect(typologySpy).toHaveBeenCalledTimes(1);
+      expect(responseSpy).toHaveBeenCalled();
     });
 
     it('should handle a unsuccessful transaction, catch error.', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = {
@@ -238,8 +223,8 @@ describe('TADProc Service', () => {
 
       await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
 
-      expect(typologySpy).toBeCalledTimes(1);
-      expect(responseSpy).toBeCalledTimes(0);
+      expect(typologySpy).toHaveBeenCalledTimes(1);
+      expect(responseSpy).toHaveBeenCalledTimes(0);
     });
   });
 });
