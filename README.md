@@ -1,18 +1,6 @@
 # 5. Transaction Aggregation and Decisioning Processor (TADP)
 
-This page should be a developers guide and include;
-
-1. detail documentation of the service
-
-    1. explain of the service functionality
-  
-    2. what information is being written to logs (system and transactional)
-  
-    3. deployment & installation guide
-  
-    4. sequence diagram focusing on this service
-  
-The below sequence diagram for the Transaction Aggregation and Decisioning Processor
+The sequence diagram below for the Transaction Aggregation and Decisioning Processor
 
 ![](images/Transaction_Aggregation_Decisioning_Processor.png)
 
@@ -1459,3 +1447,48 @@ The requests and corresponding responses below can be simulated using the follow
     }
   ]
 }
+```
+
+## Environment Variables
+
+| Name                                  | Purpose                                   | Example                                     |
+|---------------------------------------|-------------------------------------------|---------------------------------------------|
+| `NODE_TLS_REJECT_UNAUTHORIZED`       | TLS rejection setting                     | `0`                                         |
+| `FUNCTION_NAME`                       | Name of the function                      | `transaction-aggregation-decisioning-processor` |
+| `NODE_ENV`                            | Environment variable                      | `production`                                |
+| `SERVER_URL`                          | Server URL                                | `0.0.0.0:4222`                              |
+| `SIDECAR_HOST`                        | Host for sidecar                          | `0.0.0.0:4222`                              |
+| `MAX_CPU`                             | Maximum CPU usage                         |                                             |
+| `REDIS_DB`                            | Redis database number                     | `0`                                         |
+| `REDIS_AUTH`                          | Authentication for Redis                  | `exampleAuth`                               |
+| `REDIS_SERVERS`                       | List of Redis servers                     | `[{"host":"127.0.0.1", "port":6379}, {"host":"127.0.0.1", "port":6380}]` |
+| `REDIS_IS_CLUSTER`                    | Flag for Redis clustering                 | `false`                                     |
+| `TRANSACTION_HISTORY_DATABASE_CERT_PATH` | Certificate path for transaction history database |                                           |
+| `TRANSACTION_HISTORY_DATABASE_URL`    | URL for transaction history database      |                                             |
+| `TRANSACTION_HISTORY_DATABASE_USER`   | User for transaction history database     |                                             |
+| `TRANSACTION_HISTORY_DATABASE_PASSWORD` | Password for transaction history database |                                           |
+| `TRANSACTION_HISTORY_DATABASE`        | Database for transaction history          |                                             |
+| `NETWORK_MAP_DATABASE_CERT_PATH`      | Certificate path for network map database |                                           |
+| `NETWORK_MAP_DATABASE_URL`           | URL for network map database              |                                             |
+| `NETWORK_MAP_DATABASE_USER`          | User for network map database             |                                             |
+| `NETWORK_MAP_DATABASE_PASSWORD`      | Password for network map database         |                                             |
+| `NETWORK_MAP_DATABASE`               | Database for network map                  |                                             |
+| `CONFIG_DATABASE_CERT_PATH`          | Certificate path for configuration database |                                         |
+| `CONFIG_DATABASE_URL`                | URL for configuration database            |                                             |
+| `CONFIG_DATABASE_USER`               | User for configuration database           |                                             |
+| `CONFIG_DATABASE_PASSWORD`           | Password for configuration database       |                                             |
+| `CONFIG_DATABASE`                    | Configuration database                    |                                             |
+| `CONFIG_COLLECTION`                  | Collection for configuration database     |                                             |
+| `TRANSACTION_DATABASE_CERT_PATH`     | Certificate path for transaction database |                                             |
+| `TRANSACTION_DATABASE_URL`           | URL for transaction database              |                                             |
+| `TRANSACTION_DATABASE_USER`          | User for transaction database             |                                             |
+| `TRANSACTION_DATABASE_PASSWORD`      | Password for transaction database         |                                             |
+| `TRANSACTION_DATABASE`               | Transaction database                      |                                             |
+| `APM_ACTIVE`                         | Flag for APM activation                   | `true`                                      |
+| `APM_URL`                            | URL for APM                               | `http://apm-server.development:8200`       |
+| `APM_SECRET_TOKEN`                   | APM secret token                          |                                             |
+| `LOGSTASH_HOST`                      | Hostname for Logstash                    | `logstash.development`                      |
+| `LOGSTASH_PORT`                      | Port for Logstash                        | `8080`                                      |
+| `LOGSTASH_LEVEL`                     | Log level for Logstash                   | `info`                                      |
+| `PRODUCER_STREAM`                    | Producer stream                          |                                             |
+| `STARTUP_TYPE`                       | Type of startup                          | `nats`                                      |
