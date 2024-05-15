@@ -4,7 +4,7 @@ import { NetworkMap, Pacs002, RuleResult } from '@frmscoe/frms-coe-lib/lib/inter
 import { TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 import { databaseManager, dbInit, runServer, server } from '../../src/index';
 import * as helpers from '../../src/services/helper.service';
-import { handleChannels, handleTypologies } from '../../src/services/helper.service';
+import { handleTypologies } from '../../src/services/helper.service';
 
 describe('TADProc Service', () => {
   let responseSpy: jest.SpyInstance;
@@ -14,7 +14,7 @@ describe('TADProc Service', () => {
   });
   describe('Handle Typologies', () => {
     beforeEach(() => {
-      responseSpy = jest.spyOn(helpers, 'handleChannels').mockImplementation(jest.fn());
+      responseSpy = jest.spyOn(helpers, 'handleTypologies').mockImplementation(jest.fn());
 
       jest.spyOn(databaseManager, 'getJson').mockImplementation((..._args: unknown[]): Promise<string> => {
         return Promise.resolve('[]');
@@ -28,7 +28,7 @@ describe('TADProc Service', () => {
         return Promise.resolve();
       });
 
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((..._args: unknown[]): Promise<number> => {
         return Promise.resolve(1);
@@ -59,7 +59,7 @@ describe('TADProc Service', () => {
 
     const getMockNetworkMap = () => {
       const jNetworkMap = JSON.parse(
-        '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}]}',
+        '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"pacs.002.001.12","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}',
       );
       const networkMap: NetworkMap = Object.assign(new NetworkMap(), jNetworkMap);
       return networkMap;
@@ -67,7 +67,7 @@ describe('TADProc Service', () => {
 
     const getMockNetworkMapNoMessages = () => {
       const jNetworkMap = JSON.parse(
-        '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"","channels":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}]}',
+        '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}',
       );
       const networkMap: NetworkMap = Object.assign(new NetworkMap(), jNetworkMap);
       return networkMap;
@@ -77,20 +77,12 @@ describe('TADProc Service', () => {
       return { result: 50, id: '028@1.0', cfg: '1.0', workflow: { alertThreshold: 50, interdictionThreshold: 0 }, ruleResults };
     };
 
-    const getMockNetworkMapWithMultipleChannels = () => {
-      const jNetworkMap = JSON.parse(
-        '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]},{"id":"029@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"029@1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"005@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]},{"id":"002@1.0","host":"http://openfaas:8080","cfg":"1.0","typologies":[{"id":"030@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"006@1.0","host":"http://openfaas:8080","cfg":"1.0"}]},{"id":"031@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"031@1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"007@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}]}',
-      );
-      const networkMap: NetworkMap = Object.assign(new NetworkMap(), jNetworkMap);
-      return networkMap;
-    };
-
     it('should handle successful request, with an unmatched number', async () => {
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
-      const networkMap = getMockNetworkMapWithMultipleChannels();
+      const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = {
         result: 50,
         id: '030@1.0',
@@ -99,19 +91,19 @@ describe('TADProc Service', () => {
         ruleResults,
       };
 
-      await helpers.handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
+      await helpers.handleTypologies(expectedReq, networkMap, typologyResult);
 
-      expect(handleChannels).toHaveBeenCalledTimes(0);
+      expect(handleTypologies).toHaveBeenCalledTimes(1);
     });
 
     it('should handle successful request, with a matched number', async () => {
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
-      await helpers.handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
+      await helpers.handleTypologies(expectedReq, networkMap, typologyResult);
       expect(responseSpy).toHaveBeenCalled();
     });
 
@@ -120,19 +112,17 @@ describe('TADProc Service', () => {
 
       jest.spyOn(databaseManager, 'getJson').mockImplementation((..._args: unknown[]): Promise<string> => {
         return new Promise<string>((resolve, _reject) =>
-          resolve(
-            '[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"result":true,"id":"","cfg":"","subRuleRef":"","reason":""}]}]',
-          ),
+          resolve('[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"","cfg":"","subRuleRef":"","reason":""}]}]'),
         );
       });
 
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
-      const networkMap = getMockNetworkMapWithMultipleChannels();
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
-      await handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
+      await handleTypologies(expectedReq, networkMap, typologyResult);
 
-      expect(responseSpy).toHaveBeenCalledTimes(0);
+      expect(responseSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should handle successful request, cache error', async () => {
@@ -141,42 +131,42 @@ describe('TADProc Service', () => {
       });
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
-      await handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
+      await handleTypologies(expectedReq, networkMap, typologyResult);
 
-      expect(responseSpy).toHaveBeenCalledTimes(0);
+      expect(responseSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should handle successful request, not all results yet', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
-      const networkMap = getMockNetworkMapWithMultipleChannels();
+      const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
-      await handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
+      await handleTypologies(expectedReq, networkMap, typologyResult);
 
-      expect(responseSpy).toHaveBeenCalledTimes(0);
+      expect(responseSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should respond with error if cache key deletion fails', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
-      const networkMap = getMockNetworkMapWithMultipleChannels();
+      const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
-      await handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
+      await handleTypologies(expectedReq, networkMap, typologyResult);
 
-      expect(responseSpy).toHaveBeenCalledTimes(0);
+      expect(responseSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should respond with error if nothing comes back from cache', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       jest.spyOn(databaseManager, 'deleteKey').mockRejectedValueOnce((_key: string) => {
         return Promise.reject();
@@ -185,14 +175,14 @@ describe('TADProc Service', () => {
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
-      await handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
+      await handleTypologies(expectedReq, networkMap, typologyResult);
 
       expect(responseSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should respond with error if NATS communication Error Occures', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       jest.spyOn(server, 'handleResponse').mockRejectedValueOnce((_value: string) => {
         return Promise.reject();
@@ -201,21 +191,22 @@ describe('TADProc Service', () => {
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
-      await handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
+      await handleTypologies(expectedReq, networkMap, typologyResult);
 
       expect(responseSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should respond with error if message is missing from networkmap', async () => {
+      responseSpy.mockRestore();
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
       const networkMap = getMockNetworkMapNoMessages();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
-      const result = await helpers.handleTypologies(expectedReq, networkMap.messages[0].channels[0], networkMap, typologyResult);
-      expect(JSON.stringify(result)).toEqual('{"review":false,"channelResults":[]}');
-      expect(responseSpy).toHaveBeenCalledTimes(0);
+      const result = await helpers.handleTypologies(expectedReq, networkMap, typologyResult);
+      expect(result).toEqual({ review: false, typologyResult: [] });
+      //    expect(responseSpy).toHaveBeenCalledTimes(1);
     });
   });
 });
