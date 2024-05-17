@@ -25,13 +25,11 @@ export const handleExecute = async (rawTransaction: any): Promise<void> => {
     const networkMap = rawTransaction.networkMap as NetworkMap;
     const typologyResult = rawTransaction.typologyResult as TypologyResult;
 
-    // const channelResult = rawTransaction.channelResult as ChannelResult;
     const traceParent = metaData?.traceParent ?? undefined;
     apmTransaction = apm.startTransaction('handle.execute', {
       childOf: traceParent,
     });
 
-    // Send every channel request to the service function
     const toReturn: TADPResult = {
       id: '',
       cfg: '',

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 /* eslint-disable */
 import { NetworkMap, Pacs002, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
-import { TransactionConfiguration } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TransactionConfiguration';
 import { TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 import { databaseManager, dbInit, runServer, server } from '../../src/index';
 import * as helpers from '../../src/services/helper.service';
@@ -16,19 +15,6 @@ describe('TADProc Service', () => {
   });
 
   beforeEach(async () => {
-    jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementation(() => {
-      return new Promise((resolve, _reject) => {
-        resolve(
-          Object.assign(
-            new TransactionConfiguration(),
-            JSON.parse(
-              '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]}]}]]',
-            ),
-          ),
-        );
-      });
-    });
-
     jest.spyOn(databaseManager, 'insertTransaction').mockImplementation(() => {
       return new Promise((resolve, _reject) => {
         resolve('');
@@ -44,13 +30,6 @@ describe('TADProc Service', () => {
     jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((..._args: unknown[]): Promise<number> => {
       return new Promise<number>((resolve, _reject) => {
         resolve(1);
-      });
-    });
-
-    jest.spyOn(databaseManager, 'setAdd').mockImplementation((_key: unknown, value: any): Promise<void> => {
-      return new Promise<void>((resolve, _reject) => {
-        cacheString = value;
-        resolve();
       });
     });
 
