@@ -40,11 +40,6 @@ export const handleExecute = async (rawTransaction: any): Promise<void> => {
     };
 
     const typologies = networkMap.messages[0].typologies.filter((t) => t.id === typologyResult.id && t.cfg === typologyResult.cfg);
-    /* typologies.find()
-
-    const typologyResult = channelRes?.typologyResult.find((t) => t.id === typology.id && t.cfg === typology.cfg);
-    if (!typologyResult) continue;
-    if (typologyResult.review) review = true; */
 
     loggerService.debug(`Processing Typology ${typologyResult.id}.`, functionName, transactionID);
     const { typologyResult: typologyResults, review } = await handleTypologies(transaction, networkMap, typologyResult);
