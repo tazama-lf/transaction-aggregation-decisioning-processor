@@ -208,5 +208,45 @@ describe('TADProc Service', () => {
       expect(result).toEqual({ review: false, typologyResult: [] });
       //    expect(responseSpy).toHaveBeenCalledTimes(1);
     });
+
+    it('should repond with review false if typology result not match any typologies from networkmap', async () => {
+      responseSpy.mockRestore();
+      const expectedReq = getMockTransaction();
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const networkMap = getMockNetworkMap();
+      const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
+      const result = await helpers.handleTypologies(expectedReq, networkMap, typologyResult);
+      expect(result).toEqual({
+        review: false,
+        typologyResult: [
+          {
+            result: 50,
+            id: '028@1.0',
+            cfg: '1.0',
+            workflow: { alertThreshold: '0', interdictionThreshold: '' },
+            ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '' }],
+          },
+        ],
+      });
+    });
+
+    it('should respond with empty results if no typologies', async () => {
+      responseSpy.mockRestore();
+      jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((..._args: unknown[]): Promise<number> => {
+        return Promise.resolve(-1);
+      });
+      const expectedReq = getMockTransaction();
+
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const networkMap = getMockNetworkMapNoMessages();
+      const typology = { ...networkMap.messages[0].typologies[0] };
+      typology.id = '998@1.0';
+      networkMap.messages[0].typologies.push(typology);
+
+      const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
+
+      const result = await helpers.handleTypologies(expectedReq, networkMap, typologyResult);
+      expect(result).toEqual({ review: false, typologyResult: [] });
+    });
   });
 });

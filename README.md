@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # 5. Transaction Aggregation and Decisioning Processor (TADP)
 
 The sequence diagram below for the Transaction Aggregation and Decisioning Processor
