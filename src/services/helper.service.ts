@@ -33,11 +33,12 @@ export const handleTypologies = async (
     const typologyResults: TypologyResult[] = jtypologyResults.map(
       (jtypologyResult: { typologyResult: TypologyResult }) => jtypologyResult.typologyResult,
     );
-    if (!typologyResults || !typologyResults.length)
+    if (!typologyResults || !typologyResults.length) {
       return {
         review: false,
         typologyResult: [],
       };
+    }
 
     const apmTadProc = apm.startSpan('tadProc.exec');
 
