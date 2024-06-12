@@ -45,10 +45,11 @@ export default [
     },
     ignores: [
       '**/coverage/**',
-      '**/lib/**',
+      '**/build/**',
       '**/node_modules/**',
       '**/__tests__/**',
       '**/jest.config.ts',
+      '**/cluster-setup.ts',
     ],
   }
 ];
