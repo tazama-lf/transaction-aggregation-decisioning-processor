@@ -50,28 +50,34 @@ Where the `transaction` is described as a `Pacs002` message defined [here](https
 ### Code Activity Diagram
 
 ```mermaid
-flowchart TD
-    start([Start]) --> receivePayload[Receive payload from CADProc]
-    receivePayload --> note1["Channel output payload includes: Rule results, Typology results, Channel trigger results, Network sub-map, Original transaction data"]
-    note1 --> loop1{for each channel result received}
-    loop1 -->|More channel results| determineTransaction[Determine transaction]
-    determineTransaction --> determineChannels[Determine all channels]
-    determineChannels --> readConfig[Read Transaction Configuration from database to determine review message]
-    readConfig --> loop2{Channels results outstanding}
-    loop2 -->|More channel results| writeCache[Write channel result to cache]
-    writeCache --> loop2
-    loop2 -->|Channels complete| checkReview{Review any typologies?}
-    checkReview -->|ALRT| sendAlert[Send alert to CMS]
-    checkReview -->|NALT| noAlert[Don't send alert to CMS]
-    sendAlert --> clearCache[Clear cache]
-    noAlert --> clearCache
-    clearCache --> writeHistory[Write transactions to transaction history DB]
-    writeHistory --> logReview[Log review message - Review or None]
-    logReview --> loop1
-    loop1 -->|No more channel results| sendResponse[Send 200 response back to CADProc]
-    sendResponse --> note2["Response includes: Channel-ID, Channel Results"]
-    note2 --> stop([Stop])
+  flowchart TD
+  A([Start handleExecute]) -->|Parse rawTransaction| B[Set transaction details]
+  B --> C[Start APM Transaction]
+  C --> D{Typologies Matched?}
+  D -->|Yes| E[Process Typologies]
+  D -->|No| F[Log Error and Exit]
+  E --> G{All Typologies Processed?}
+  G -->|Yes| H[Create Alert and CMSRequest]
+  H --> I[Insert Transaction History]
+  I --> J[Calculate Processing Time]
+  J --> K[Handle Server Response]
+  K --> L([End APM Transaction])
+  F --> L
+  G -->|No| F
 ```
+
+ - **Start handleExecute**: Initiation of the handleExecute function.
+ - **Set transaction details**: Parsing and extracting data from rawTransaction into usable variables.
+ - **Start APM Transaction**: Begin a transaction monitoring session to track performance.
+ - **Typologies Matched?**: Checks if there are any matching typologies for the transaction.
+ - **Process Typologies**: Process matching typologies if found.
+ - **All Typologies Processed?**: Verifies if all typologies were processed.
+ - **Create Alert and CMSRequest**: Constructs an alert and formats the CMS request if all typologies are processed.
+ - **Insert Transaction History**: Inserts a record of the transaction into the database.
+ - **Calculate Processing Time**: Calculates the time taken to process the transaction.
+ - **Handle Server Response**: Sends a response back through the server.
+ - **End APM Transaction**: Marks the end of the APM transaction session.
+ - **Log Error and Exit**: Logs any errors encountered during the process and exits the function if any step fails significantly.
 
 ## Outputs
 The output is the input with an added [tadpResult](https://github.com/frmscoe/frms-coe-lib/blob/dev/src/interfaces/processor-files/TADPResult.ts):
