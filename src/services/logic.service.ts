@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: Apache-2.0
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import apm from '../apm';
 import { Alert } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/Alert';
 import { CalculateDuration } from '@frmscoe/frms-coe-lib/lib/helpers/calculatePrcg';
@@ -11,6 +10,7 @@ import { type TADPResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-
 import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 import { type MetaData } from '@frmscoe/frms-coe-lib/lib/interfaces/metaData';
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export const handleExecute = async (rawTransaction: any): Promise<void> => {
   const functionName = 'handleExecute()';
   let apmTransaction = null;
