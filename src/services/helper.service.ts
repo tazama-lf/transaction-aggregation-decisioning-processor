@@ -15,9 +15,9 @@ export const handleTypologies = async (
   //  const startTime = process.hrtime.bigint();
   const functionName = 'handleTypologies()';
   try {
-    const typologies = networkMap.messages[0].typologies.filter((t) => t.id === typologyResult.id && t.cfg === typologyResult.cfg);
+    const typologies = networkMap.messages[0].typologies;
     const transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
-    const cacheKey = `TADP_${transactionID}_${typologyResult.id}_${typologyResult.cfg}`;
+    const cacheKey = `TADP_${transactionID}_TP`;
     const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, { typologyResult: { ...typologyResult } });
 
     // check if all results for this Channel is found
