@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import apm from '../apm';
-// import { CalculateDuration } from '@frmscoe/frms-coe-lib/lib/helpers/calculatePrcg';
 import { databaseManager, loggerService } from '..';
 import { type NetworkMap, type Pacs002 } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
@@ -12,7 +11,6 @@ export const handleTypologies = async (
   typologyResult: TypologyResult,
 ): Promise<{ typologyResult: TypologyResult[]; review: boolean }> => {
   let span;
-  //  const startTime = process.hrtime.bigint();
   const functionName = 'handleTypologies()';
   try {
     const typologies = networkMap.messages[0].typologies;
@@ -20,7 +18,8 @@ export const handleTypologies = async (
     const cacheKey = `TADP_${transactionID}_TP`;
     const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, { typologyResult: { ...typologyResult } });
 
-    // check if all results for this Channel is found
+    // Check if all typologyRules have been stored
+    // Compare with configured network map's typologies
     if (jtypologyCount && jtypologyCount < typologies.length) {
       return {
         review: false,
@@ -28,7 +27,7 @@ export const handleTypologies = async (
       };
     }
 
-    // else means we have all results for Channel, so lets evaluate result
+    // else means we have all results for Typologies, so lets evaluate result
     const jtypologyResults = await databaseManager.getMemberValues(cacheKey);
     const typologyResults: TypologyResult[] = jtypologyResults.map(
       (jtypologyResult: { typologyResult: TypologyResult }) => jtypologyResult.typologyResult,
