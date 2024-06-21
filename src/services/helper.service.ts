@@ -18,7 +18,7 @@ export const handleTypologies = async (
     const cacheKey = `TADP_${transactionID}_TP`;
     const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, { typologyResult: { ...typologyResult } });
 
-    // Check if all typologyRules have been stored
+    // Check if all typologyResults have been stored
     // Compare with configured network map's typologies
     if (jtypologyCount && jtypologyCount < typologies.length) {
       return {
