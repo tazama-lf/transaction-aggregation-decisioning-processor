@@ -43,13 +43,6 @@ export const configuration: IConfig = {
       password: process.env.REDIS_AUTH!,
       isCluster: process.env.REDIS_IS_CLUSTER === 'true',
     },
-    networkMap: {
-      password: process.env.NETWORK_MAP_DATABASE_PASSWORD!,
-      url: process.env.NETWORK_MAP_DATABASE_URL!,
-      user: process.env.NETWORK_MAP_DATABASE_USER!,
-      databaseName: process.env.NETWORK_MAP_DATABASE!,
-      certPath: process.env.NETWORK_MAP_DATABASE_CERT_PATH!,
-    },
     configuration: {
       password: process.env.CONFIG_DATABASE_PASSWORD!,
       url: process.env.CONFIG_DATABASE_URL!,
