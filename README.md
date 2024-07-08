@@ -26,6 +26,12 @@ cp .env.template .env
 ```
 A [registry](https://github.com/frmscoe/docs) of environment variables is provided to provide more context for what each variable is used for.
 
+##### Additional Variables
+
+| Variable | Purpose | Example
+| ------ | ------ | ------ |
+| `SUPPRESS_ALERTS` | Suppress forwarding report to NATS producer | `false`
+
 #### Build and Start
 
 ```sh
