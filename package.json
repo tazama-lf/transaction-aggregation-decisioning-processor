@@ -16,7 +16,7 @@
     "lint:eslint-unused": "eslint --report-unused-disable-directives \"**/*.ts\"",
     "lint:eslint-no-inline": "eslint --no-inline-config \"**/*.ts\"",
     "lint:prettier": "prettier --check \"**/*.ts\"",
-    "prepare": "husky install",
+    "prepare": "husky",
     "test": "jest --config=jest.config.ts --passWithNoTests --forceExit",
     "test:watch": "jest --config=jest.config.ts --watch"
   },
@@ -41,8 +41,8 @@
   ],
   "license": "Apache-2.0",
   "dependencies": {
-    "@frmscoe/frms-coe-lib": "^4.0.0-rc.5",
-    "@frmscoe/frms-coe-startup-lib": "^2.2.0-alpha.1",
+    "@frmscoe/frms-coe-lib": "^4.0.0-rc.10",
+    "@frmscoe/frms-coe-startup-lib": "^2.2.0-rc.3",
     "dotenv": "^16.4.5",
     "tslib": "^2.6.3"
   },
