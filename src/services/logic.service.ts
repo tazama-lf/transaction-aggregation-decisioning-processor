@@ -66,7 +66,7 @@ export const handleExecute = async (rawTransaction: any): Promise<void> => {
         };
 
         result.report.tadpResult.prcgTm = CalculateDuration(startTime);
-        await server.handleResponse(result);
+        await server.handleResponse(result, configuration.producerStream);
       }
     }
     apmTransaction?.end();
