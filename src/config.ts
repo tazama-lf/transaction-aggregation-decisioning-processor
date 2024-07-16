@@ -26,6 +26,7 @@ export interface IConfig {
   };
   sidecarHost: string;
   producerStream: string;
+  suppressAlerts: boolean;
 }
 
 export const configuration: IConfig = {
@@ -75,4 +76,5 @@ export const configuration: IConfig = {
   },
   sidecarHost: process.env.SIDECAR_HOST!,
   producerStream: process.env.PRODUCER_STREAM!,
+  suppressAlerts: process.env.SUPPRESS_ALERTS === 'true',
 };

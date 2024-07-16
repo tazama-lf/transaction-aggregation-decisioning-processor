@@ -2,6 +2,7 @@
 /* eslint-disable */
 import { NetworkMap, Pacs002, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
+import { configuration } from '../../src/config';
 import { databaseManager, dbInit, runServer, server } from '../../src/index';
 import * as helpers from '../../src/services/helper.service';
 import { handleExecute } from '../../src/services/logic.service';
@@ -166,7 +167,55 @@ describe('TADProc Service', () => {
       await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
 
       expect(typologySpy).toHaveBeenCalledTimes(1);
-      expect(responseSpy).toHaveBeenCalled();
+      expect(responseSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle a successful transaction, with review. Suppressed', async () => {
+      const expectedReq = getMockTransaction();
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+
+      configuration.suppressAlerts = true;
+
+      const networkMap = getMockNetworkMap();
+      const typologyResult: TypologyResult = {
+        result: 50,
+        id: '028@1.0',
+        cfg: '1.0',
+        review: true,
+        workflow: { alertThreshold: 100, interdictionThreshold: 0 },
+        ruleResults,
+      };
+
+      const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockImplementationOnce(() => {
+        return Promise.resolve({
+          review: true,
+          typologyResult: [
+            {
+              id: '028@1.0',
+              cfg: '1.0',
+              result: 50,
+              review: true,
+              workflow: { alertThreshold: 0 },
+              prcgTm: 0,
+              ruleResults: [
+                { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
+                { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
+              ],
+            },
+          ],
+        });
+      });
+
+      const responseSpy = jest.spyOn(server, 'handleResponse').mockImplementation((response: unknown, subject?: string[] | undefined) => {
+        return Promise.resolve();
+      });
+
+      await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
+
+      expect(typologySpy).toHaveBeenCalledTimes(1);
+      expect(responseSpy).toHaveBeenCalledTimes(0); // suppressed
+
+      configuration.suppressAlerts = false;
     });
 
     it('should handle a unsuccessful transaction, catch error.', async () => {

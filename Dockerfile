@@ -86,6 +86,9 @@ ENV TRANSACTION_DATABASE='evaluationResults'
 ENV CACHE_ENABLED=
 ENV CACHE_TTL=30
 
+# Alert
+ENV SUPPRESS_ALERTS=false
+
 # Apm
 ENV APM_ACTIVE=true
 ENV APM_URL=http://apm-server.development.svc.cluster.local:8200/

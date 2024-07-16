@@ -9,6 +9,7 @@ import { type CMSRequest } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-
 import { type TADPResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TADPResult';
 import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 import { type MetaData } from '@frmscoe/frms-coe-lib/lib/interfaces/metaData';
+import { configuration } from '../config';
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export const handleExecute = async (rawTransaction: any): Promise<void> => {
@@ -52,18 +53,21 @@ export const handleExecute = async (rawTransaction: any): Promise<void> => {
       alert.tadpResult = toReturn;
       alert.status = review ? 'ALRT' : 'NALT';
       alert.metaData = metaData;
-      const result: CMSRequest = {
-        message: `Successfully completed ${typologies.length} typologies`,
-        report: alert,
-        transaction,
-        networkMap,
-      };
 
       const spanInsertTransactionHistory = apm.startSpan('db.insert.transactionHistory');
       await databaseManager.insertTransaction(transactionID, transaction, networkMap, alert);
       spanInsertTransactionHistory?.end();
-      result.report.tadpResult.prcgTm = CalculateDuration(startTime);
-      await server.handleResponse(result);
+      if (!configuration.suppressAlerts) {
+        const result: CMSRequest = {
+          message: `Successfully completed ${typologies.length} typologies`,
+          report: alert,
+          transaction,
+          networkMap,
+        };
+
+        result.report.tadpResult.prcgTm = CalculateDuration(startTime);
+        await server.handleResponse(result);
+      }
     }
     apmTransaction?.end();
   } catch (e) {
