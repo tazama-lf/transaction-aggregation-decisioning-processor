@@ -5,48 +5,11 @@
 
 name: Node.js CI
 env:
-  NODE_ENV: 'dev'
-  STARTUP_TYPE: 'nats'
-  SERVER_URL: 'nats://localhost:4222'
-  PRODUCER_STREAM: CMS
-  ACK_POLICY: 'None'
-  STREAM_SUBJECT:
-  APM_ACTIVE: false
-  APM_LOGGING: false
-  FUNCTION_NAME: 'transaction-aggregation-decisioning-processor'
-  REDIS_DB: 0
-  REDIS_AUTH:
-  REDIS_SERVERS: '[{"host":"127.0.0.1", "port":6379}]'
-  REDIS_IS_CLUSTER: false
-  TRANSACTION_HISTORY_DATABASE_CERT_PATH: '/usr/local/share/ca-certificates/ca-certificates.crt'
-  TRANSACTION_HISTORY_DATABASE_URL: 'http://localhost:8529/'
-  TRANSACTION_HISTORY_DATABASE_USER: 'root'
-  TRANSACTION_HISTORY_DATABASE_PASSWORD:
-  TRANSACTION_HISTORY_DATABASE: 'transactionHistory'
-  NETWORK_MAP_DATABASE_CERT_PATH: '/usr/local/share/ca-certificates/ca-certificates.crt'
-  NETWORK_MAP_DATABASE_URL: 'http://localhost:8529/'
-  NETWORK_MAP_DATABASE_USER: 'root'
-  NETWORK_MAP_DATABASE_PASSWORD:
-  NETWORK_MAP_DATABASE: 'networkmap'
-  CONFIG_DATABASE_CERT_PATH: '/usr/local/share/ca-certificates/ca-certificates.crt'
-  CONFIG_DATABASE_URL: 'http://localhost:8529/'
-  CONFIG_DATABASE_USER: 'root'
-  CONFIG_DATABASE_PASSWORD:
-  CONFIG_DATABASE: 'Configuration'
-  CONFIG_COLLECTION: configuration
-  TRANSACTION_DATABASE_CERT_PATH: '/usr/local/share/ca-certificates/ca-certificates.crt'
-  TRANSACTION_DATABASE_URL: 'http://localhost:8529/'
-  TRANSACTION_DATABASE_USER: 'root'
-  TRANSACTION_DATABASE_PASSWORD:
-  TRANSACTION_DATABASE: 'evaluationResults'
-  GH_RW_TOKEN: '${{ secrets.GH_WRITE_TOKEN }}'
-  GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   NPM_SCOPE: "@frmscoe"
   NPM_REGISTRY: "https://npm.pkg.github.com/"
-  ENV_NEWMAN: https://raw.githubusercontent.com/frmscoe/postman/indexes/environments/Ekuta-LOCAL.postman_environment.json
-  THRESHOLD: 5
-  REPO_NAME: 'performance-benchmark'
-  ITERATION_COUNT: 1000
+  NODE_ENV: 'test'
+  STARTUP_TYPE: 'nats'
 
 on:
   push:
