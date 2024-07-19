@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+
 ARG BUILD_IMAGE=node:20-bullseye
 ARG RUN_IMAGE=gcr.io/distroless/nodejs20-debian11:nonroot
 
@@ -69,18 +71,11 @@ ENV TRANSACTION_HISTORY_DATABASE_USER='root'
 ENV TRANSACTION_HISTORY_DATABASE_PASSWORD=
 ENV TRANSACTION_HISTORY_DATABASE='transactionHistory'
 
-ENV NETWORK_MAP_DATABASE_CERT_PATH='/usr/local/share/ca-certificates/ca-certificates.crt'
-ENV NETWORK_MAP_DATABASE_URL=
-ENV NETWORK_MAP_DATABASE_USER='root'
-ENV NETWORK_MAP_DATABASE_PASSWORD=
-ENV NETWORK_MAP_DATABASE='networkmap'
-
 ENV CONFIG_DATABASE_CERT_PATH='/usr/local/share/ca-certificates/ca-certificates.crt'
 ENV CONFIG_DATABASE_URL=
 ENV CONFIG_DATABASE_USER='root'
 ENV CONFIG_DATABASE_PASSWORD=
-ENV CONFIG_DATABASE='Configuration'
-ENV CONFIG_COLLECTION=configuration
+ENV CONFIG_DATABASE='configuration'
 
 ENV TRANSACTION_DATABASE_CERT_PATH='/usr/local/share/ca-certificates/ca-certificates.crt'
 ENV TRANSACTION_DATABASE_URL=
@@ -90,6 +85,9 @@ ENV TRANSACTION_DATABASE='evaluationResults'
 
 ENV CACHE_ENABLED=
 ENV CACHE_TTL=30
+
+# Alert
+ENV SUPPRESS_ALERTS=false
 
 # Apm
 ENV APM_ACTIVE=true

@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: Apache-2.0
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 // config settings, env variables
 import * as path from 'path';
 import * as dotenv from 'dotenv';
@@ -27,6 +26,7 @@ export interface IConfig {
   };
   sidecarHost: string;
   producerStream: string;
+  suppressAlerts: boolean;
 }
 
 export const configuration: IConfig = {
@@ -43,13 +43,6 @@ export const configuration: IConfig = {
       servers: JSON.parse(process.env.REDIS_SERVERS! || '[{"hostname": "127.0.0.1", "port":6379}]'),
       password: process.env.REDIS_AUTH!,
       isCluster: process.env.REDIS_IS_CLUSTER === 'true',
-    },
-    networkMap: {
-      password: process.env.NETWORK_MAP_DATABASE_PASSWORD!,
-      url: process.env.NETWORK_MAP_DATABASE_URL!,
-      user: process.env.NETWORK_MAP_DATABASE_USER!,
-      databaseName: process.env.NETWORK_MAP_DATABASE!,
-      certPath: process.env.NETWORK_MAP_DATABASE_CERT_PATH!,
     },
     configuration: {
       password: process.env.CONFIG_DATABASE_PASSWORD!,
@@ -83,4 +76,5 @@ export const configuration: IConfig = {
   },
   sidecarHost: process.env.SIDECAR_HOST!,
   producerStream: process.env.PRODUCER_STREAM!,
+  suppressAlerts: process.env.SUPPRESS_ALERTS === 'true',
 };

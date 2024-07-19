@@ -1,107 +1,44 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import apm from '../apm';
-import { CalculateDuration } from '@frmscoe/frms-coe-lib/lib/helpers/calculatePrcg';
 import { databaseManager, loggerService } from '..';
-import { type Channel, type Message, type NetworkMap, type Pacs002 } from '@frmscoe/frms-coe-lib/lib/interfaces';
-import { type ChannelResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/ChannelResult';
+import { type NetworkMap, type Pacs002 } from '@frmscoe/frms-coe-lib/lib/interfaces';
 import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
-
-export const handleChannels = async (
-  message: Message,
-  transaction: Pacs002,
-  networkMap: NetworkMap,
-  channelResult: ChannelResult,
-): Promise<{ channelResults: ChannelResult[]; review: boolean }> => {
-  const span = apm.startSpan('handleChannels');
-  const functionName = 'handleChannels()';
-
-  try {
-    const transactionType = 'FIToFIPmtSts';
-    const transactionID = transaction[transactionType].GrpHdr.MsgId;
-    const cacheKey = `tadp_${transactionID}_${message.id}_${message.cfg}`;
-    const spanDBMembers = apm.startSpan('db.get.members');
-    const jchannelCount = await databaseManager.addOneGetCount(cacheKey, { channelResult: { ...channelResult } });
-
-    // check if all Channel results for this transaction is found
-    if (jchannelCount && jchannelCount < message.channels.length) {
-      span?.end();
-      loggerService.log('All channels not completed.', functionName, transactionID);
-      return { channelResults: [], review: false };
-    }
-    const jchannelResults = await databaseManager.getMemberValues(cacheKey);
-    spanDBMembers?.end();
-
-    const channelResults: ChannelResult[] = jchannelResults.map(
-      (jchannelResult: { channelResult: ChannelResult }) => jchannelResult.channelResult,
-    );
-
-    let review = false;
-    for (const configuredChannel of networkMap.messages[0].channels) {
-      if (configuredChannel) {
-        const channelRes = channelResults.find((c) => c.id === configuredChannel.id && c.cfg === configuredChannel.cfg);
-        if (!channelRes) continue;
-        for (const typology of configuredChannel.typologies) {
-          const typologyResult = channelRes?.typologyResult.find((t) => t.id === typology.id && t.cfg === typology.cfg);
-          if (!typologyResult) continue;
-          if (typologyResult.review) review = true;
-        }
-      }
-    }
-
-    // Delete interim cache as transaction processed to fulfilment
-    await databaseManager.deleteKey(cacheKey);
-
-    span?.end();
-    return { channelResults, review };
-  } catch (error) {
-    span?.end();
-    let innerError;
-    loggerService.error(error as string, innerError, functionName);
-    throw error;
-  }
-};
 
 export const handleTypologies = async (
   transaction: Pacs002,
-  channel: Channel,
   networkMap: NetworkMap,
   typologyResult: TypologyResult,
-): Promise<{ channelResults: ChannelResult[]; review: boolean }> => {
+): Promise<{ typologyResult: TypologyResult[]; review: boolean }> => {
   let span;
-  const startTime = process.hrtime.bigint();
   const functionName = 'handleTypologies()';
   try {
+    const typologies = networkMap.messages[0].typologies;
     const transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
-    const cacheKey = `CADP_${transactionID}_${channel.id}_${channel.cfg}`;
+    const cacheKey = `TADP_${transactionID}_TP`;
     const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, { typologyResult: { ...typologyResult } });
 
-    // check if all results for this Channel is found
-    if (jtypologyCount && jtypologyCount < channel.typologies.length) {
+    // Check if all typologyResults have been stored
+    // Compare with configured network map's typologies
+    if (jtypologyCount && jtypologyCount < typologies.length) {
       return {
         review: false,
-        channelResults: [],
+        typologyResult: [],
       };
     }
 
-    // else means we have all results for Channel, so lets evaluate result
+    // else means we have all results for Typologies, so lets evaluate result
     const jtypologyResults = await databaseManager.getMemberValues(cacheKey);
     const typologyResults: TypologyResult[] = jtypologyResults.map(
       (jtypologyResult: { typologyResult: TypologyResult }) => jtypologyResult.typologyResult,
     );
-    if (!typologyResults || !typologyResults.length)
+    if (!typologyResults || !typologyResults.length) {
       return {
         review: false,
-        channelResults: [],
+        typologyResult: [],
       };
+    }
 
-    const channelResult: ChannelResult = {
-      prcgTm: CalculateDuration(startTime),
-      result: 0.0,
-      cfg: channel.cfg,
-      id: channel.id,
-      typologyResult: typologyResults,
-    };
     const apmTadProc = apm.startSpan('tadProc.exec');
 
     const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
@@ -109,30 +46,36 @@ export const handleTypologies = async (
     if (!message) {
       let innerError;
       loggerService.error(
-        `Failed to process Channel ${channel.id} request , Message missing from networkmap.`,
+        `Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request , Message missing from networkmap.`,
         innerError,
         functionName,
         transactionID,
       );
       return {
         review: false,
-        channelResults: [],
+        typologyResult: [],
       };
     }
 
-    const { channelResults, review } = await handleChannels(message, transaction, networkMap, channelResult);
+    let review = false;
+    for (const typology of networkMap.messages[0].typologies) {
+      const typologyResult = typologyResults.find((t) => t.id === typology.id && t.cfg === typology.cfg);
+      if (!typologyResult) continue;
+      if (typologyResult.review) review = true;
+    }
+
     apmTadProc?.end();
 
     span = apm.startSpan(`[${transactionID}] Delete Channel interim cache key`);
     await databaseManager.deleteKey(cacheKey);
     span?.end();
-    return { channelResults, review };
+    return { typologyResult: typologyResults, review };
   } catch (error) {
     span?.end();
-    loggerService.error(`Failed to process Channel ${channel.id} request`, error as Error, functionName);
+    loggerService.error(`Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request`, error as Error, functionName);
     return {
       review: false,
-      channelResults: [],
+      typologyResult: [],
     };
   }
 };

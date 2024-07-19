@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 /* eslint-disable */
 import { NetworkMap, Pacs002, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
-import { TransactionConfiguration } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TransactionConfiguration';
 import { TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
+import { configuration } from '../../src/config';
 import { databaseManager, dbInit, runServer, server } from '../../src/index';
 import * as helpers from '../../src/services/helper.service';
 import { handleExecute } from '../../src/services/logic.service';
@@ -16,19 +16,6 @@ describe('TADProc Service', () => {
   });
 
   beforeEach(async () => {
-    jest.spyOn(databaseManager, 'getTransactionConfig').mockImplementation(() => {
-      return new Promise((resolve, _reject) => {
-        resolve(
-          Object.assign(
-            new TransactionConfiguration(),
-            JSON.parse(
-              '[[{"id":"001@1.0","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]},{"id":"002@1.0","cfg":"1.0","typologies":[{"id":"028@1.0","cfg":"1.0","threshold":20},{"id":"029@1.0","cfg":"1.0","threshold":20}]}]}]]',
-            ),
-          ),
-        );
-      });
-    });
-
     jest.spyOn(databaseManager, 'insertTransaction').mockImplementation(() => {
       return new Promise((resolve, _reject) => {
         resolve('');
@@ -44,13 +31,6 @@ describe('TADProc Service', () => {
     jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((..._args: unknown[]): Promise<number> => {
       return new Promise<number>((resolve, _reject) => {
         resolve(1);
-      });
-    });
-
-    jest.spyOn(databaseManager, 'setAdd').mockImplementation((_key: unknown, value: any): Promise<void> => {
-      return new Promise<void>((resolve, _reject) => {
-        cacheString = value;
-        resolve();
       });
     });
 
@@ -76,15 +56,7 @@ describe('TADProc Service', () => {
 
   const getMockNetworkMap = () => {
     const jNetworkMap = JSON.parse(
-      '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}]}',
-    );
-    const networkMap: NetworkMap = Object.assign(new NetworkMap(), jNetworkMap);
-    return networkMap;
-  };
-
-  const getMockNetworkMapWithMultipleChannels = () => {
-    const jNetworkMap = JSON.parse(
-      '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"pacs.002.001.12","channels":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]},{"id":"029@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"029@1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"005@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]},{"id":"002@1.0","host":"http://openfaas:8080","cfg":"1.0","typologies":[{"id":"030@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"006@1.0","host":"http://openfaas:8080","cfg":"1.0"}]},{"id":"031@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"031@1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"007@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}]}',
+      '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"pacs.002.001.12","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}',
     );
     const networkMap: NetworkMap = Object.assign(new NetworkMap(), jNetworkMap);
     return networkMap;
@@ -94,9 +66,9 @@ describe('TADProc Service', () => {
     it('should handle a successful transaction, incomplete.', async () => {
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
-      const networkMap = getMockNetworkMapWithMultipleChannels();
+      const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = {
         result: 50,
         id: '030@1.0',
@@ -107,12 +79,12 @@ describe('TADProc Service', () => {
 
       await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
 
-      expect(server.handleResponse).toBeCalledTimes(0);
+      expect(server.handleResponse).toHaveReturnedTimes(0);
     });
 
     it('should handle a successful transaction, complete.', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = {
@@ -127,24 +99,17 @@ describe('TADProc Service', () => {
       const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockImplementationOnce(() => {
         return Promise.resolve({
           review: false,
-          channelResults: [
+          typologyResult: [
             {
-              result: 0,
               id: '028@1.0',
               cfg: '1.0',
-              typologyResult: [
-                {
-                  id: '028@1.0',
-                  cfg: '1.0',
-                  result: 50,
-                  workflow: { alertThreshold: 0 },
-                  review: true,
-                  prcgTm: 0,
-                  ruleResults: [
-                    { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
-                    { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
-                  ],
-                },
+              result: 50,
+              workflow: { alertThreshold: 0 },
+              review: true,
+              prcgTm: 0,
+              ruleResults: [
+                { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
+                { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
               ],
             },
           ],
@@ -157,13 +122,13 @@ describe('TADProc Service', () => {
 
       await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
 
-      expect(typologySpy).toBeCalledTimes(1);
-      expect(responseSpy).toBeCalled();
+      expect(typologySpy).toHaveBeenCalledTimes(1);
+      expect(responseSpy).toHaveBeenCalled();
     });
 
     it('should handle a successful transaction, with review.', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = {
@@ -178,25 +143,17 @@ describe('TADProc Service', () => {
       const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockImplementationOnce(() => {
         return Promise.resolve({
           review: true,
-          channelResults: [
+          typologyResult: [
             {
-              result: 0,
               id: '028@1.0',
               cfg: '1.0',
+              result: 50,
+              review: true,
+              workflow: { alertThreshold: 0 },
               prcgTm: 0,
-              typologyResult: [
-                {
-                  id: '028@1.0',
-                  cfg: '1.0',
-                  result: 50,
-                  review: true,
-                  workflow: { alertThreshold: 0 },
-                  prcgTm: 0,
-                  ruleResults: [
-                    { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
-                    { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
-                  ],
-                },
+              ruleResults: [
+                { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
+                { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
               ],
             },
           ],
@@ -209,13 +166,61 @@ describe('TADProc Service', () => {
 
       await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
 
-      expect(typologySpy).toBeCalledTimes(1);
-      expect(responseSpy).toBeCalled();
+      expect(typologySpy).toHaveBeenCalledTimes(1);
+      expect(responseSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle a successful transaction, with review. Suppressed', async () => {
+      const expectedReq = getMockTransaction();
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+
+      configuration.suppressAlerts = true;
+
+      const networkMap = getMockNetworkMap();
+      const typologyResult: TypologyResult = {
+        result: 50,
+        id: '028@1.0',
+        cfg: '1.0',
+        review: true,
+        workflow: { alertThreshold: 100, interdictionThreshold: 0 },
+        ruleResults,
+      };
+
+      const typologySpy = jest.spyOn(helpers, 'handleTypologies').mockImplementationOnce(() => {
+        return Promise.resolve({
+          review: true,
+          typologyResult: [
+            {
+              id: '028@1.0',
+              cfg: '1.0',
+              result: 50,
+              review: true,
+              workflow: { alertThreshold: 0 },
+              prcgTm: 0,
+              ruleResults: [
+                { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123' },
+                { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder' },
+              ],
+            },
+          ],
+        });
+      });
+
+      const responseSpy = jest.spyOn(server, 'handleResponse').mockImplementation((response: unknown, subject?: string[] | undefined) => {
+        return Promise.resolve();
+      });
+
+      await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
+
+      expect(typologySpy).toHaveBeenCalledTimes(1);
+      expect(responseSpy).toHaveBeenCalledTimes(0); // suppressed
+
+      configuration.suppressAlerts = false;
     });
 
     it('should handle a unsuccessful transaction, catch error.', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ result: true, id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = {
@@ -238,8 +243,8 @@ describe('TADProc Service', () => {
 
       await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
 
-      expect(typologySpy).toBeCalledTimes(1);
-      expect(responseSpy).toBeCalledTimes(0);
+      expect(typologySpy).toHaveBeenCalledTimes(1);
+      expect(responseSpy).toHaveBeenCalledTimes(0);
     });
   });
 });
