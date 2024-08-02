@@ -38,7 +38,7 @@ COPY service.yaml ./
 
 
 # Turn down the verbosity to default level.
-ENV NPM_CONFIG_LOGLEVEL warn
+ENV NPM_CONFIG_LOGLEVEL info
 
 ENV mode="http"
 ENV upstream_url="http://127.0.0.1:3000"

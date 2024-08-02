@@ -40,7 +40,7 @@ export const handleExecute = async (rawTransaction: any): Promise<void> => {
 
     const typologies = networkMap.messages[0].typologies.filter((t) => t.id === typologyResult.id && t.cfg === typologyResult.cfg);
 
-    loggerService.debug(`Processing Typology ${typologyResult.id}.`, functionName, transactionID);
+    loggerService.debug(`Processing Typology ${typologyResult.cfg}.`, functionName, transactionID);
     const { typologyResult: typologyResults, review } = await handleTypologies(transaction, networkMap, typologyResult);
 
     if (typologyResults.length && typologyResults.length === networkMap.messages[0].typologies.length) {
@@ -68,6 +68,8 @@ export const handleExecute = async (rawTransaction: any): Promise<void> => {
         result.report.tadpResult.prcgTm = CalculateDuration(startTime);
         await server.handleResponse(result);
       }
+
+      loggerService.log(`Transaction completed with a status of ${alert.status}`, functionName, transactionID);
     }
     apmTransaction?.end();
   } catch (e) {
