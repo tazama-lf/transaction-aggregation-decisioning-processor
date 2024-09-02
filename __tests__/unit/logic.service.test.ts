@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 /* eslint-disable */
-import { NetworkMap, Pacs002, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
-import { TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
+import { NetworkMap, Pacs002, RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import { TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 import { configuration } from '../../src/config';
 import { databaseManager, dbInit, runServer, server } from '../../src/index';
 import * as helpers from '../../src/services/helper.service';

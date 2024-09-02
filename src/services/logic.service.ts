@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 import apm from '../apm';
-import { Alert } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/Alert';
-import { CalculateDuration } from '@frmscoe/frms-coe-lib/lib/helpers/calculatePrcg';
+import { Alert } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/Alert';
+import { CalculateDuration } from '@tazama-lf/frms-coe-lib/lib/helpers/calculatePrcg';
 import { databaseManager, loggerService, server } from '../index';
 import { handleTypologies } from './helper.service';
-import { type Pacs002, type NetworkMap } from '@frmscoe/frms-coe-lib/lib/interfaces';
-import { type CMSRequest } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/CMSRequest';
-import { type TADPResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TADPResult';
-import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
-import { type MetaData } from '@frmscoe/frms-coe-lib/lib/interfaces/metaData';
+import { type Pacs002, type NetworkMap } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import { type CMSRequest } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/CMSRequest';
+import { type TADPResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TADPResult';
+import { type TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
+import { type MetaData } from '@tazama-lf/frms-coe-lib/lib/interfaces/metaData';
 import { configuration } from '../config';
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
