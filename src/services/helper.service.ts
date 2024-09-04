@@ -2,8 +2,8 @@
 
 import apm from '../apm';
 import { databaseManager, loggerService } from '..';
-import { type NetworkMap, type Pacs002 } from '@frmscoe/frms-coe-lib/lib/interfaces';
-import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
+import { type NetworkMap, type Pacs002 } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import { type TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 
 export const handleTypologies = async (
   transaction: Pacs002,
