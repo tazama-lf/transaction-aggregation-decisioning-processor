@@ -6,10 +6,10 @@ import { configuration } from './config';
  **/
 const apm = new Apm({
   serviceName: configuration.serviceName,
-  secretToken: configuration.apm?.secretToken,
-  serverUrl: configuration.apm?.url,
+  secretToken: configuration.apm?.apmSecretToken,
+  serverUrl: configuration.apm?.apmUrl,
   usePathAsTransactionName: true,
-  active: configuration.apm?.active?.toLowerCase() === 'true',
+  active: configuration.apm?.apmActive,
   transactionIgnoreUrls: ['/health'],
 });
 

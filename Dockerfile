@@ -40,26 +40,21 @@ COPY service.yaml ./
 # Turn down the verbosity to default level.
 ENV NPM_CONFIG_LOGLEVEL info
 
-ENV mode="http"
-ENV upstream_url="http://127.0.0.1:3000"
 ENV exec_timeout="10s"
 ENV write_timeout="15s"
 ENV read_timeout="15s"
-ENV prefix_logs="false"
-ENV MAX_CPU=
 
 # Service-Based Environment Variables
 ENV FUNCTION_NAME=transaction-aggregation-decisioning-processor
 ENV NODE_ENV=production
-ENV SERVER_URL=
-ENV CMS_ENDPOINT=
+ENV MAX_CPU=
 
 ENV TRANSACTION_ROUTING_HOST=localhost
 ENV TRANSACTION_ROUTING_PORT=3000
 ENV TRANSACTION_ROUTING_PATH=result-test
 
 # Redis
-ENV REDIS_DB=0
+ENV REDIS_DATABASE=0
 ENV REDIS_AUTH=
 ENV REDIS_SERVERS=
 ENV REDIS_IS_CLUSTER=
@@ -71,11 +66,11 @@ ENV TRANSACTION_HISTORY_DATABASE_USER='root'
 ENV TRANSACTION_HISTORY_DATABASE_PASSWORD=
 ENV TRANSACTION_HISTORY_DATABASE='transactionHistory'
 
-ENV CONFIG_DATABASE_CERT_PATH='/usr/local/share/ca-certificates/ca-certificates.crt'
-ENV CONFIG_DATABASE_URL=
-ENV CONFIG_DATABASE_USER='root'
-ENV CONFIG_DATABASE_PASSWORD=
-ENV CONFIG_DATABASE='configuration'
+ENV CONFIGURATION_DATABASE_CERT_PATH='/usr/local/share/ca-certificates/ca-certificates.crt'
+ENV CONFIGURATION_DATABASE_URL=
+ENV CONFIGURATION_DATABASE_USER='root'
+ENV CONFIGURATION_DATABASE_PASSWORD=
+ENV CONFIGURATION_DATABASE='configuration'
 
 ENV TRANSACTION_DATABASE_CERT_PATH='/usr/local/share/ca-certificates/ca-certificates.crt'
 ENV TRANSACTION_DATABASE_URL=
@@ -84,7 +79,7 @@ ENV TRANSACTION_DATABASE_PASSWORD=
 ENV TRANSACTION_DATABASE='evaluationResults'
 
 ENV CACHE_ENABLED=
-ENV CACHE_TTL=30
+ENV CACHETTL=30
 
 # Alert
 ENV SUPPRESS_ALERTS=false
@@ -107,10 +102,6 @@ ENV ACK_POLICY=Explicit
 ENV PRODUCER_STORAGE=File
 ENV PRODUCER_RETENTION_POLICY=Workqueue
 ENV SIDECAR_HOST=0.0.0.0:5000
-
-# Set healthcheck command
-HEALTHCHECK --interval=3s CMD [ -e /tmp/.lock ] || exit 1
-EXPOSE 4222
 
 # Execute watchdog command
 CMD ["build/index.js"]

@@ -11,7 +11,7 @@ import { Singleton } from './services/services';
 
 const databaseManagerConfig = configuration.db;
 
-export const loggerService: LoggerService = new LoggerService(configuration.sidecarHost);
+export const loggerService: LoggerService = new LoggerService(configuration.logger.sidecarHost);
 let databaseManager: DatabaseManagerInstance<typeof databaseManagerConfig>;
 
 export const dbInit = async (): Promise<void> => {

@@ -3,6 +3,16 @@
 import * as path from 'path';
 import * as dotenv from 'dotenv';
 import { type ManagerConfig } from '@tazama-lf/frms-coe-lib';
+import {
+  validateDatabaseConfig,
+  validateEnvVar,
+  validateLogConfig,
+  validateRedisConfig,
+  validateAPMConfig,
+  validateProcessorConfig,
+} from '@tazama-lf/frms-coe-lib/lib/helpers/env';
+import { Database } from '@tazama-lf/frms-coe-lib/lib/helpers/env/database.config';
+import { type ApmConfig, type LogConfig } from '@tazama-lf/frms-coe-lib/lib/helpers/env/monitoring.config';
 
 // Load .env file into process.env if it exists. This is convenient for running locally.
 dotenv.config({
@@ -13,68 +23,34 @@ export interface IConfig {
   maxCPU: number;
   env: string;
   serviceName: string;
-  apm: {
-    secretToken: string;
-    url: string;
-    active: string;
-  };
+  apm: ApmConfig;
   db: ManagerConfig;
-  logger: {
-    logstashHost: string;
-    logstashPort: number;
-    logstashLevel: string;
-  };
-  sidecarHost: string;
+  logger: LogConfig;
   producerStream: string;
   suppressAlerts: boolean;
 }
 
+const generalConfig = validateProcessorConfig();
+const authEnabled = generalConfig.nodeEnv === 'production';
+const redisConfig = validateRedisConfig(authEnabled);
+const transactionHistory = validateDatabaseConfig(authEnabled, Database.TRANSACTION_HISTORY);
+const transaction = validateDatabaseConfig(authEnabled, Database.TRANSACTION);
+const configDBConfig = validateDatabaseConfig(authEnabled, Database.CONFIGURATION);
+const apm = validateAPMConfig();
+const logger = validateLogConfig();
+
 export const configuration: IConfig = {
-  maxCPU: parseInt(process.env.MAX_CPU!, 10) || 1,
-  serviceName: process.env.FUNCTION_NAME!,
-  apm: {
-    url: process.env.APM_URL!,
-    secretToken: process.env.APM_SECRET_TOKEN!,
-    active: process.env.APM_ACTIVE!,
-  },
+  maxCPU: generalConfig.maxCPU || 1,
+  serviceName: generalConfig.functionName,
+  apm,
   db: {
-    redisConfig: {
-      db: parseInt(process.env.REDIS_DB!, 10) || 0,
-      servers: JSON.parse(process.env.REDIS_SERVERS! || '[{"hostname": "127.0.0.1", "port":6379}]'),
-      password: process.env.REDIS_AUTH!,
-      isCluster: process.env.REDIS_IS_CLUSTER === 'true',
-    },
-    configuration: {
-      password: process.env.CONFIG_DATABASE_PASSWORD!,
-      url: process.env.CONFIG_DATABASE_URL!,
-      user: process.env.CONFIG_DATABASE_USER!,
-      databaseName: process.env.CONFIG_DATABASE!,
-      certPath: process.env.CONFIG_DATABASE_CERT_PATH!,
-      localCacheEnabled: process.env.CACHE_ENABLED === 'true',
-      localCacheTTL: parseInt(process.env.CACHE_TTL!, 10) || 3000,
-    },
-    transactionHistory: {
-      password: process.env.TRANSACTION_HISTORY_DATABASE_PASSWORD!,
-      url: process.env.TRANSACTION_HISTORY_DATABASE_URL!,
-      user: process.env.TRANSACTION_HISTORY_DATABASE_USER!,
-      databaseName: process.env.TRANSACTION_HISTORY_DATABASE!,
-      certPath: process.env.TRANSACTION_HISTORY_DATABASE_CERT_PATH!,
-    },
-    transaction: {
-      password: process.env.TRANSACTION_DATABASE_PASSWORD!,
-      url: process.env.TRANSACTION_DATABASE_URL!,
-      user: process.env.TRANSACTION_DATABASE_USER!,
-      databaseName: process.env.TRANSACTION_DATABASE!,
-      certPath: process.env.TRANSACTION_DATABASE_CERT_PATH!,
-    },
+    redisConfig,
+    configuration: configDBConfig,
+    transactionHistory,
+    transaction,
   },
-  env: process.env.NODE_ENV!,
-  logger: {
-    logstashHost: process.env.LOGSTASH_HOST!,
-    logstashPort: parseInt(process.env.LOGSTASH_PORT ?? '0', 10),
-    logstashLevel: process.env.LOGSTASH_LEVEL! || 'info',
-  },
-  sidecarHost: process.env.SIDECAR_HOST!,
-  producerStream: process.env.PRODUCER_STREAM!,
-  suppressAlerts: process.env.SUPPRESS_ALERTS === 'true',
+  env: generalConfig.nodeEnv || 'dev',
+  logger,
+  producerStream: validateEnvVar('PRODUCER_STREAM', 'string'),
+  suppressAlerts: validateEnvVar('SUPPRESS_ALERTS', 'boolean'),
 };

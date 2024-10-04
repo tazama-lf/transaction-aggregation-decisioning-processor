@@ -6,6 +6,46 @@ import { databaseManager, dbInit, runServer, server } from '../../src/index';
 import * as helpers from '../../src/services/helper.service';
 import { handleTypologies } from '../../src/services/helper.service';
 
+jest.mock('@tazama-lf/frms-coe-lib/lib/helpers/env', () => ({
+  validateAPMConfig: jest.fn().mockReturnValue({
+    apmServiceName: '',
+  }),
+  validateLogConfig: jest.fn().mockReturnValue({}),
+  validateProcessorConfig: jest.fn().mockReturnValue({
+    functionName: 'test-ed',
+    nodeEnv: 'test',
+  }),
+  validateEnvVar: jest.fn().mockReturnValue(''),
+  validateRedisConfig: jest.fn().mockReturnValue({
+    db: 0,
+    servers: [
+      {
+        host: 'redis://localhost',
+        port: 6379,
+      },
+    ],
+    password: '',
+    isCluster: false,
+  }),
+  validateDatabaseConfig: jest.fn().mockReturnValue({}),
+}));
+
+jest.mock('@tazama-lf/frms-coe-lib/lib/helpers/env/database.config', () => ({
+  Database: {
+    CONFIGURATION: 'MOCK_DB',
+  },
+}));
+
+jest.mock('@tazama-lf/frms-coe-startup-lib/lib/interfaces/iStartupConfig', () => ({
+  startupConfig: {
+    startupType: 'nats',
+    consumerStreamName: 'consumer',
+    serverUrl: 'server',
+    producerStreamName: 'producer',
+    functionName: 'producer',
+  },
+}));
+
 describe('TADProc Service', () => {
   let responseSpy: jest.SpyInstance;
   beforeAll(async () => {
