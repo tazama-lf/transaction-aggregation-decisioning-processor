@@ -13,6 +13,7 @@ jest.mock('@tazama-lf/frms-coe-lib/lib/helpers/env', () => ({
   validateAPMConfig: jest.fn().mockReturnValue({
     apmServiceName: '',
   }),
+  validateLocalCacheConfig: jest.fn().mockReturnValue({}),
   validateLogConfig: jest.fn().mockReturnValue({}),
   validateProcessorConfig: jest.fn().mockReturnValue({
     functionName: 'test-ed',

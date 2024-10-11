@@ -10,6 +10,7 @@ import {
   validateRedisConfig,
   validateAPMConfig,
   validateProcessorConfig,
+  validateLocalCacheConfig,
 } from '@tazama-lf/frms-coe-lib/lib/helpers/env';
 import { Database } from '@tazama-lf/frms-coe-lib/lib/helpers/env/database.config';
 import { type ApmConfig, type LogConfig } from '@tazama-lf/frms-coe-lib/lib/helpers/env/monitoring.config';
@@ -38,6 +39,7 @@ const transaction = validateDatabaseConfig(authEnabled, Database.TRANSACTION);
 const configDBConfig = validateDatabaseConfig(authEnabled, Database.CONFIGURATION);
 const apm = validateAPMConfig();
 const logger = validateLogConfig();
+const localCacheConfig = validateLocalCacheConfig();
 
 export const configuration: IConfig = {
   maxCPU: generalConfig.maxCPU || 1,
@@ -48,6 +50,7 @@ export const configuration: IConfig = {
     configuration: configDBConfig,
     transactionHistory,
     transaction,
+    localCacheConfig,
   },
   env: generalConfig.nodeEnv || 'dev',
   logger,
