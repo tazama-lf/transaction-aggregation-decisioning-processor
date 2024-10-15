@@ -2,58 +2,30 @@
 // config settings, env variables
 import * as path from 'path';
 import * as dotenv from 'dotenv';
-import { type ManagerConfig } from '@tazama-lf/frms-coe-lib';
-import {
-  validateDatabaseConfig,
-  validateEnvVar,
-  validateLogConfig,
-  validateRedisConfig,
-  validateAPMConfig,
-  validateProcessorConfig,
-  validateLocalCacheConfig,
-} from '@tazama-lf/frms-coe-lib/lib/helpers/env';
-import { Database } from '@tazama-lf/frms-coe-lib/lib/helpers/env/database.config';
-import { type ApmConfig, type LogConfig } from '@tazama-lf/frms-coe-lib/lib/helpers/env/monitoring.config';
+import type { AdditionalConfig, ProcessorConfig } from '@tazama-lf/frms-coe-lib/lib/config/processor.config';
+import type { DatabasesConfig } from './services/services';
 
 // Load .env file into process.env if it exists. This is convenient for running locally.
 dotenv.config({
   path: path.resolve(__dirname, '../.env'),
 });
 
-export interface IConfig {
-  maxCPU: number;
-  env: string;
-  serviceName: string;
-  apm: ApmConfig;
-  db: ManagerConfig;
-  logger: LogConfig;
-  producerStream: string;
-  suppressAlerts: boolean;
+export interface ExtendedConfig {
+  PRODUCER_STREAM: string;
+  SUPPRESS_ALERTS: boolean;
 }
 
-const generalConfig = validateProcessorConfig();
-const authEnabled = generalConfig.nodeEnv === 'production';
-const redisConfig = validateRedisConfig(authEnabled);
-const transactionHistory = validateDatabaseConfig(authEnabled, Database.TRANSACTION_HISTORY);
-const transaction = validateDatabaseConfig(authEnabled, Database.TRANSACTION);
-const configDBConfig = validateDatabaseConfig(authEnabled, Database.CONFIGURATION);
-const apm = validateAPMConfig();
-const logger = validateLogConfig();
-const localCacheConfig = validateLocalCacheConfig();
-
-export const configuration: IConfig = {
-  maxCPU: generalConfig.maxCPU || 1,
-  serviceName: generalConfig.functionName,
-  apm,
-  db: {
-    redisConfig,
-    configuration: configDBConfig,
-    transactionHistory,
-    transaction,
-    localCacheConfig,
+export const additionalEnvironmentVariables: AdditionalConfig[] = [
+  {
+    name: 'SUPPRESS_ALERTS',
+    type: 'boolean',
+    optional: false,
   },
-  env: generalConfig.nodeEnv || 'dev',
-  logger,
-  producerStream: validateEnvVar('PRODUCER_STREAM', 'string'),
-  suppressAlerts: validateEnvVar('SUPPRESS_ALERTS', 'boolean'),
-};
+  {
+    name: 'PRODUCER_STREAM',
+    type: 'string',
+    optional: false,
+  },
+];
+
+export type Configuration = ProcessorConfig & DatabasesConfig & ExtendedConfig;
