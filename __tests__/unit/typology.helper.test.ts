@@ -6,8 +6,6 @@ import { databaseManager, dbInit, runServer, server } from '../../src/index';
 import * as helpers from '../../src/services/helper.service';
 import { handleTypologies } from '../../src/services/helper.service';
 
-jest.mock('@tazama-lf/frms-coe-lib/lib/helpers/env', () => ({}));
-
 jest.mock('@tazama-lf/frms-coe-lib/lib/services/dbManager', () => ({
   CreateStorageManager: jest.fn().mockReturnValue({
     db: {
@@ -20,12 +18,6 @@ jest.mock('@tazama-lf/frms-coe-lib/lib/services/dbManager', () => ({
       isReadyCheck: jest.fn().mockReturnValue({ nodeEnv: 'test' }),
     },
   }),
-}));
-
-jest.mock('@tazama-lf/frms-coe-lib/lib/helpers/env/database.config', () => ({
-  Database: {
-    CONFIGURATION: 'MOCK_DB',
-  },
 }));
 
 jest.mock('@tazama-lf/frms-coe-startup-lib/lib/interfaces/iStartupConfig', () => ({

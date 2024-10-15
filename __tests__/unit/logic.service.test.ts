@@ -8,8 +8,6 @@ import { handleExecute } from '../../src/services/logic.service';
 
 let cacheString: string | number | Buffer;
 
-jest.mock('@tazama-lf/frms-coe-lib/lib/helpers/env', () => ({}));
-
 jest.mock('@tazama-lf/frms-coe-lib/lib/services/dbManager', () => ({
   CreateStorageManager: jest.fn().mockReturnValue({
     db: {
