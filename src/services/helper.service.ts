@@ -29,9 +29,10 @@ export const handleTypologies = async (
 
     // else means we have all results for Typologies, so lets evaluate result
     const jtypologyResults = await databaseManager.getMemberValues(cacheKey);
-    const typologyResults: TypologyResult[] = jtypologyResults.map(
-      (jtypologyResult: { typologyResult: TypologyResult }) => jtypologyResult.typologyResult,
-    );
+    const typologyResults: TypologyResult[] = jtypologyResults.map((jtypologyResult) => {
+      const tpResult = jtypologyResult as { typologyResult: TypologyResult };
+      return tpResult.typologyResult;
+    });
     if (!typologyResults || !typologyResults.length) {
       return {
         review: false,
