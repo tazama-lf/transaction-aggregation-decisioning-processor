@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 import apm from '../apm';
-import { Alert } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/Alert';
-import { CalculateDuration } from '@frmscoe/frms-coe-lib/lib/helpers/calculatePrcg';
-import { databaseManager, loggerService, server } from '../index';
+import { Alert } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/Alert';
+import { CalculateDuration } from '@tazama-lf/frms-coe-lib/lib/helpers/calculatePrcg';
+import { configuration, databaseManager, loggerService, server } from '../index';
 import { handleTypologies } from './helper.service';
-import { type Pacs002, type NetworkMap } from '@frmscoe/frms-coe-lib/lib/interfaces';
-import { type CMSRequest } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/CMSRequest';
-import { type TADPResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TADPResult';
-import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
-import { type MetaData } from '@frmscoe/frms-coe-lib/lib/interfaces/metaData';
-import { configuration } from '../config';
+import { type Pacs002, type NetworkMap } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import { type CMSRequest } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/CMSRequest';
+import { type TADPResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TADPResult';
+import { type TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
+import { type MetaData } from '@tazama-lf/frms-coe-lib/lib/interfaces/metaData';
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export const handleExecute = async (rawTransaction: any): Promise<void> => {
@@ -40,7 +39,7 @@ export const handleExecute = async (rawTransaction: any): Promise<void> => {
 
     const typologies = networkMap.messages[0].typologies.filter((t) => t.id === typologyResult.id && t.cfg === typologyResult.cfg);
 
-    loggerService.debug(`Processing Typology ${typologyResult.id}.`, functionName, transactionID);
+    loggerService.debug(`Processing Typology ${typologyResult.cfg}.`, functionName, transactionID);
     const { typologyResult: typologyResults, review } = await handleTypologies(transaction, networkMap, typologyResult);
 
     if (typologyResults.length && typologyResults.length === networkMap.messages[0].typologies.length) {
@@ -57,7 +56,7 @@ export const handleExecute = async (rawTransaction: any): Promise<void> => {
       const spanInsertTransactionHistory = apm.startSpan('db.insert.transactionHistory');
       await databaseManager.insertTransaction(transactionID, transaction, networkMap, alert);
       spanInsertTransactionHistory?.end();
-      if (!configuration.suppressAlerts) {
+      if (!configuration.SUPPRESS_ALERTS) {
         const result: CMSRequest = {
           message: `Successfully completed ${typologies.length} typologies`,
           report: alert,
@@ -68,6 +67,8 @@ export const handleExecute = async (rawTransaction: any): Promise<void> => {
         result.report.tadpResult.prcgTm = CalculateDuration(startTime);
         await server.handleResponse(result);
       }
+
+      loggerService.log(`Transaction completed with a status of ${alert.status}`, functionName, transactionID);
     }
     apmTransaction?.end();
   } catch (e) {

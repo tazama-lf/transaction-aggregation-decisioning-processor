@@ -1,14 +1,34 @@
 // SPDX-License-Identifier: Apache-2.0
 /* eslint-disable */
-import { NetworkMap, Pacs002, RuleResult } from '@frmscoe/frms-coe-lib/lib/interfaces';
-import { TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
-import { configuration } from '../../src/config';
-import { databaseManager, dbInit, runServer, server } from '../../src/index';
+import { NetworkMap, Pacs002, RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import { TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
+import { configuration, databaseManager, dbInit, runServer, server } from '../../src/index';
 import * as helpers from '../../src/services/helper.service';
 import { handleExecute } from '../../src/services/logic.service';
 
 let cacheString: string | number | Buffer;
 
+jest.mock('@tazama-lf/frms-coe-lib/lib/services/dbManager', () => ({
+  CreateStorageManager: jest.fn().mockReturnValue({
+    db: {
+      insertTransaction: jest.fn(),
+      addOneGetCount: jest.fn(),
+      getMemberValues: jest.fn(),
+      deleteKey: jest.fn(),
+      isReadyCheck: jest.fn().mockReturnValue({ nodeEnv: 'test' }),
+    },
+  }),
+}));
+
+jest.mock('@tazama-lf/frms-coe-startup-lib/lib/interfaces/iStartupConfig', () => ({
+  startupConfig: {
+    startupType: 'nats',
+    consumerStreamName: 'consumer',
+    serverUrl: 'server',
+    producerStreamName: 'producer',
+    functionName: 'producer',
+  },
+}));
 describe('TADProc Service', () => {
   beforeAll(async () => {
     await dbInit();
@@ -85,6 +105,7 @@ describe('TADProc Service', () => {
     it('should handle a successful transaction, complete.', async () => {
       const expectedReq = getMockTransaction();
       const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      configuration.SUPPRESS_ALERTS = false;
 
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = {
@@ -174,7 +195,7 @@ describe('TADProc Service', () => {
       const expectedReq = getMockTransaction();
       const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
 
-      configuration.suppressAlerts = true;
+      configuration.SUPPRESS_ALERTS = true;
 
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = {
@@ -215,7 +236,7 @@ describe('TADProc Service', () => {
       expect(typologySpy).toHaveBeenCalledTimes(1);
       expect(responseSpy).toHaveBeenCalledTimes(0); // suppressed
 
-      configuration.suppressAlerts = false;
+      configuration.SUPPRESS_ALERTS = false;
     });
 
     it('should handle a unsuccessful transaction, catch error.', async () => {
