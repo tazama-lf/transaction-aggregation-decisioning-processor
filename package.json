@@ -17,7 +17,7 @@
     "lint:eslint-no-inline": "eslint --no-inline-config \"**/*.ts\"",
     "lint:prettier": "prettier --check \"**/*.ts\"",
     "prepare": "husky",
-    "test": "jest --config=jest.config.ts --passWithNoTests --forceExit",
+    "test": "jest --config=jest.config.ts --passWithNoTests --maxWorkers 2",
     "test:watch": "jest --config=jest.config.ts --watch"
   },
   "keywords": [
@@ -41,8 +41,8 @@
   ],
   "license": "Apache-2.0",
   "dependencies": {
-    "@tazama-lf/frms-coe-lib": "^5.0.0-rc.3",
-    "@tazama-lf/frms-coe-startup-lib": "2.3.0-rc.4",
+    "@tazama-lf/frms-coe-lib": "^5.0.0-rc.4",
+    "@tazama-lf/frms-coe-startup-lib": "2.3.0-rc.5",
     "dotenv": "^16.4.5",
     "tslib": "^2.6.3"
   },
