@@ -2,8 +2,8 @@
 
 import apm from '../apm';
 import { databaseManager, loggerService } from '..';
-import { type NetworkMap, type Pacs002 } from '@frmscoe/frms-coe-lib/lib/interfaces';
-import { type TypologyResult } from '@frmscoe/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
+import { type NetworkMap, type Pacs002 } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import { type TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 
 export const handleTypologies = async (
   transaction: Pacs002,
@@ -29,9 +29,10 @@ export const handleTypologies = async (
 
     // else means we have all results for Typologies, so lets evaluate result
     const jtypologyResults = await databaseManager.getMemberValues(cacheKey);
-    const typologyResults: TypologyResult[] = jtypologyResults.map(
-      (jtypologyResult: { typologyResult: TypologyResult }) => jtypologyResult.typologyResult,
-    );
+    const typologyResults: TypologyResult[] = jtypologyResults.map((jtypologyResult) => {
+      const tpResult = jtypologyResult as { typologyResult: TypologyResult };
+      return tpResult.typologyResult;
+    });
     if (!typologyResults || !typologyResults.length) {
       return {
         review: false,

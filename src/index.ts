@@ -1,21 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
 import './apm';
-import { LoggerService, type DatabaseManagerInstance } from '@frmscoe/frms-coe-lib';
-import { StartupFactory, type IStartupService } from '@frmscoe/frms-coe-startup-lib';
-import { getRoutesFromNetworkMap } from '@frmscoe/frms-coe-lib/lib/helpers/networkMapIdentifiers';
+import { LoggerService, type DatabaseManagerInstance } from '@tazama-lf/frms-coe-lib';
+import { StartupFactory, type IStartupService } from '@tazama-lf/frms-coe-startup-lib';
+import { getRoutesFromNetworkMap } from '@tazama-lf/frms-coe-lib/lib/helpers/networkMapIdentifiers';
 import cluster from 'cluster';
 import os from 'os';
-import { configuration } from './config';
+import { additionalEnvironmentVariables, type Configuration } from './config';
 import { handleExecute } from './services/logic.service';
-import { Singleton } from './services/services';
+import { type DatabasesConfig, Singleton } from './services/services';
+import { validateProcessorConfig } from '@tazama-lf/frms-coe-lib/lib/config/processor.config';
 
-const databaseManagerConfig = configuration.db;
-
-export const loggerService: LoggerService = new LoggerService(configuration.sidecarHost);
-let databaseManager: DatabaseManagerInstance<typeof databaseManagerConfig>;
+let configuration = validateProcessorConfig(additionalEnvironmentVariables) as Configuration;
+export const loggerService: LoggerService = new LoggerService(configuration);
+let databaseManager: DatabaseManagerInstance<DatabasesConfig>;
 
 export const dbInit = async (): Promise<void> => {
-  databaseManager = await Singleton.getDatabaseManager(databaseManagerConfig);
+  const { db, config } = await Singleton.getDatabaseManager(configuration);
+  databaseManager = db;
+  configuration = { ...configuration, ...config };
 };
 
 /*
@@ -25,12 +27,12 @@ export let server: IStartupService;
 
 export const runServer = async (): Promise<void> => {
   server = new StartupFactory();
-  if (configuration.env !== 'test') {
+  if (configuration.nodeEnv !== 'test') {
     let isConnected = false;
     for (let retryCount = 0; retryCount < 10; retryCount++) {
       loggerService.log('Connecting to nats server...');
-      const { consumers } = await getRoutesFromNetworkMap(databaseManager, configuration.serviceName);
-      if (!(await server.init(handleExecute, undefined, consumers, configuration.producerStream))) {
+      const { consumers } = await getRoutesFromNetworkMap(databaseManager, configuration.functionName);
+      if (!(await server.init(handleExecute, undefined, consumers, configuration.PRODUCER_STREAM))) {
         await new Promise((resolve) => setTimeout(resolve, 5000));
       } else {
         loggerService.log('Connected to nats');
@@ -72,7 +74,7 @@ if (cluster.isPrimary && configuration.maxCPU !== 1) {
   // In this case it is an HTTP server
   (async () => {
     try {
-      if (configuration.env !== 'test') {
+      if (configuration.nodeEnv !== 'test') {
         await dbInit();
         await runServer();
       }
@@ -84,4 +86,4 @@ if (cluster.isPrimary && configuration.maxCPU !== 1) {
   loggerService.log(`Worker ${process.pid} started`);
 }
 
-export { databaseManager };
+export { configuration, databaseManager };
