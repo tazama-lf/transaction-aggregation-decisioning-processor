@@ -1,18 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
 import './apm';
+
 import { LoggerService, type DatabaseManagerInstance } from '@tazama-lf/frms-coe-lib';
-import { StartupFactory, type IStartupService } from '@tazama-lf/frms-coe-startup-lib';
+import { validateProcessorConfig } from '@tazama-lf/frms-coe-lib/lib/config/processor.config';
 import { getRoutesFromNetworkMap } from '@tazama-lf/frms-coe-lib/lib/helpers/networkMapIdentifiers';
-import cluster from 'cluster';
-import os from 'os';
+import { StartupFactory, type IStartupService } from '@tazama-lf/frms-coe-startup-lib';
+import cluster from 'node:cluster';
+import os from 'node:os';
+import { setTimeout } from 'node:timers/promises';
+import * as util from 'node:util';
 import { additionalEnvironmentVariables, type Configuration } from './config';
 import { handleExecute } from './services/logic.service';
-import { type DatabasesConfig, Singleton } from './services/services';
-import { validateProcessorConfig } from '@tazama-lf/frms-coe-lib/lib/config/processor.config';
+import { Singleton } from './services/services';
 
 let configuration = validateProcessorConfig(additionalEnvironmentVariables) as Configuration;
 export const loggerService: LoggerService = new LoggerService(configuration);
-let databaseManager: DatabaseManagerInstance<DatabasesConfig>;
+let databaseManager: DatabaseManagerInstance<Configuration>;
 
 export const dbInit = async (): Promise<void> => {
   const { db, config } = await Singleton.getDatabaseManager(configuration);
@@ -33,7 +36,7 @@ export const runServer = async (): Promise<void> => {
       loggerService.log('Connecting to nats server...');
       const { consumers } = await getRoutesFromNetworkMap(databaseManager, configuration.functionName);
       if (!(await server.init(handleExecute, undefined, consumers, configuration.PRODUCER_STREAM))) {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await setTimeout(5000);
       } else {
         loggerService.log('Connected to nats');
         isConnected = true;
@@ -48,11 +51,11 @@ export const runServer = async (): Promise<void> => {
 };
 
 process.on('uncaughtException', (err) => {
-  loggerService.error('process on uncaughtException error', err, 'index.ts');
+  loggerService.error('process on uncaughtException error', util.inspect(err), 'index.ts');
 });
 
 process.on('unhandledRejection', (err) => {
-  loggerService.error(`process on unhandledRejection error: ${JSON.stringify(err) ?? '[NoMetaData]'}`);
+  loggerService.error(`process on unhandledRejection error: ${util.inspect(err)}`);
 });
 
 const numCPUs = os.cpus().length > configuration.maxCPU ? configuration.maxCPU + 1 : os.cpus().length + 1;
@@ -71,7 +74,6 @@ if (cluster.isPrimary && configuration.maxCPU !== 1) {
   });
 } else {
   // Workers can share any TCP connection
-  // In this case it is an HTTP server
   (async () => {
     try {
       if (configuration.nodeEnv !== 'test') {
