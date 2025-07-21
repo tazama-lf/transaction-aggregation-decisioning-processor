@@ -6,5 +6,5 @@ process.env.SUPPRESS_ALERTS = 'true';
 process.env.PRODUCER_STREAM = 'stream';
 
 process.env.APM_ACTIVE = 'false';
-process.env.APM_SERVICE_NAME = '';
-process.env.APM_URL = '';
+process.env.APM_SERVICE_NAME = 'test';
+process.env.APM_URL = 'test';
