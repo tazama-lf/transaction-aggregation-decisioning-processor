@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 // config settings, env variables
-import * as path from 'path';
-import * as dotenv from 'dotenv';
+import type { ManagerConfig } from '@tazama-lf/frms-coe-lib';
 import type { AdditionalConfig, ProcessorConfig } from '@tazama-lf/frms-coe-lib/lib/config/processor.config';
-import type { DatabasesConfig } from './services/services';
+import * as dotenv from 'dotenv';
+import * as path from 'node:path';
 
 // Load .env file into process.env if it exists. This is convenient for running locally.
 dotenv.config({
@@ -28,4 +28,5 @@ export const additionalEnvironmentVariables: AdditionalConfig[] = [
   },
 ];
 
+export type DatabasesConfig = Omit<Required<ManagerConfig>, 'pseudonyms'>;
 export type Configuration = ProcessorConfig & DatabasesConfig & ExtendedConfig;
