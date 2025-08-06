@@ -14,7 +14,7 @@ import type { DataCache } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 export const handleExecute = async (req: unknown): Promise<void> => {
   const functionName = 'handleExecute()';
   let apmTransaction = null;
-  const parsedReq = req as TADPRequest & { DataCache: DataCache};
+  const parsedReq = req as TADPRequest & { DataCache: DataCache };
   try {
     const startTime = process.hrtime.bigint();
 
