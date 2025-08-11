@@ -9,14 +9,23 @@ export const handleTypologies = async (
   transaction: Pacs002,
   networkMap: NetworkMap,
   typologyResult: TypologyResult,
+  tenantId: string,
 ): Promise<{ typologyResult: TypologyResult[]; review: boolean }> => {
   let span;
   const functionName = 'handleTypologies()';
   try {
     const [{ typologies }] = networkMap.messages;
     const transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
-    const cacheKey = `TADP_${transactionID}_TP`;
-    const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, { typologyResult: { ...typologyResult } });
+    // Include tenantId in cache key to ensure tenant separation
+    const cacheKey = `TADP_${tenantId}_${transactionID}_TP`;
+
+    // Include tenantId in the stored typology result
+    const typologyResultWithTenant = {
+      ...typologyResult,
+      tenantId,
+    };
+
+    const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, { typologyResult: typologyResultWithTenant });
 
     // Check if all typologyResults have been stored
     // Compare with configured network map's typologies
@@ -29,10 +38,16 @@ export const handleTypologies = async (
 
     // else means we have all results for Typologies, so lets evaluate result
     const jtypologyResults = await databaseManager.getMemberValues(cacheKey);
-    const typologyResults: TypologyResult[] = jtypologyResults.map((jtypologyResult) => {
-      const tpResult = jtypologyResult as { typologyResult: TypologyResult };
-      return tpResult.typologyResult;
-    });
+    const typologyResults: TypologyResult[] = jtypologyResults
+      .map((jtypologyResult) => {
+        const tpResult = jtypologyResult as { typologyResult: TypologyResult & { tenantId: string } };
+        // Filter by tenantId to ensure we only get results for this specific tenant
+        if (tpResult.typologyResult.tenantId === tenantId) {
+          return tpResult.typologyResult;
+        }
+        return null;
+      })
+      .filter(Boolean) as TypologyResult[];
     if (!typologyResults.length) {
       return {
         review: false,
@@ -47,7 +62,7 @@ export const handleTypologies = async (
     if (!message) {
       let innerError;
       loggerService.error(
-        `Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request , Message missing from networkmap.`,
+        `Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request for tenant ${tenantId}, Message missing from networkmap.`,
         innerError,
         functionName,
         transactionID,
@@ -73,7 +88,11 @@ export const handleTypologies = async (
     return { typologyResult: typologyResults, review };
   } catch (error) {
     span?.end();
-    loggerService.error(`Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request`, error as Error, functionName);
+    loggerService.error(
+      `Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request for tenant ${tenantId}`,
+      error as Error,
+      functionName,
+    );
     return {
       review: false,
       typologyResult: [],
