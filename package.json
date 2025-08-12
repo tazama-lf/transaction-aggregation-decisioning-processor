@@ -24,7 +24,7 @@
     "tazama",
     "frm"
   ],
-  "author": "tazama",
+  "author": "Tazama.org",
   "license": "Apache-2.0",
   "dependencies": {
     "@tazama-lf/frms-coe-lib": "5.1.1",
