@@ -21,24 +21,10 @@
     "test:watch": "jest --config=jest.config.ts --watch"
   },
   "keywords": [
-    "mojaloop",
     "tazama",
     "frm"
   ],
-  "contributors": [
-    {
-      "name": "Aaron Reynoza",
-      "email": "ldaaron38@gmail.com"
-    },
-    {
-      "name": "Joey Goksu",
-      "email": "me@joeygoksu.com"
-    },
-    {
-      "name": "Theophilus Okwugwuni",
-      "email": "theophilusdev@gmail.com"
-    }
-  ],
+  "author": "tazama",
   "license": "Apache-2.0",
   "dependencies": {
     "@tazama-lf/frms-coe-lib": "5.1.1",
