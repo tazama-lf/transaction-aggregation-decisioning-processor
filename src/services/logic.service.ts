@@ -1,33 +1,33 @@
 // SPDX-License-Identifier: Apache-2.0
 import apm from '../apm';
-import { Alert } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/Alert';
+
 import { CalculateDuration } from '@tazama-lf/frms-coe-lib/lib/helpers/calculatePrcg';
+import type { MetaData } from '@tazama-lf/frms-coe-lib/lib/interfaces/metaData';
+import { Alert } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/Alert';
+import type { CMSRequest } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/CMSRequest';
+import type { TADPRequest } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TADPRequest';
+import type { TADPResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TADPResult';
 import { configuration, databaseManager, loggerService, server } from '../index';
 import { handleTypologies } from './helper.service';
-import { type Pacs002, type NetworkMap } from '@tazama-lf/frms-coe-lib/lib/interfaces';
-import { type CMSRequest } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/CMSRequest';
-import { type TADPResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TADPResult';
-import { type TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
-import { type MetaData } from '@tazama-lf/frms-coe-lib/lib/interfaces/metaData';
+import type { DataCache } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-export const handleExecute = async (rawTransaction: any): Promise<void> => {
+export const handleExecute = async (req: unknown): Promise<void> => {
   const functionName = 'handleExecute()';
   let apmTransaction = null;
+  const parsedReq = req as TADPRequest & { DataCache: DataCache };
   try {
     const startTime = process.hrtime.bigint();
 
     // Get the request body and parse it to variables
-    const metaData = rawTransaction?.metaData as MetaData;
-    const transaction = rawTransaction.transaction as Pacs002;
+    const metaData = parsedReq.metaData as MetaData | undefined;
+    const { transaction, networkMap, typologyResult } = parsedReq;
     const transactionType = 'FIToFIPmtSts';
     const transactionID = transaction[transactionType].GrpHdr.MsgId;
-    const networkMap = rawTransaction.networkMap as NetworkMap;
-    const typologyResult = rawTransaction.typologyResult as TypologyResult;
 
-    const traceParent = metaData?.traceParent ?? undefined;
+    const dataCache = parsedReq.DataCache;
+
     apmTransaction = apm.startTransaction('handle.execute', {
-      childOf: traceParent,
+      childOf: typeof metaData?.traceParent === 'string' ? metaData.traceParent : undefined,
     });
 
     const toReturn: TADPResult = {
@@ -53,9 +53,9 @@ export const handleExecute = async (rawTransaction: any): Promise<void> => {
       alert.status = review ? 'ALRT' : 'NALT';
       alert.metaData = metaData;
 
-      const spanInsertTransactionHistory = apm.startSpan('db.insert.transactionHistory');
-      await databaseManager.insertTransaction(transactionID, transaction, networkMap, alert);
-      spanInsertTransactionHistory?.end();
+      const spanInsertTransaction = apm.startSpan('db.insert.transaction');
+      await databaseManager.insertTransaction(transactionID, transaction, networkMap, alert, dataCache);
+      spanInsertTransaction?.end();
       if (!configuration.SUPPRESS_ALERTS) {
         const result: CMSRequest = {
           message: `Successfully completed ${typologies.length} typologies`,

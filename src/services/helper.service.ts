@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-
 import apm from '../apm';
+
 import { databaseManager, loggerService } from '..';
-import { type NetworkMap, type Pacs002 } from '@tazama-lf/frms-coe-lib/lib/interfaces';
-import { type TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
+import type { NetworkMap, Pacs002 } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import type { TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 
 export const handleTypologies = async (
   transaction: Pacs002,
@@ -13,7 +13,7 @@ export const handleTypologies = async (
   let span;
   const functionName = 'handleTypologies()';
   try {
-    const typologies = networkMap.messages[0].typologies;
+    const [{ typologies }] = networkMap.messages;
     const transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
     const cacheKey = `TADP_${transactionID}_TP`;
     const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, { typologyResult: { ...typologyResult } });
@@ -33,7 +33,7 @@ export const handleTypologies = async (
       const tpResult = jtypologyResult as { typologyResult: TypologyResult };
       return tpResult.typologyResult;
     });
-    if (!typologyResults || !typologyResults.length) {
+    if (!typologyResults.length) {
       return {
         review: false,
         typologyResult: [],
