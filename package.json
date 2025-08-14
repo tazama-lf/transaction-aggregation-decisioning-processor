@@ -14,7 +14,6 @@
     "lint": "npm run lint:eslint && npm run lint:prettier",
     "lint:eslint": "eslint",
     "lint:eslint-unused": "eslint --report-unused-disable-directives",
-    "lint:eslint-no-inline": "eslint --no-inline-config",
     "lint:prettier": "prettier --check \"**/*.ts\"",
     "prepare": "husky",
     "test": "jest --config=jest.config.ts --passWithNoTests --maxWorkers 2",
