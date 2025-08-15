@@ -29,6 +29,9 @@ export const handleExecute = async (req: unknown): Promise<void> => {
     // Extract tenantId from the TenantId attribute or default to 'default'
     const tenantId = TenantId ?? 'default';
 
+    // Pre-calculate alert subject to avoid repeated string concatenation in hot path
+    const alertSubject = configuration.ALERT_DESTINATION === 'tenant' ? [`${configuration.ALERT_PRODUCER}-${tenantId}`] : undefined;
+
     apmTransaction = apm.startTransaction('handle.execute', {
       childOf: typeof metaData?.traceParent === 'string' ? metaData.traceParent : undefined,
     });
@@ -69,16 +72,7 @@ export const handleExecute = async (req: unknown): Promise<void> => {
 
         result.report.tadpResult.prcgTm = CalculateDuration(startTime);
 
-        // Determine the destination subject based on ALERT_DESTINATION configuration
-        let subject: string[] | undefined;
-        if (configuration.ALERT_DESTINATION === 'tenant') {
-          subject = [`${configuration.ALERT_PRODUCER}-${tenantId}`];
-        } else {
-          // For 'global' destination, use default behavior (no specific subject)
-          subject = undefined;
-        }
-
-        await server.handleResponse(result, subject);
+        await server.handleResponse(result, alertSubject);
       }
 
       loggerService.log(`Transaction completed with a status of ${alert.status} for tenant ${tenantId}`, functionName, transactionID);
