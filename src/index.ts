@@ -35,7 +35,7 @@ export const runServer = async (): Promise<void> => {
     for (let retryCount = 0; retryCount < 10; retryCount++) {
       loggerService.log('Connecting to nats server...');
       const { consumers } = await getRoutesFromNetworkMap(databaseManager, configuration.functionName);
-      if (!(await server.init(handleExecute, undefined, consumers, configuration.PRODUCER_STREAM))) {
+      if (!(await server.init(handleExecute, undefined, consumers, configuration.ALERT_PRODUCER))) {
         await setTimeout(5000);
       } else {
         loggerService.log('Connected to nats');
