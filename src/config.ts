@@ -28,5 +28,5 @@ export const additionalEnvironmentVariables: AdditionalConfig[] = [
   },
 ];
 
-export type DatabasesConfig = Omit<Required<ManagerConfig>, 'pseudonyms'>;
+export type DatabasesConfig = Required<Pick<ManagerConfig, 'configuration' | 'evaluation' | 'localCacheConfig' | 'redisConfig'>>;
 export type Configuration = ProcessorConfig & DatabasesConfig & ExtendedConfig;

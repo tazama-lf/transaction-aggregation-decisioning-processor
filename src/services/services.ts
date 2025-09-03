@@ -15,7 +15,7 @@ export class Singleton {
       const requireAuth = configuration.nodeEnv === 'production';
 
       const { db } = await CreateStorageManager<typeof configuration>(
-        [Database.EVALUATION, Database.CONFIGURATION, Database.TRANSACTION_HISTORY, Cache.LOCAL, Cache.DISTRIBUTED],
+        [Database.CONFIGURATION, Database.EVALUATION, Cache.LOCAL, Cache.DISTRIBUTED],
         requireAuth,
       );
 

@@ -81,20 +81,16 @@ describe('TADProc Service', () => {
       return quote;
     };
 
-    const getMockNetworkMap = () => {
-      const jNetworkMap = JSON.parse(
-        '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"pacs.002.001.12","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}',
+    const getMockNetworkMap = (): NetworkMap => {
+      return JSON.parse(
+        '{"messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"pacs.002.001.12","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}',
       );
-      const networkMap: NetworkMap = Object.assign(new NetworkMap(), jNetworkMap);
-      return networkMap;
     };
 
-    const getMockNetworkMapNoMessages = () => {
-      const jNetworkMap = JSON.parse(
-        '{"_key":"26345403","_id":"networkConfiguration/26345403","_rev":"_cxc-1vO---","messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}',
+    const getMockNetworkMapNoMessages = (): NetworkMap => {
+      return JSON.parse(
+        '{"messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}',
       );
-      const networkMap: NetworkMap = Object.assign(new NetworkMap(), jNetworkMap);
-      return networkMap;
     };
 
     const getMockTypologyResult = (ruleResults: RuleResult[]): TypologyResult => {
