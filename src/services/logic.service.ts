@@ -14,23 +14,21 @@ import type { DataCache } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 export const handleExecute = async (req: unknown): Promise<void> => {
   const functionName = 'handleExecute()';
   let apmTransaction = null;
-  const parsedReq = req as TADPRequest & { DataCache: DataCache; TenantId?: string };
+  const parsedReq = req as TADPRequest & { DataCache: DataCache };
   try {
     const startTime = process.hrtime.bigint();
 
     // Get the request body and parse it to variables
     const metaData = parsedReq.metaData as MetaData | undefined;
-    const { transaction, networkMap, typologyResult, TenantId } = parsedReq;
+    const { transaction, networkMap, typologyResult } = parsedReq;
     const transactionType = 'FIToFIPmtSts';
     const transactionID = transaction[transactionType].GrpHdr.MsgId;
-
     const dataCache = parsedReq.DataCache;
-
-    // Extract tenantId from the TenantId attribute or default to 'default'
-    const tenantId = TenantId ?? 'default';
+    const tenantId = parsedReq.transaction.TenantId;
 
     // Pre-calculate alert subject to avoid repeated string concatenation in hot path
-    const alertSubject = configuration.ALERT_DESTINATION === 'tenant' ? [`${configuration.ALERT_PRODUCER}-${tenantId}`] : undefined;
+    const alertSubject =
+      configuration.ALERT_DESTINATION === 'tenant' ? [`${configuration.ALERT_PRODUCER}-${tenantId}`] : [configuration.ALERT_PRODUCER];
 
     apmTransaction = apm.startTransaction('handle.execute', {
       childOf: typeof metaData?.traceParent === 'string' ? metaData.traceParent : undefined,
@@ -46,7 +44,7 @@ export const handleExecute = async (req: unknown): Promise<void> => {
     const typologies = networkMap.messages[0].typologies.filter((t) => t.id === typologyResult.id && t.cfg === typologyResult.cfg);
 
     loggerService.debug(`Processing Typology ${typologyResult.cfg} for tenant ${tenantId}.`, functionName, transactionID);
-    const { typologyResult: typologyResults, review } = await handleTypologies(transaction, networkMap, typologyResult, tenantId);
+    const { typologyResult: typologyResults, review } = await handleTypologies(transaction, networkMap, typologyResult);
 
     if (typologyResults.length && typologyResults.length === networkMap.messages[0].typologies.length) {
       toReturn.id = networkMap.messages[0].id;
