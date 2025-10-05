@@ -40,7 +40,7 @@ describe('TADProc Service', () => {
     beforeEach(() => {
       jest.resetModules();
 
-      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
 
       jest.spyOn(databaseManager, 'getJson').mockImplementation((..._args: unknown[]): Promise<string> => {
         return Promise.resolve('[]');
@@ -114,7 +114,7 @@ describe('TADProc Service', () => {
       const expectedReq = getMockTransaction();
       const networkMap = getMockNetworkMap();
 
-      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const typologyResult: TypologyResult = {
         result: 50,
         id: '030@1.0',
@@ -141,14 +141,14 @@ describe('TADProc Service', () => {
               id: '028@1.0',
               cfg: '1.0',
               workflow: { alertThreshold: '0', interdictionThreshold: '' },
-              ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '' }],
+              ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }],
               tenantId: 'test-tenant',
             },
           },
         ]);
       });
 
-      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
@@ -186,7 +186,7 @@ describe('TADProc Service', () => {
         ]);
       });
 
-      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
@@ -208,7 +208,7 @@ describe('TADProc Service', () => {
       });
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
@@ -230,7 +230,7 @@ describe('TADProc Service', () => {
       });
 
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
 
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
@@ -243,7 +243,7 @@ describe('TADProc Service', () => {
 
     it('should respond with error if cache interaction fails', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
 
       jest.spyOn(databaseManager, 'addOneGetCount').mockRejectedValueOnce(() => {
         return Promise.reject();
@@ -263,7 +263,7 @@ describe('TADProc Service', () => {
 
     it('should respond with error if NATS communication Error Occures', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
 
       jest.spyOn(server, 'handleResponse').mockRejectedValueOnce((_value: string) => {
         return Promise.reject();
@@ -298,7 +298,7 @@ describe('TADProc Service', () => {
     it('should respond with error if message is missing from networkmap', async () => {
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const networkMap = getMockNetworkMapNoMessages();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
@@ -316,7 +316,7 @@ describe('TADProc Service', () => {
               id: '028@1.0',
               cfg: '1.0',
               workflow: { alertThreshold: '0', interdictionThreshold: '' },
-              ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '' }],
+              ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }],
               tenantId: 'test-tenant',
             },
           },
@@ -324,7 +324,7 @@ describe('TADProc Service', () => {
       });
 
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
       const result = await helpers.handleTypologies(expectedReq, networkMap, typologyResult);
@@ -336,7 +336,7 @@ describe('TADProc Service', () => {
             id: '028@1.0',
             cfg: '1.0',
             workflow: { alertThreshold: '0', interdictionThreshold: '' },
-            ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '' }],
+            ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }],
             tenantId: 'test-tenant',
           },
         ],
@@ -349,7 +349,7 @@ describe('TADProc Service', () => {
       });
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const networkMap = getMockNetworkMapNoMessages();
       const typology = { ...networkMap.messages[0].typologies[0] };
       typology.id = '998@1.0';

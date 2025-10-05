@@ -86,7 +86,7 @@ describe('TADProc Service', () => {
     it('should handle a successful transaction, incomplete.', async () => {
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '', tenantId: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '', tenantId: '', indpdntVarbl: 0 }];
 
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = {
@@ -105,7 +105,7 @@ describe('TADProc Service', () => {
 
     it('should handle a successful transaction, complete.', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '', tenantId: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '', tenantId: '', indpdntVarbl: 0 }];
       configuration.SUPPRESS_ALERTS = false;
 
       const networkMap = getMockNetworkMap();
@@ -132,8 +132,16 @@ describe('TADProc Service', () => {
               prcgTm: 0,
               tenantId: 'test-tenant',
               ruleResults: [
-                { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123', tenantId: 'test-tenant' },
-                { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder', tenantId: 'test-tenant' },
+                { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123', tenantId: 'test-tenant', indpdntVarbl: 0 },
+                {
+                  id: '028@1.0',
+                  cfg: '1.0',
+                  result: true,
+                  subRuleRef: '04',
+                  reason: 'Thedebtoris50orolder',
+                  tenantId: 'test-tenant',
+                  indpdntVarbl: 0,
+                },
               ],
             },
           ],
@@ -152,7 +160,7 @@ describe('TADProc Service', () => {
 
     it('should handle a successful transaction, with review.', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '', tenantId: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '', tenantId: '', indpdntVarbl: 0 }];
 
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = {
@@ -178,8 +186,16 @@ describe('TADProc Service', () => {
               prcgTm: 0,
               tenantId: 'test-tenant',
               ruleResults: [
-                { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123', tenantId: 'test-tenant' },
-                { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder', tenantId: 'test-tenant' },
+                { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123', tenantId: 'test-tenant', indpdntVarbl: 0 },
+                {
+                  id: '028@1.0',
+                  cfg: '1.0',
+                  result: true,
+                  subRuleRef: '04',
+                  reason: 'Thedebtoris50orolder',
+                  tenantId: 'test-tenant',
+                  indpdntVarbl: 0,
+                },
               ],
             },
           ],
@@ -198,7 +214,7 @@ describe('TADProc Service', () => {
 
     it('should handle a successful transaction, with review. Suppressed', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '', tenantId: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '', tenantId: '', indpdntVarbl: 0 }];
 
       configuration.SUPPRESS_ALERTS = true;
 
@@ -226,8 +242,16 @@ describe('TADProc Service', () => {
               prcgTm: 0,
               tenantId: 'test-tenant',
               ruleResults: [
-                { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123', tenantId: 'test-tenant' },
-                { id: '028@1.0', cfg: '1.0', result: true, subRuleRef: '04', reason: 'Thedebtoris50orolder', tenantId: 'test-tenant' },
+                { id: '003@1.0', cfg: '1.0', result: true, reason: 'asdf', subRuleRef: '123', tenantId: 'test-tenant', indpdntVarbl: 0 },
+                {
+                  id: '028@1.0',
+                  cfg: '1.0',
+                  result: true,
+                  subRuleRef: '04',
+                  reason: 'Thedebtoris50orolder',
+                  tenantId: 'test-tenant',
+                  indpdntVarbl: 0,
+                },
               ],
             },
           ],
@@ -248,7 +272,7 @@ describe('TADProc Service', () => {
 
     it('should handle a unsuccessful transaction, catch error.', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '', tenantId: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '', tenantId: '', indpdntVarbl: 0 }];
 
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = {
