@@ -24,8 +24,12 @@ export const handleExecute = async (req: unknown): Promise<void> => {
     const [networkMapMessage] = networkMap.messages;
     const transactionType = 'FIToFIPmtSts';
     const transactionID = transaction[transactionType].GrpHdr.MsgId;
-
     const dataCache = parsedReq.DataCache;
+    const tenantId = parsedReq.transaction.TenantId;
+
+    // Pre-calculate alert subject to avoid repeated string concatenation in hot path
+    const alertSubject =
+      configuration.ALERT_DESTINATION === 'tenant' ? [`${configuration.ALERT_PRODUCER}-${tenantId}`] : [configuration.ALERT_PRODUCER];
 
     apmTransaction = apm.startTransaction('handle.execute', {
       childOf: typeof metaData?.traceParent === 'string' ? metaData.traceParent : undefined,
@@ -40,7 +44,7 @@ export const handleExecute = async (req: unknown): Promise<void> => {
 
     const typologyCount = networkMap.messages[0].typologies.length;
 
-    loggerService.debug(`Processing Typology ${typologyResult.cfg}.`, functionName, transactionID);
+    loggerService.debug(`Processing Typology ${typologyResult.cfg} for tenant ${tenantId}.`, functionName, transactionID);
     const { typologyResult: typologyResults, review } = await handleTypologies(transaction, networkMap, typologyResult);
 
     if (typologyResults.length && typologyResults.length === typologyCount) {
@@ -69,10 +73,11 @@ export const handleExecute = async (req: unknown): Promise<void> => {
         };
 
         result.report.tadpResult.prcgTm = CalculateDuration(startTime);
-        await server.handleResponse(result);
+
+        await server.handleResponse(result, alertSubject);
       }
 
-      loggerService.log(`Transaction completed with a status of ${alert.status}`, functionName, transactionID);
+      loggerService.log(`Transaction completed with a status of ${alert.status} for tenant ${tenantId}`, functionName, transactionID);
     }
     apmTransaction?.end();
   } catch (e) {

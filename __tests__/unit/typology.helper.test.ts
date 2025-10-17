@@ -40,7 +40,7 @@ describe('TADProc Service', () => {
     beforeEach(() => {
       jest.resetModules();
 
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
 
       jest.spyOn(databaseManager, 'getJson').mockImplementation((..._args: unknown[]): Promise<string> => {
         return Promise.resolve('[]');
@@ -58,7 +58,8 @@ describe('TADProc Service', () => {
         return Promise.resolve(1);
       });
 
-      jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+      // Default mock that can be overridden in individual tests
+      jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
         return Promise.resolve([
           {
             typologyResult: {
@@ -67,6 +68,7 @@ describe('TADProc Service', () => {
               cfg: '1.0',
               workflow: { alertThreshold: '0', interdictionThreshold: '' },
               ruleResults,
+              tenantId: 'test-tenant',
             },
           },
         ]);
@@ -75,7 +77,7 @@ describe('TADProc Service', () => {
 
     const getMockTransaction = () => {
       const jquote = JSON.parse(
-        '{"TxTp":"pacs.002.001.12","FIToFIPmtSts":{"GrpHdr":{"MsgId":"30bea71c5a054978ad0da7f94b2a40e9789","CreDtTm":"${new Date().toISOString()}"},"TxInfAndSts":{"OrgnlInstrId":"5ab4fc7355de4ef8a75b78b00a681ed2255","OrgnlEndToEndId":"2c516801007642dfb89294dde","TxSts":"ACCC","ChrgsInf":[{"Amt":{"Amt":307.14,"Ccy":"USD"},"Agt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"dfsp001"}}}},{"Amt":{"Amt":153.57,"Ccy":"USD"},"Agt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"dfsp001"}}}},{"Amt":{"Amt":30.71,"Ccy":"USD"},"Agt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"dfsp002"}}}}],"AccptncDtTm":"2021-12-03T15:24:26.000Z","InstgAgt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"dfsp001"}}},"InstdAgt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"dfsp002"}}}}}}',
+        '{"TxTp":"pacs.002.001.12","TenantId":"test-tenant","FIToFIPmtSts":{"GrpHdr":{"MsgId":"30bea71c5a054978ad0da7f94b2a40e9789","CreDtTm":"${new Date().toISOString()}"},"TxInfAndSts":{"OrgnlInstrId":"5ab4fc7355de4ef8a75b78b00a681ed2255","OrgnlEndToEndId":"2c516801007642dfb89294dde","TxSts":"ACCC","ChrgsInf":[{"Amt":{"Amt":307.14,"Ccy":"USD"},"Agt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"dfsp001"}}}},{"Amt":{"Amt":153.57,"Ccy":"USD"},"Agt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"dfsp001"}}}},{"Amt":{"Amt":30.71,"Ccy":"USD"},"Agt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"dfsp002"}}}}],"AccptncDtTm":"2021-12-03T15:24:26.000Z","InstgAgt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"dfsp001"}}},"InstdAgt":{"FinInstnId":{"ClrSysMmbId":{"MmbId":"dfsp002"}}}}}}',
       );
       const quote: Pacs002 = Object.assign({}, jquote);
       return quote;
@@ -94,17 +96,25 @@ describe('TADProc Service', () => {
     };
 
     const getMockTypologyResult = (ruleResults: RuleResult[]): TypologyResult => {
-      return { result: 50, id: '028@1.0', cfg: '1.0', workflow: { alertThreshold: 50, interdictionThreshold: 0 }, ruleResults };
+      return {
+        result: 50,
+        tenantId: 'DEFAULT',
+        id: '028@1.0',
+        cfg: '1.0',
+        workflow: { alertThreshold: 50, interdictionThreshold: 0 },
+        ruleResults,
+      };
     };
 
     it('should handle successful request, with an unmatched number', async () => {
       const expectedReq = getMockTransaction();
       const networkMap = getMockNetworkMap();
 
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const typologyResult: TypologyResult = {
         result: 50,
         id: '030@1.0',
+        tenantId: 'DEFAULT',
         cfg: '030@1.0',
         workflow: { alertThreshold: 0, interdictionThreshold: 0 },
         ruleResults,
@@ -118,7 +128,23 @@ describe('TADProc Service', () => {
     it('should handle successful request, with a matched number', async () => {
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      // Mock getMemberValues to return results with tenantId
+      jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+        return Promise.resolve([
+          {
+            typologyResult: {
+              result: 50,
+              id: '028@1.0',
+              cfg: '1.0',
+              workflow: { alertThreshold: '0', interdictionThreshold: '' },
+              ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }],
+              tenantId: 'test-tenant',
+            },
+          },
+        ]);
+      });
+
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
@@ -134,11 +160,29 @@ describe('TADProc Service', () => {
 
       jest.spyOn(databaseManager, 'getJson').mockImplementation((..._args: unknown[]): Promise<string> => {
         return new Promise<string>((resolve, _reject) =>
-          resolve('[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"","cfg":"","subRuleRef":"","reason":""}]}]'),
+          resolve(
+            '[{"id":"028@1.0","cfg":"1.0","result":50,"ruleResults":[{"id":"","cfg":"","subRuleRef":"","reason":""}],"tenantId":"test-tenant"}]',
+          ),
         );
       });
 
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      // Mock getMemberValues to return results with tenantId
+      jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+        return Promise.resolve([
+          {
+            typologyResult: {
+              result: 50,
+              id: '028@1.0',
+              cfg: '1.0',
+              workflow: { alertThreshold: '0', interdictionThreshold: '' },
+              ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '' }],
+              tenantId: 'test-tenant',
+            },
+          },
+        ]);
+      });
+
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
@@ -150,12 +194,17 @@ describe('TADProc Service', () => {
     });
 
     it('should handle successful request, cache error', async () => {
-      jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+      // Reset the addOneGetCount mock to return the full count so we get to getMemberValues
+      jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((..._args: unknown[]): Promise<number> => {
+        return Promise.resolve(1);
+      });
+      // Mock getMemberValues to return empty array to simulate cache error
+      jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
         return Promise.resolve([]);
       });
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
@@ -163,14 +212,21 @@ describe('TADProc Service', () => {
       console.log(testValue);
 
       expect(testValue.review).toEqual(false);
-      expect(testValue.typologyResult[0].id).toContain('028@1.0');
-      expect(testValue.typologyResult[0].result).toEqual(50);
+      expect(testValue.typologyResult).toEqual([]);
     });
 
     it('should handle successful request, not all results yet', async () => {
-      //???
+      // Set up mock to return incomplete count (less than total typologies)
+      jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((..._args: unknown[]): Promise<number> => {
+        return Promise.resolve(0); // Incomplete - should return early with empty results
+      });
+      // Also mock getMemberValues just in case to ensure clean state
+      jest.spyOn(databaseManager, 'getMemberValues').mockImplementation((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+        return Promise.resolve([]);
+      });
+
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
 
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
@@ -178,13 +234,12 @@ describe('TADProc Service', () => {
       const testValue = await handleTypologies(expectedReq, networkMap, typologyResult);
 
       expect(testValue.review).toEqual(false);
-      expect(testValue.typologyResult[0].id).toContain('028@1.0');
-      expect(testValue.typologyResult[0].result).toEqual(50);
+      expect(testValue.typologyResult).toEqual([]);
     });
 
     it('should respond with error if cache interaction fails', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
 
       jest.spyOn(databaseManager, 'addOneGetCount').mockRejectedValueOnce(() => {
         return Promise.reject();
@@ -204,10 +259,26 @@ describe('TADProc Service', () => {
 
     it('should respond with error if NATS communication Error Occures', async () => {
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
 
       jest.spyOn(server, 'handleResponse').mockRejectedValueOnce((_value: string) => {
         return Promise.reject();
+      });
+
+      // Mock getMemberValues to return results with tenantId
+      jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+        return Promise.resolve([
+          {
+            typologyResult: {
+              result: 50,
+              id: '028@1.0',
+              cfg: '1.0',
+              workflow: { alertThreshold: '0', interdictionThreshold: '' },
+              ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '' }],
+              tenantId: 'test-tenant',
+            },
+          },
+        ]);
       });
 
       const networkMap = getMockNetworkMap();
@@ -223,7 +294,7 @@ describe('TADProc Service', () => {
     it('should respond with error if message is missing from networkmap', async () => {
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const networkMap = getMockNetworkMapNoMessages();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
 
@@ -232,8 +303,24 @@ describe('TADProc Service', () => {
     });
 
     it('should repond with review false if typology result not match any typologies from networkmap', async () => {
+      // Mock getMemberValues to return results with tenantId
+      jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+        return Promise.resolve([
+          {
+            typologyResult: {
+              result: 50,
+              id: '028@1.0',
+              cfg: '1.0',
+              workflow: { alertThreshold: '0', interdictionThreshold: '' },
+              ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }],
+              tenantId: 'test-tenant',
+            },
+          },
+        ]);
+      });
+
       const expectedReq = getMockTransaction();
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const networkMap = getMockNetworkMap();
       const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
       const result = await helpers.handleTypologies(expectedReq, networkMap, typologyResult);
@@ -245,7 +332,8 @@ describe('TADProc Service', () => {
             id: '028@1.0',
             cfg: '1.0',
             workflow: { alertThreshold: '0', interdictionThreshold: '' },
-            ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '' }],
+            ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }],
+            tenantId: 'test-tenant',
           },
         ],
       });
@@ -257,7 +345,7 @@ describe('TADProc Service', () => {
       });
       const expectedReq = getMockTransaction();
 
-      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '' }];
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
       const networkMap = getMockNetworkMapNoMessages();
       const typology = { ...networkMap.messages[0].typologies[0] };
       typology.id = '998@1.0';

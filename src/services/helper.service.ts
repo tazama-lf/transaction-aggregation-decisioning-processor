@@ -15,12 +15,14 @@ export const handleTypologies = async (
   try {
     const [{ typologies }] = networkMap.messages;
     const transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
-    const cacheKey = `TADP_${transactionID}_TP`;
+    const tenantId = transaction.TenantId;
+    const cacheKey = `TADP_${tenantId}_${transactionID}_TP`;
+
     const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, { typologyResult: { ...typologyResult } });
 
     // Check if all typologyResults have been stored
     // Compare with configured network map's typologies
-    if (jtypologyCount && jtypologyCount < typologies.length) {
+    if (!jtypologyCount || jtypologyCount < typologies.length) {
       return {
         review: false,
         typologyResult: [],
@@ -29,10 +31,14 @@ export const handleTypologies = async (
 
     // else means we have all results for Typologies, so lets evaluate result
     const jtypologyResults = await databaseManager.getMemberValues(cacheKey);
-    const typologyResults: TypologyResult[] = jtypologyResults.map((jtypologyResult) => {
+    const typologyResults: TypologyResult[] = [];
+    for (const jtypologyResult of jtypologyResults) {
       const tpResult = jtypologyResult as { typologyResult: TypologyResult };
-      return tpResult.typologyResult;
-    });
+      // Filter by tenantId to ensure we only get results for this specific tenant
+      if (tpResult.typologyResult.tenantId === tenantId) {
+        typologyResults.push(tpResult.typologyResult);
+      }
+    }
     if (!typologyResults.length) {
       return {
         review: false,
@@ -47,7 +53,7 @@ export const handleTypologies = async (
     if (!message) {
       let innerError;
       loggerService.error(
-        `Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request , Message missing from networkmap.`,
+        `Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request for tenant ${tenantId}, Message missing from networkmap.`,
         innerError,
         functionName,
         transactionID,
