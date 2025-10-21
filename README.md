@@ -8,7 +8,7 @@ The sequence diagram below for the Transaction Aggregation and Decisioning Proce
 
 ### Services
 
-- [ArangoDB](https://arangodb.com/): Database Management
+- [PostgresQL](https://www.postgresql.org/): Database Management
 - [NATS](https://nats.io): Message queue
 
 You also need NodeJS to be installed in your system. The current [LTS](https://nodejs.org/en) should be suitable. Please open an issue if the application fails to build on the current LTS version. Unix platforms, you should be able to find `nodejs` in your package manager's repositories.
@@ -19,18 +19,37 @@ You also need NodeJS to be installed in your system. The current [LTS](https://n
 git clone transaction-aggregation-decisioning-processor
 cd transaction-aggregation-decisioning-processor
 ```
+
 You then need to configure your environment: a [sample](.env.template) configuration file has been provided and you may adapt that to your environment. Copy it to `.env` and modify as needed:
 
 ```sh
 cp .env.template .env
 ```
-A [registry](https://github.com/frmscoe/docs) of environment variables is provided to provide more context for what each variable is used for.
+
+A [registry](https://github.com/tazama-lf/docs/blob/f292c9ddabf52d6fe62addc1c61957419ed4ad05/Technical/processor-startup-config-registry.md) of environment variables is provided to provide more context for what each variable is used for.
 
 ##### Additional Variables
-
-| Variable | Purpose | Example
-| ------ | ------ | ------ |
-| `SUPPRESS_ALERTS` | Suppress forwarding report to NATS producer | `false`
+| Name                                   | Purpose                                     | Example                   |
+|----------------------------------------|---------------------------------------------|---------------------------|
+| `SUPPRESS_ALERTS`                      | Suppress forwarding report to NATS producer | `false`                   |
+| `RAW_HISTORY_DATABASE`                 | PostgreSQL database name                    | `raw_history`             |
+| `RAW_HISTORY_DATABASE_HOST`            | PostgreSQL hostname or endpoint             | `localhost`               |
+| `RAW_HISTORY_DATABASE_PORT`            | PostgreSQL post used                        | `5432`                    |
+| `RAW_HISTORY_DATABASE_USER`            | PostgreSQL username                         | `root`                    |
+| `RAW_HISTORY_DATABASE_PASSWORD`        | PostgreSQL database password                | `password`                |
+| `RAW_HISTORY_DATABASE_CERT_PATH`       | PostgreSQL certificate path                 | `/path/to/cert`           |
+| `EVALUATION_DATABASE`                  | PostgreSQL database name                    | `evaluation`              |
+| `EVALUATION_DATABASE_HOST`             | PostgreSQL hostname or endpoint             | `localhost`               |
+| `EVALUATION_DATABASE_PORT`             | PostgreSQL post used                        | `5432`                    |
+| `EVALUATION_DATABASE_USER`             | PostgreSQL username                         | `root`                    |
+| `EVALUATION_DATABASE_PASSWORD`         | PostgreSQL database password                | `password`                |
+| `EVALUATION_DATABASE_CERT_PATH`        | PostgreSQL certificate path                 | `/path/to/cert`           |
+| `CONFIGURATION_DATABASE`               | PostgreSQL database name                    | `configuration`           |
+| `CONFIGURATION_DATABASE_HOST`          | PostgreSQL hostname or endpoint             | `localhost`               |
+| `CONFIGURATION_DATABASE_PORT`          | PostgreSQL post used                        | `5432`                    |
+| `CONFIGURATION_DATABASE_USER`          | PostgreSQL username                         | `root`                    |
+| `CONFIGURATION_DATABASE_PASSWORD`      | PostgreSQL database password                | `password`                |
+| `CONFIGURATION_DATABASE_CERT_PATH`     | PostgreSQL certificate path                 | `/path/to/cert`           |
 
 #### Build and Start
 
@@ -43,15 +62,15 @@ npm run start
 
 ```js
 {
-  typologyResult: TypologyResult; // https://raw.githubusercontent.com/frmscoe/frms-coe-lib/46d1ec1fc9a07b6556baa4fecd80e09c709ccb1b/src/interfaces/processor-files/TypologyResult.ts
-  transaction: Pacs002; // https://raw.githubusercontent.com/frmscoe/frms-coe-lib/cb464248be1efc45ba2701131e75fcf89c478baf/src/interfaces/Pacs.002.001.12.ts
-  networkMap: NetworkMap; // https://raw.githubusercontent.com/frmscoe/frms-coe-lib/aad0f12d07a82dd948fa9d8033f96e9bf8cb3dde/src/interfaces/NetworkMap.ts
+  typologyResult: TypologyResult; // https://raw.githubusercontent.com/tazama-lf/frms-coe-lib/46d1ec1fc9a07b6556baa4fecd80e09c709ccb1b/src/interfaces/processor-files/TypologyResult.ts
+  transaction: Pacs002; // https://raw.githubusercontent.com/tazama-lf/frms-coe-lib/cb464248be1efc45ba2701131e75fcf89c478baf/src/interfaces/Pacs.002.001.12.ts
+  networkMap: NetworkMap; // https://raw.githubusercontent.com/tazama-lf/frms-coe-lib/aad0f12d07a82dd948fa9d8033f96e9bf8cb3dde/src/interfaces/NetworkMap.ts
   metaData?: {
     prcgTmDp: number;
     prcgTmCRSP: number;
 }
 ```
-Where the `transaction` is described as a `Pacs002` message defined [here](https://github.com/frmscoe/frms-coe-lib/blob/dev/src/interfaces/Pacs.002.001.12.ts)
+Where the `transaction` is described as a `Pacs002` message defined [here](https://github.com/tazama-lf/frms-coe-lib/blob/dev/src/interfaces/Pacs.002.001.12.ts)
 
 ### Code Activity Diagram
 
@@ -86,13 +105,13 @@ Where the `transaction` is described as a `Pacs002` message defined [here](https
  - **Log Error and Exit**: Logs any errors encountered during the process and exits the function if any step fails significantly.
 
 ## Outputs
-The output is the input with an added [tadpResult](https://github.com/frmscoe/frms-coe-lib/blob/dev/src/interfaces/processor-files/TADPResult.ts):
+The output is the input with an added [tadpResult](https://github.com/tazama-lf/frms-coe-lib/blob/dev/src/interfaces/processor-files/TADPResult.ts):
 
 ```js
 {
-  typologyResult: TypologyResult; // https://raw.githubusercontent.com/frmscoe/frms-coe-lib/46d1ec1fc9a07b6556baa4fecd80e09c709ccb1b/src/interfaces/processor-files/TypologyResult.ts
-  transaction: Pacs002; // https://raw.githubusercontent.com/frmscoe/frms-coe-lib/cb464248be1efc45ba2701131e75fcf89c478baf/src/interfaces/Pacs.002.001.12.ts
-  networkMap: NetworkMap; // https://raw.githubusercontent.com/frmscoe/frms-coe-lib/aad0f12d07a82dd948fa9d8033f96e9bf8cb3dde/src/interfaces/NetworkMap.ts
+  typologyResult: TypologyResult; // https://raw.githubusercontent.com/tazama-lf/frms-coe-lib/46d1ec1fc9a07b6556baa4fecd80e09c709ccb1b/src/interfaces/processor-files/TypologyResult.ts
+  transaction: Pacs002; // https://raw.githubusercontent.com/tazama-lf/frms-coe-lib/cb464248be1efc45ba2701131e75fcf89c478baf/src/interfaces/Pacs.002.001.12.ts
+  networkMap: NetworkMap; // https://raw.githubusercontent.com/tazama-lf/frms-coe-lib/aad0f12d07a82dd948fa9d8033f96e9bf8cb3dde/src/interfaces/NetworkMap.ts
   metaData?: {
     prcgTmDp: number;
     prcgTmCRSP: number;
@@ -100,37 +119,3 @@ The output is the input with an added [tadpResult](https://github.com/frmscoe/fr
   tadpResult: TADPResult;
 }
 ```
-
-## Environment Variables
-
-You then need to configure your environment: a [sample](.env.template) configuration file has been provided and you may adapt that to your environment. Copy it to `.env` and modify as needed:
-
-```sh
-cp .env.template .env
-```
-A [registry](https://github.com/frmscoe/docs) of environment variables is provided to provide more context for what each variable is used for.
-
-##### Additional Variables
-| Name                                    | Purpose                                     | Example                   |
-|-----------------------------------------|---------------------------------------------|---------------------------|
-| `TRANSACTION_HISTORY_DATABASE_CERT_PATH` | Certificate path for transaction history database |                           |
-| `TRANSACTION_HISTORY_DATABASE_URL`      | URL for transaction history database        | `http://localhost:8529`   |
-| `TRANSACTION_HISTORY_DATABASE_USER`     | User for transaction history database       | `root`                    |
-| `TRANSACTION_HISTORY_DATABASE_PASSWORD` | Password for transaction history database   | `secret`                  |
-| `TRANSACTION_HISTORY_DATABASE`          | Database name for transaction history       | `transactionHistory`      |
-| `NETWORK_MAP_DATABASE_CERT_PATH`       | Certificate path for network map database   | `/path/to/cert`           |
-| `NETWORK_MAP_DATABASE_URL`             | URL for network map database                | `http://localhost:8529`   |
-| `NETWORK_MAP_DATABASE_USER`            | User for network map database               | `root`                    |
-| `NETWORK_MAP_DATABASE_PASSWORD`        | Password for network map database           | `password`                |
-| `NETWORK_MAP_DATABASE`                 | Database name for network map               | `networkMap`              |
-| `CONFIG_DATABASE_CERT_PATH`            | Certificate path for configuration database | `/path/to/cert`           |
-| `CONFIG_DATABASE_URL`                  | URL for configuration database              | `http://localhost:8529`   |
-| `CONFIG_DATABASE_USER`                 | User for configuration database             | `root`                    |
-| `CONFIG_DATABASE_PASSWORD`             | Password for configuration database         | `password`                |
-| `CONFIG_DATABASE`                      | Configuration database                      | `Configuration`           |
-| `CONFIG_COLLECTION`                    | Collection for configuration database       | `config`                  |
-| `TRANSACTION_DATABASE_CERT_PATH`       | Certificate path for transaction database   | `/path/to/cert`           |
-| `TRANSACTION_DATABASE_URL`             | URL for transaction database                | `http://localhost:8529`   |
-| `TRANSACTION_DATABASE_USER`            | User for transaction database               | `root`                    |
-| `TRANSACTION_DATABASE_PASSWORD`        | Password for transaction database           | `password`                |
-| `TRANSACTION_DATABASE`                 | Database name for evaluation results        | `evalResults`             |

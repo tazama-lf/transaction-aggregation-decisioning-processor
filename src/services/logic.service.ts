@@ -2,14 +2,14 @@
 import apm from '../apm';
 
 import { CalculateDuration } from '@tazama-lf/frms-coe-lib/lib/helpers/calculatePrcg';
-import type { MetaData } from '@tazama-lf/frms-coe-lib/lib/interfaces/metaData';
-import { Alert } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/Alert';
+import type { DataCache } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import type { Alert } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/Alert';
 import type { CMSRequest } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/CMSRequest';
 import type { TADPRequest } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TADPRequest';
 import type { TADPResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TADPResult';
+import { v7 } from 'uuid';
 import { configuration, databaseManager, loggerService, server } from '../index';
 import { handleTypologies } from './helper.service';
-import type { DataCache } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 
 export const handleExecute = async (req: unknown): Promise<void> => {
   const functionName = 'handleExecute()';
@@ -19,8 +19,9 @@ export const handleExecute = async (req: unknown): Promise<void> => {
     const startTime = process.hrtime.bigint();
 
     // Get the request body and parse it to variables
-    const metaData = parsedReq.metaData as MetaData | undefined;
+    const { metaData } = parsedReq;
     const { transaction, networkMap, typologyResult } = parsedReq;
+    const [networkMapMessage] = networkMap.messages;
     const transactionType = 'FIToFIPmtSts';
     const transactionID = transaction[transactionType].GrpHdr.MsgId;
     const dataCache = parsedReq.DataCache;
@@ -34,35 +35,38 @@ export const handleExecute = async (req: unknown): Promise<void> => {
       childOf: typeof metaData?.traceParent === 'string' ? metaData.traceParent : undefined,
     });
 
-    const toReturn: TADPResult = {
+    const tadpResult: TADPResult = {
       id: '',
       cfg: '',
       typologyResult: [],
       prcgTm: 0,
     };
 
-    const typologies = networkMap.messages[0].typologies.filter((t) => t.id === typologyResult.id && t.cfg === typologyResult.cfg);
+    const typologyCount = networkMap.messages[0].typologies.length;
 
     loggerService.debug(`Processing Typology ${typologyResult.cfg} for tenant ${tenantId}.`, functionName, transactionID);
     const { typologyResult: typologyResults, review } = await handleTypologies(transaction, networkMap, typologyResult);
 
-    if (typologyResults.length && typologyResults.length === networkMap.messages[0].typologies.length) {
-      toReturn.id = networkMap.messages[0].id;
-      toReturn.cfg = networkMap.messages[0].cfg;
-      toReturn.typologyResult = typologyResults;
-      toReturn.prcgTm = CalculateDuration(startTime);
+    if (typologyResults.length && typologyResults.length === typologyCount) {
+      tadpResult.id = networkMapMessage.id;
+      tadpResult.cfg = networkMapMessage.cfg;
+      tadpResult.typologyResult = typologyResults;
+      tadpResult.prcgTm = CalculateDuration(startTime);
 
-      const alert = new Alert();
-      alert.tadpResult = toReturn;
-      alert.status = review ? 'ALRT' : 'NALT';
-      alert.metaData = metaData;
+      const alert: Alert = {
+        evaluationID: v7(),
+        tadpResult,
+        status: review ? 'ALRT' : 'NALT',
+        metaData,
+        timestamp: new Date().toISOString(),
+      };
 
       const spanInsertTransaction = apm.startSpan('db.insert.transaction');
-      await databaseManager.insertTransaction(transactionID, transaction, networkMap, alert, dataCache);
+      await databaseManager.saveEvaluationResult(transactionID, transaction, networkMap, alert, dataCache);
       spanInsertTransaction?.end();
       if (!configuration.SUPPRESS_ALERTS) {
         const result: CMSRequest = {
-          message: `Successfully completed ${typologies.length} typologies`,
+          message: `Successfully completed ${typologyCount} typologies`,
           report: alert,
           transaction,
           networkMap,
