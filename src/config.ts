@@ -11,8 +11,9 @@ dotenv.config({
 });
 
 export interface ExtendedConfig {
-  PRODUCER_STREAM: string;
+  ALERT_PRODUCER: string;
   SUPPRESS_ALERTS: boolean;
+  ALERT_DESTINATION: 'global' | 'tenant';
 }
 
 export const additionalEnvironmentVariables: AdditionalConfig[] = [
@@ -22,11 +23,16 @@ export const additionalEnvironmentVariables: AdditionalConfig[] = [
     optional: false,
   },
   {
-    name: 'PRODUCER_STREAM',
+    name: 'ALERT_PRODUCER',
+    type: 'string',
+    optional: false,
+  },
+  {
+    name: 'ALERT_DESTINATION',
     type: 'string',
     optional: false,
   },
 ];
 
-export type DatabasesConfig = Omit<Required<ManagerConfig>, 'pseudonyms'>;
+export type DatabasesConfig = Required<Pick<ManagerConfig, 'configuration' | 'evaluation' | 'localCacheConfig' | 'redisConfig'>>;
 export type Configuration = ProcessorConfig & DatabasesConfig & ExtendedConfig;
