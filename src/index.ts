@@ -11,7 +11,7 @@ import { setTimeout } from 'node:timers/promises';
 import * as util from 'node:util';
 import { additionalEnvironmentVariables, type Configuration } from './config';
 import { handleExecute } from './services/logic.service';
-import { Singleton } from './services/services';
+import { handleReload, Singleton } from './services/services';
 
 let configuration = validateProcessorConfig(additionalEnvironmentVariables) as Configuration;
 export const loggerService: LoggerService = new LoggerService(configuration);
@@ -27,6 +27,17 @@ export const dbInit = async (): Promise<void> => {
  * Initialize the clients and start the server
  */
 export let server: IStartupService;
+
+const commandChannelInit = async (): Promise<void> => {
+  try {
+    const commandChannelServer = new StartupFactory();
+    await commandChannelServer.initCommandChannel(handleReload, configuration.COMMAND_CHANNEL_CONSUMER_STREAM, loggerService);
+    loggerService.log('Command channel connected');
+  } catch (err) {
+    loggerService.error('Error on startup');
+    throw err;
+  }
+};
 
 export const runServer = async (): Promise<void> => {
   server = new StartupFactory();
@@ -79,6 +90,7 @@ if (cluster.isPrimary && configuration.maxCPU !== 1) {
       if (configuration.nodeEnv !== 'test') {
         await dbInit();
         await runServer();
+        await commandChannelInit();
       }
     } catch (err) {
       loggerService.error(`Error while starting services on Worker ${process.pid}`, err);

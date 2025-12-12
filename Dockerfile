@@ -96,5 +96,12 @@ ENV ACK_POLICY=Explicit
 ENV PRODUCER_STORAGE=File
 ENV PRODUCER_RETENTION_POLICY=Workqueue
 
+#COMMAND_CHANNEL
+ENV COMMAND_CHANNEL_STREAM_SUBJECT=command-channel.subject
+ENV COMMAND_CHANNEL_CONSUMER_STREAM=transaction-aggregation-decisioning-processor:command-channel:consumer
+ENV COMMAND_CHANNEL_PRODUCER_STREAM=transaction-aggregation-decisioning-processor:command-channel:producer
+
 # Execute watchdog command
 CMD ["build/index.js"]
+
+

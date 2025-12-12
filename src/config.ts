@@ -14,6 +14,9 @@ export interface ExtendedConfig {
   ALERT_PRODUCER: string;
   SUPPRESS_ALERTS: boolean;
   ALERT_DESTINATION: 'global' | 'tenant';
+  COMMAND_CHANNEL_STREAM_SUBJECT: string;
+  COMMAND_CHANNEL_CONSUMER_STREAM: string;
+  COMMAND_CHANNEL_PRODUCER_STREAM: string;
 }
 
 export const additionalEnvironmentVariables: AdditionalConfig[] = [
@@ -29,6 +32,21 @@ export const additionalEnvironmentVariables: AdditionalConfig[] = [
   },
   {
     name: 'ALERT_DESTINATION',
+    type: 'string',
+    optional: false,
+  },
+  {
+    name: 'COMMAND_CHANNEL_STREAM_SUBJECT',
+    type: 'string',
+    optional: false,
+  },
+  {
+    name: 'COMMAND_CHANNEL_CONSUMER_STREAM',
+    type: 'string',
+    optional: false,
+  },
+  {
+    name: 'COMMAND_CHANNEL_PRODUCER_STREAM',
     type: 'string',
     optional: false,
   },
