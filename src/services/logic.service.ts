@@ -10,6 +10,7 @@ import type { TADPResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processo
 import { v7 } from 'uuid';
 import { configuration, databaseManager, loggerService, server } from '../index';
 import { handleTypologies } from './helper.service';
+import { isBaseMessageTransaction, isPacs002Transaction } from '@tazama-lf/frms-coe-lib';
 
 export const handleExecute = async (req: unknown): Promise<void> => {
   const functionName = 'handleExecute()';
@@ -22,8 +23,15 @@ export const handleExecute = async (req: unknown): Promise<void> => {
     const { metaData } = parsedReq;
     const { transaction, networkMap, typologyResult } = parsedReq;
     const [networkMapMessage] = networkMap.messages;
-    const transactionType = 'FIToFIPmtSts';
-    const transactionID = transaction[transactionType].GrpHdr.MsgId;
+    let transactionID = '';
+    if (isPacs002Transaction(transaction)) {
+      const transactionType = 'FIToFIPmtSts';
+      transactionID = transaction[transactionType].GrpHdr.MsgId;
+    } 
+
+    if (isBaseMessageTransaction(transaction)) {
+      transactionID = transaction.MsgId;
+    }
     const dataCache = parsedReq.DataCache;
     const tenantId = parsedReq.transaction.TenantId;
 

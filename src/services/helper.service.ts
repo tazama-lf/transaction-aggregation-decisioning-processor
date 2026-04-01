@@ -4,6 +4,7 @@ import apm from '../apm';
 import { databaseManager, loggerService } from '..';
 import type { NetworkMap, Pacs002 } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 import type { TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
+import { isBaseMessageTransaction, isPacs002Transaction } from '@tazama-lf/frms-coe-lib';
 
 export const handleTypologies = async (
   transaction: Pacs002,
@@ -14,7 +15,15 @@ export const handleTypologies = async (
   const functionName = 'handleTypologies()';
   try {
     const [{ typologies }] = networkMap.messages;
-    const transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
+    let transactionID;
+    if (isPacs002Transaction(transaction)) {
+      transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
+    } 
+
+    if (isBaseMessageTransaction(transaction)) {
+      transactionID = transaction.MsgId;
+    }
+    
     const tenantId = transaction.TenantId;
     const cacheKey = `TADP_${tenantId}_${transactionID}_TP`;
 
