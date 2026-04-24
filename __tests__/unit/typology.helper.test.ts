@@ -341,7 +341,7 @@ describe('TADProc Service', () => {
 
     const getMockBaseMessageTransaction = () => {
       return {
-        TxTp: 'custom.basemessage.001',
+        TxTp: 'pacs.002.001.12',
         TenantId: 'test-tenant',
         MsgId: 'BM-30bea71c5a054978ad0da7f94b2a40e9789',
         Payload: {
