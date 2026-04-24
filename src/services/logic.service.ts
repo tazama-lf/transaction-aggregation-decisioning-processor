@@ -23,14 +23,15 @@ export const handleExecute = async (req: unknown): Promise<void> => {
     const { metaData } = parsedReq;
     const { transaction, networkMap, typologyResult } = parsedReq;
     const [networkMapMessage] = networkMap.messages;
-    let transactionID = '';
+    let transactionID: string;
     if (isPacs002Transaction(transaction)) {
       const transactionType = 'FIToFIPmtSts';
       transactionID = transaction[transactionType].GrpHdr.MsgId;
-    } 
-
-    if (isBaseMessageTransaction(transaction)) {
+    } else if (isBaseMessageTransaction(transaction)) {
       transactionID = transaction.MsgId;
+    } else {
+      loggerService.error('Unsupported transaction type', new Error('Unsupported transaction type'), functionName);
+      return;
     }
     const dataCache = parsedReq.DataCache;
     const tenantId = parsedReq.transaction.TenantId;
@@ -89,7 +90,7 @@ export const handleExecute = async (req: unknown): Promise<void> => {
     }
     apmTransaction?.end();
   } catch (e) {
-    loggerService.error('Error while calculating Transaction score', e as Error, functionName);
+    loggerService.error('Error while calculating Transaction score', e, functionName);
   } finally {
     apmTransaction?.end();
   }

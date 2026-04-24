@@ -26,8 +26,8 @@
   "author": "tazama",
   "license": "Apache-2.0",
   "dependencies": {
-    "@tazama-lf/frms-coe-lib": "0.0.1-psl.5",
-    "@tazama-lf/frms-coe-startup-lib": "0.0.1-psl.4",
+    "@tazama-lf/frms-coe-lib": "0.0.1-psl.6",
+    "@tazama-lf/frms-coe-startup-lib": "0.0.1-psl.5",
     "dotenv": "^17.2.1",
     "tslib": "^2.8.1",
     "uuid": "^11.1.0"
