@@ -339,6 +339,72 @@ describe('TADProc Service', () => {
       });
     });
 
+    const getMockBaseMessageTransaction = () => {
+      return {
+        TxTp: 'custom.basemessage.001',
+        TenantId: 'test-tenant',
+        MsgId: 'BM-30bea71c5a054978ad0da7f94b2a40e9789',
+        Payload: {
+          someField: 'someValue',
+        },
+      } as any;
+    };
+
+    const getMockUnsupportedTransaction = () => {
+      // Missing FIToFIPmtSts (not Pacs002) and missing MsgId/Payload (not BaseMessage)
+      return {
+        TxTp: 'unknown.tx.type',
+        TenantId: 'test-tenant',
+      } as any;
+    };
+
+    it('should handle successful request for a BaseMessage transaction, with a matched number', async () => {
+      const expectedReq = getMockBaseMessageTransaction();
+
+      // Mock getMemberValues to return results with tenantId
+      jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+        return Promise.resolve([
+          {
+            typologyResult: {
+              result: 50,
+              id: '028@1.0',
+              cfg: '1.0',
+              workflow: { alertThreshold: '0', interdictionThreshold: '' },
+              ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }],
+              tenantId: 'test-tenant',
+            },
+          },
+        ]);
+      });
+
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
+      const networkMap = getMockNetworkMap();
+      const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
+
+      const testValue = await helpers.handleTypologies(expectedReq, networkMap, typologyResult);
+
+      expect(testValue.review).toEqual(false);
+      expect(testValue.typologyResult[0].id).toContain('028@1.0');
+      expect(testValue.typologyResult[0].result).toEqual(50);
+    });
+
+    it('should respond with empty results when transaction is neither Pacs002 nor BaseMessage', async () => {
+      const expectedReq = getMockUnsupportedTransaction();
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
+      const networkMap = getMockNetworkMap();
+      const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
+
+      const addOneGetCountSpy = jest.spyOn(databaseManager, 'addOneGetCount');
+      const getMemberValuesSpy = jest.spyOn(databaseManager, 'getMemberValues');
+
+      const result = await helpers.handleTypologies(expectedReq, networkMap, typologyResult);
+
+      expect(result).toEqual({ review: false, typologyResult: [] });
+      // Should bail out before touching the cache
+      expect(addOneGetCountSpy).not.toHaveBeenCalled();
+      expect(getMemberValuesSpy).not.toHaveBeenCalled();
+    });
+
     it('should respond with empty results if no typologies', async () => {
       jest.spyOn(databaseManager, 'addOneGetCount').mockImplementation((..._args: unknown[]): Promise<number> => {
         return Promise.resolve(-1);
