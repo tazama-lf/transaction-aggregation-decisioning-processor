@@ -2,7 +2,7 @@
 import apm from '../apm';
 
 import { databaseManager, loggerService } from '..';
-import { isBaseMessageTransaction, isPacs002Transaction } from '@tazama-lf/frms-coe-lib';
+import { isBaseMessageTransaction, isPacs002Transaction, isStructuredTransaction } from '@tazama-lf/frms-coe-lib';
 import type { NetworkMap, SupportedTransactionMessage } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 import type { TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 
@@ -16,8 +16,13 @@ export const handleTypologies = async (
   try {
     const [{ typologies }] = networkMap.messages;
     let transactionID: string;
-    if (isPacs002Transaction(transaction)) {
-      transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
+    if (isStructuredTransaction(transaction)) {
+      if (isPacs002Transaction(transaction)) {
+        transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
+      } else {
+        loggerService.error('Unsupported structured transaction type', new Error('Unsupported structured transaction type'), functionName);
+        return { typologyResult: [], review: false };
+      }
     } else if (isBaseMessageTransaction(transaction)) {
       transactionID = transaction.MsgId;
     } else {
@@ -87,7 +92,7 @@ export const handleTypologies = async (
     return { typologyResult: typologyResults, review };
   } catch (error) {
     span?.end();
-    loggerService.error(`Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request`, error, functionName);
+    loggerService.error(`Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request`, error as Error, functionName);
     return {
       review: false,
       typologyResult: [],

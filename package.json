@@ -1,6 +1,6 @@
 {
   "name": "transaction-agreggation-decisioning-processor",
-  "version": "4.0.0-rc.1",
+  "version": "4.0.0-rc.2",
   "description": "transaction-agreggation-decisioning-processor",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -40,7 +40,7 @@
     "@types/rimraf": "^4.0.5",
     "@typescript-eslint/eslint-plugin": "^8.45.0",
     "@typescript-eslint/parser": "^8.45.0",
-    "eslint": "^9.39.4",
+    "eslint": "^9.36.0",
     "eslint-config-love": "^121.0.0",
     "eslint-config-prettier": "^10.1.8",
     "husky": "9.1.7",

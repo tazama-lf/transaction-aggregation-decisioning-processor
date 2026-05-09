@@ -2,7 +2,7 @@
 import apm from '../apm';
 
 import { CalculateDuration } from '@tazama-lf/frms-coe-lib/lib/helpers/calculatePrcg';
-import { isBaseMessageTransaction, isPacs002Transaction } from '@tazama-lf/frms-coe-lib';
+import { isBaseMessageTransaction, isPacs002Transaction, isStructuredTransaction } from '@tazama-lf/frms-coe-lib';
 import type { DataCache } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 import type { Alert } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/Alert';
 import type { CMSRequest } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/CMSRequest';
@@ -24,8 +24,13 @@ export const handleExecute = async (req: unknown): Promise<void> => {
     const { transaction, networkMap, typologyResult } = parsedReq;
     const [networkMapMessage] = networkMap.messages;
     let transactionID: string;
-    if (isPacs002Transaction(transaction)) {
-      transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
+    if (isStructuredTransaction(transaction)) {
+      if (isPacs002Transaction(transaction)) {
+        transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
+      } else {
+        loggerService.error('Unsupported structured transaction type', new Error('Unsupported structured transaction type'), functionName);
+        return;
+      }
     } else if (isBaseMessageTransaction(transaction)) {
       transactionID = transaction.MsgId;
     } else {
@@ -89,7 +94,7 @@ export const handleExecute = async (req: unknown): Promise<void> => {
     }
     apmTransaction?.end();
   } catch (e) {
-    loggerService.error('Error while calculating Transaction score', e, functionName);
+    loggerService.error('Error while calculating Transaction score', e as Error, functionName);
   } finally {
     apmTransaction?.end();
   }
