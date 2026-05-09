@@ -356,5 +356,30 @@ describe('TADProc Service', () => {
       const result = await helpers.handleTypologies(expectedReq, networkMap, typologyResult);
       expect(result).toEqual({ review: false, typologyResult: [] });
     });
+
+    it('should return empty results for unsupported structured transaction type', async () => {
+      // Pacs008 passes isStructuredTransaction but not isPacs002Transaction
+      const pacs008 = {
+        TxTp: 'pacs.008.001.10',
+        TenantId: 'test-tenant',
+        FIToFICstmrCdtTrf: { GrpHdr: { MsgId: 'msg-001', CreDtTm: '2021-12-03T15:24:26.000Z' }, CdtTrfTxInf: {} },
+      };
+      const networkMap = getMockNetworkMap();
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
+      const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
+
+      const result = await helpers.handleTypologies(pacs008 as any, networkMap, typologyResult);
+      expect(result).toEqual({ review: false, typologyResult: [] });
+    });
+
+    it('should return empty results for BaseMessage transaction type', async () => {
+      const baseMessage = { TxTp: 'custom-type', TenantId: 'test-tenant', MsgId: 'msg-001', Payload: { key: 'value' } };
+      const networkMap = getMockNetworkMap();
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
+      const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
+
+      const result = await helpers.handleTypologies(baseMessage as any, networkMap, typologyResult);
+      expect(result).toEqual({ review: false, typologyResult: [] });
+    });
   });
 });
