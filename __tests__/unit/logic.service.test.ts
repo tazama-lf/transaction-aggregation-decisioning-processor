@@ -348,5 +348,28 @@ describe('TADProc Service', () => {
       expect(typologySpy).toHaveBeenCalledTimes(1);
       expect(responseSpy).toHaveBeenCalledTimes(0);
     });
+
+    it('should return early when transaction is neither Pacs002 nor BaseMessage', async () => {
+      const expectedReq = { TxTp: 'unknown.tx.type', TenantId: 'test-tenant' } as any;
+      const ruleResults: RuleResult[] = [{ id: '', cfg: '', subRuleRef: '', reason: '', tenantId: '', indpdntVarbl: 0 }];
+
+      const networkMap = getMockNetworkMap();
+      const typologyResult: TypologyResult = {
+        result: 50,
+        id: '028@1.0',
+        cfg: '1.0',
+        workflow: { alertThreshold: 0, interdictionThreshold: 0 },
+        ruleResults,
+        tenantId: 'test-tenant',
+      };
+
+      const typologySpy = jest.spyOn(helpers, 'handleTypologies');
+      const responseSpy = jest.spyOn(server, 'handleResponse');
+
+      await handleExecute({ transaction: expectedReq, networkMap: networkMap, typologyResult: typologyResult });
+
+      expect(typologySpy).not.toHaveBeenCalled();
+      expect(responseSpy).not.toHaveBeenCalled();
+    });
   });
 });

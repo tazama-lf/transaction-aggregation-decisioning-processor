@@ -2,7 +2,7 @@
 import apm from '../apm';
 
 import { CalculateDuration } from '@tazama-lf/frms-coe-lib/lib/helpers/calculatePrcg';
-import { isBaseMessageTransaction, isPacs002Transaction } from '@tazama-lf/frms-coe-lib/lib/helpers/transactionTypeGuards';
+import { isBaseMessageTransaction, isPacs002Transaction } from '@tazama-lf/frms-coe-lib';
 import type { DataCache } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 import type { Alert } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/Alert';
 import type { CMSRequest } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/CMSRequest';
@@ -23,11 +23,14 @@ export const handleExecute = async (req: unknown): Promise<void> => {
     const { metaData } = parsedReq;
     const { transaction, networkMap, typologyResult } = parsedReq;
     const [networkMapMessage] = networkMap.messages;
-    let transactionID = '';
+    let transactionID: string;
     if (isPacs002Transaction(transaction)) {
       transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
     } else if (isBaseMessageTransaction(transaction)) {
       transactionID = transaction.MsgId;
+    } else {
+      loggerService.error('Unsupported transaction type', new Error('Unsupported transaction type'), functionName);
+      return;
     }
     const dataCache = parsedReq.DataCache;
     const tenantId = parsedReq.transaction.TenantId;

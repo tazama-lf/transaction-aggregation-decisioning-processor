@@ -2,7 +2,7 @@
 import apm from '../apm';
 
 import { databaseManager, loggerService } from '..';
-import { isBaseMessageTransaction, isPacs002Transaction } from '@tazama-lf/frms-coe-lib/lib/helpers/transactionTypeGuards';
+import { isBaseMessageTransaction, isPacs002Transaction } from '@tazama-lf/frms-coe-lib';
 import type { NetworkMap, SupportedTransactionMessage } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 import type { TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 
@@ -15,11 +15,13 @@ export const handleTypologies = async (
   const functionName = 'handleTypologies()';
   try {
     const [{ typologies }] = networkMap.messages;
-    let transactionID = '';
+    let transactionID: string;
     if (isPacs002Transaction(transaction)) {
       transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
     } else if (isBaseMessageTransaction(transaction)) {
       transactionID = transaction.MsgId;
+    } else {
+      return { typologyResult: [], review: false };
     }
     const tenantId = transaction.TenantId;
     const cacheKey = `TADP_${tenantId}_${transactionID}_TP`;

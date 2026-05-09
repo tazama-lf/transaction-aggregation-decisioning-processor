@@ -329,6 +329,22 @@ describe('TADProc Service', () => {
       expect(testValue.typologyResult[0].id).toContain('028@1.0');
     });
 
+    it('should respond with empty results when transaction is neither Pacs002 nor BaseMessage', async () => {
+      const expectedReq = { TxTp: 'unknown.tx.type', TenantId: 'test-tenant' } as any;
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
+      const networkMap = getMockNetworkMap();
+      const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
+
+      const addOneGetCountSpy = jest.spyOn(databaseManager, 'addOneGetCount');
+      const getMemberValuesSpy = jest.spyOn(databaseManager, 'getMemberValues');
+
+      const result = await helpers.handleTypologies(expectedReq, networkMap, typologyResult);
+
+      expect(result).toEqual({ review: false, typologyResult: [] });
+      expect(addOneGetCountSpy).not.toHaveBeenCalled();
+      expect(getMemberValuesSpy).not.toHaveBeenCalled();
+    });
+
     it('should respond with error if message is missing from networkmap', async () => {
       const expectedReq = getMockTransaction();
 
