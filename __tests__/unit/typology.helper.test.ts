@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 /* eslint-disable */
-import { NetworkMap, Pacs002, RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import { BaseMessage, NetworkMap, Pacs002, RuleResult } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 import { TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 import { databaseManager, dbInit, runServer, server } from '../../src/index';
 import * as helpers from '../../src/services/helper.service';
@@ -88,6 +88,13 @@ describe('TADProc Service', () => {
         '{"messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"pacs.002.001.12","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}',
       );
     };
+
+    const getMockBaseMessageTransaction = (): BaseMessage => ({
+      TxTp: 'custom.transaction.v1',
+      TenantId: 'test-tenant',
+      MsgId: 'base-msg-id-12345',
+      Payload: { field1: 'value1', amount: 100 },
+    });
 
     const getMockNetworkMapNoMessages = (): NetworkMap => {
       return JSON.parse(
@@ -289,6 +296,37 @@ describe('TADProc Service', () => {
       expect(testValue.review).toEqual(false);
       expect(testValue.typologyResult[0].id).toContain('028@1.0');
       expect(testValue.typologyResult[0].result).toEqual(50);
+    });
+
+    it('should handle successful request with a BaseMessage transaction', async () => {
+      const expectedReq = getMockBaseMessageTransaction();
+
+      jest.spyOn(databaseManager, 'getMemberValues').mockImplementationOnce((..._args: unknown[]): Promise<Record<string, unknown>[]> => {
+        return Promise.resolve([
+          {
+            typologyResult: {
+              result: 50,
+              id: '028@1.0',
+              cfg: '1.0',
+              workflow: { alertThreshold: '0', interdictionThreshold: '' },
+              ruleResults: [{ id: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }],
+              tenantId: 'test-tenant',
+            },
+          },
+        ]);
+      });
+
+      const ruleResults: RuleResult[] = [{ id: '', tenantId: '', cfg: '', subRuleRef: '', reason: '', indpdntVarbl: 0 }];
+      // Network map with txTp matching the BaseMessage's TxTp
+      const networkMap: NetworkMap = JSON.parse(
+        '{"messages":[{"id":"001@1.0","host":"http://openfaas:8080","cfg":"1.0","txTp":"custom.transaction.v1","typologies":[{"id":"028@1.0","host":"https://frmfaas.sybrin.com/function/off-typology-processor","cfg":"1.0","rules":[{"id":"003@1.0","host":"http://openfaas:8080","cfg":"1.0"},{"id":"028@1.0","host":"http://openfaas:8080","cfg":"1.0"}]}]}]}',
+      );
+      const typologyResult: TypologyResult = getMockTypologyResult(ruleResults);
+
+      const testValue = await helpers.handleTypologies(expectedReq, networkMap, typologyResult);
+
+      expect(testValue.review).toEqual(false);
+      expect(testValue.typologyResult[0].id).toContain('028@1.0');
     });
 
     it('should respond with error if message is missing from networkmap', async () => {
