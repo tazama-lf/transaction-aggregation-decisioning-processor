@@ -2,11 +2,12 @@
 import apm from '../apm';
 
 import { databaseManager, loggerService } from '..';
-import type { NetworkMap, Pacs002 } from '@tazama-lf/frms-coe-lib/lib/interfaces';
+import { isBaseMessageTransaction, isPacs002Transaction } from '@tazama-lf/frms-coe-lib';
+import type { NetworkMap, SupportedTransactionMessage } from '@tazama-lf/frms-coe-lib/lib/interfaces';
 import type { TypologyResult } from '@tazama-lf/frms-coe-lib/lib/interfaces/processor-files/TypologyResult';
 
 export const handleTypologies = async (
-  transaction: Pacs002,
+  transaction: SupportedTransactionMessage,
   networkMap: NetworkMap,
   typologyResult: TypologyResult,
 ): Promise<{ typologyResult: TypologyResult[]; review: boolean }> => {
@@ -14,7 +15,14 @@ export const handleTypologies = async (
   const functionName = 'handleTypologies()';
   try {
     const [{ typologies }] = networkMap.messages;
-    const transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
+    let transactionID: string;
+    if (isPacs002Transaction(transaction)) {
+      transactionID = transaction.FIToFIPmtSts.GrpHdr.MsgId;
+    } else if (isBaseMessageTransaction(transaction)) {
+      transactionID = transaction.MsgId;
+    } else {
+      return { typologyResult: [], review: false };
+    }
     const tenantId = transaction.TenantId;
     const cacheKey = `TADP_${tenantId}_${transactionID}_TP`;
 
@@ -79,7 +87,7 @@ export const handleTypologies = async (
     return { typologyResult: typologyResults, review };
   } catch (error) {
     span?.end();
-    loggerService.error(`Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request`, error as Error, functionName);
+    loggerService.error(`Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request`, error, functionName);
     return {
       review: false,
       typologyResult: [],
