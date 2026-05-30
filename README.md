@@ -1,8 +1,10 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-# 5. Transaction Aggregation and Decisioning Processor (TADP)
+# 5. Event Adjudicator (EA)
 
-The sequence diagram below for the Transaction Aggregation and Decisioning Processor
+(Formerly the Transaction Aggregation and Decisioning Processor)
+
+The sequence diagram below for the Event Adjudicator
 
 ## Overview
 
@@ -16,8 +18,8 @@ You also need NodeJS to be installed in your system. The current [LTS](https://n
 #### Setting Up
 
 ```sh
-git clone transaction-aggregation-decisioning-processor
-cd transaction-aggregation-decisioning-processor
+git clone event-adjudicator
+cd event-adjudicator
 ```
 
 You then need to configure your environment: a [sample](.env.template) configuration file has been provided and you may adapt that to your environment. Copy it to `.env` and modify as needed:
@@ -114,7 +116,7 @@ The output is the input with an added [tadpResult](https://github.com/tazama-lf/
   networkMap: NetworkMap; // https://raw.githubusercontent.com/tazama-lf/frms-coe-lib/aad0f12d07a82dd948fa9d8033f96e9bf8cb3dde/src/interfaces/NetworkMap.ts
   metaData?: {
     prcgTmDp: number;
-    prcgTmCRSP: number;
+    prcgTmED: number;
   },
   tadpResult: TADPResult;
 }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 process.env.MAX_CPU = '1';
 process.env.STARTUP_TYPE = 'nats';
-process.env.FUNCTION_NAME = 'tadp';
+process.env.FUNCTION_NAME = 'event-adjudicator';
 process.env.SUPPRESS_ALERTS = 'true';
 process.env.ALERT_PRODUCER = 'stream';
 process.env.ALERT_DESTINATION = 'global';

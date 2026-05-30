@@ -29,7 +29,7 @@ export const handleTypologies = async (
       return { typologyResult: [], review: false };
     }
     const tenantId = transaction.TenantId;
-    const cacheKey = `TADP_${tenantId}_${transactionID}_TP`;
+    const cacheKey = `EA_${tenantId}_${transactionID}_TP`;
 
     const jtypologyCount = await databaseManager.addOneGetCount(cacheKey, { typologyResult: { ...typologyResult } });
 
@@ -59,7 +59,7 @@ export const handleTypologies = async (
       };
     }
 
-    const apmTadProc = apm.startSpan('tadProc.exec');
+    const apmEventAdjudicator = apm.startSpan('eventAdjudicator.exec');
 
     const message = networkMap.messages.find((tran) => tran.txTp === transaction.TxTp);
 
@@ -84,7 +84,7 @@ export const handleTypologies = async (
       if (typologyResult.review) review = true;
     }
 
-    apmTadProc?.end();
+    apmEventAdjudicator?.end();
 
     span = apm.startSpan(`[${transactionID}] Delete Channel interim cache key`);
     await databaseManager.deleteKey(cacheKey);
@@ -92,7 +92,7 @@ export const handleTypologies = async (
     return { typologyResult: typologyResults, review };
   } catch (error) {
     span?.end();
-    loggerService.error(`Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request`, error as Error, functionName);
+    loggerService.error(`Failed to process Typology ${typologyResult.id}@${typologyResult.cfg} request`, error, functionName);
     return {
       review: false,
       typologyResult: [],
