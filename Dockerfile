@@ -44,7 +44,7 @@ ENV write_timeout="15s"
 ENV read_timeout="15s"
 
 # Service-Based Environment Variables
-ENV FUNCTION_NAME=transaction-aggregation-decisioning-processor
+ENV FUNCTION_NAME=event-adjudicator
 ENV NODE_ENV=production
 ENV MAX_CPU=
 

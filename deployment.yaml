@@ -2,26 +2,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: transaction-aggregation-decisioning-processor-rel-1-0-0
+  name: event-adjudicator-rel-1-0-0
   namespace: processor
   labels:
-    app: transaction-aggregation-decisioning-processor
+    app: event-adjudicator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: transaction-aggregation-decisioning-processor
+      app: event-adjudicator
   template:
     metadata:
-      name: transaction-aggregation-decisioning-processor-rel-1-0-0
+      name: event-adjudicator-rel-1-0-0
       labels:
-        app: transaction-aggregation-decisioning-processor
+        app: event-adjudicator
       annotations:
         prometheus.io.scrape: 'false'
     spec:
       containers:
-        - name: transaction-aggregation-decisioning-processor-rel-1-0-0
-          image: example.io/transaction-aggregation-decisioning-processor-rel-1-0-0:1.0.0
+        - name: event-adjudicator-rel-1-0-0
+          image: example.io/event-adjudicator-rel-1-0-0:1.0.0
           ports:
             - name: http
               containerPort: 8080

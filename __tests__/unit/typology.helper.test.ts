@@ -30,7 +30,7 @@ jest.mock('@tazama-lf/frms-coe-startup-lib/lib/interfaces/iStartupConfig', () =>
   },
 }));
 
-describe('TADProc Service', () => {
+describe('Event Adjudicator Service', () => {
   let responseSpy: jest.SpyInstance;
   beforeAll(async () => {
     await dbInit();

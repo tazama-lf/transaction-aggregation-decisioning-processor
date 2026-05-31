@@ -29,7 +29,7 @@ jest.mock('@tazama-lf/frms-coe-startup-lib/lib/interfaces/iStartupConfig', () =>
     functionName: 'producer',
   },
 }));
-describe('TADProc Service', () => {
+describe('Event Adjudicator Service', () => {
   beforeAll(async () => {
     await dbInit();
     await runServer();
